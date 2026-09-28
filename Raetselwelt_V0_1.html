@@ -1,0 +1,284 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover" />
+<meta name="theme-color" content="#f7f4ea" />
+<title>Rätselwelt – V0.1</title>
+<style>
+  :root{
+    --bg:#f7f4ea; --ink:#1e2a2f; --muted:#69757b; --card:#fffdf8;
+    --line:#d9ded6; --accent:#2f7d67; --accent2:#e28a3a; --blue:#427aa1;
+    --yellow:#f4cf58; --red:#d95d55; --shadow:0 14px 40px rgba(43,57,51,.12);
+    --r:26px;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;min-height:100%;font-family:ui-rounded,"SF Pro Rounded","Avenir Next",system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--ink)}
+  body{overscroll-behavior:none}
+  button,input{font:inherit}
+  button{border:0;cursor:pointer}
+  .app{min-height:100svh;display:flex;flex-direction:column}
+  header{height:82px;display:flex;align-items:center;gap:14px;padding:12px clamp(16px,3vw,34px);border-bottom:1px solid rgba(30,42,47,.08);background:rgba(247,244,234,.92);backdrop-filter:blur(16px);position:sticky;top:0;z-index:20}
+  .brand{display:flex;align-items:center;gap:12px;min-width:0}
+  .brandmark{width:52px;height:52px;border-radius:18px;background:var(--accent);color:#fff;display:grid;place-items:center;font-size:27px;font-weight:900;box-shadow:inset 0 -4px 0 rgba(0,0,0,.08)}
+  .brandtext{line-height:1.02}
+  .brandtext b{display:block;font-size:clamp(20px,2.3vw,30px);letter-spacing:-.03em}
+  .brandtext span{display:block;color:var(--muted);font-size:13px;margin-top:4px}
+  .header-actions{margin-left:auto;display:flex;gap:10px}
+  .iconbtn,.pillbtn{height:48px;border-radius:16px;background:#fff;color:var(--ink);box-shadow:0 6px 18px rgba(43,57,51,.08);padding:0 16px;font-weight:800}
+  .iconbtn{width:48px;padding:0;font-size:23px}
+  main{width:min(1180px,100%);margin:0 auto;padding:clamp(18px,3vw,32px);flex:1}
+  .screen{display:none}.screen.active{display:block}
+  .hero{display:grid;grid-template-columns:1.25fr .75fr;gap:18px;align-items:stretch;margin-bottom:20px}
+  .hero-main,.hero-side{border-radius:32px;overflow:hidden;box-shadow:var(--shadow)}
+  .hero-main{background:linear-gradient(135deg,#2f7d67,#4d9a83);color:#fff;padding:clamp(24px,4vw,44px);min-height:250px;position:relative}
+  .hero-main:after{content:"?";position:absolute;right:24px;bottom:-44px;font-size:240px;line-height:1;color:rgba(255,255,255,.09);font-weight:1000;transform:rotate(10deg)}
+  .eyebrow{font-size:13px;font-weight:900;text-transform:uppercase;letter-spacing:.14em;opacity:.78}
+  h1{font-size:clamp(34px,5vw,64px);line-height:.95;margin:12px 0 14px;letter-spacing:-.055em;max-width:730px}
+  .hero-main p{font-size:clamp(16px,1.8vw,21px);line-height:1.45;max-width:650px;margin:0;color:rgba(255,255,255,.9)}
+  .hero-side{background:var(--card);padding:24px;display:flex;flex-direction:column;justify-content:space-between}
+  .hero-side h3{margin:0 0 8px;font-size:22px}.hero-side p{color:var(--muted);margin:0 0 20px;line-height:1.45}
+  .difficulty{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+  .diff{background:#f0f1ec;color:var(--ink);padding:12px 8px;border-radius:14px;font-weight:900}.diff.on{background:var(--ink);color:#fff}
+  .grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}
+  .game-card{position:relative;text-align:left;min-height:190px;border-radius:28px;background:var(--card);padding:22px;box-shadow:var(--shadow);overflow:hidden;border:2px solid transparent;transition:.18s transform,.18s border-color}
+  .game-card:active{transform:scale(.985)}
+  .game-card .num{font-size:12px;font-weight:1000;letter-spacing:.12em;color:var(--muted);text-transform:uppercase}
+  .game-card h2{font-size:25px;margin:12px 0 6px;letter-spacing:-.025em}.game-card p{margin:0;color:var(--muted);line-height:1.35;max-width:78%}
+  .game-card .symbol{position:absolute;right:16px;bottom:8px;font-size:86px;line-height:1;font-weight:1000;opacity:.12}
+  .game-card.word{border-color:#d7eadf}.game-card.maze{border-color:#d6e5ee}.game-card.mix{border-color:#f5dfc9}.game-card.logic{border-color:#ead7d4}.game-card.dots{border-color:#e8e0b6}.game-card.quick{border-color:#dddbea}
+  .topline{display:flex;align-items:center;gap:12px;margin-bottom:18px}
+  .back{background:#fff;border-radius:15px;padding:12px 16px;font-weight:900;box-shadow:0 5px 14px rgba(43,57,51,.07)}
+  .screen-title{font-size:clamp(27px,3.2vw,42px);font-weight:1000;letter-spacing:-.04em}.spacer{flex:1}
+  .status{background:#fff;border-radius:14px;padding:10px 14px;font-weight:800;color:var(--muted)}
+  .panel{background:var(--card);border-radius:30px;padding:clamp(16px,2.7vw,30px);box-shadow:var(--shadow)}
+  .game-layout{display:grid;grid-template-columns:minmax(0,1fr) 280px;gap:20px}
+  .sidebox{background:#f3f1e9;border-radius:22px;padding:18px;height:max-content}
+  .sidebox h3{margin:0 0 12px;font-size:17px}.sidebox p{font-size:14px;color:var(--muted);line-height:1.4}
+  .word-list{display:flex;flex-wrap:wrap;gap:8px}.word-chip{padding:9px 11px;border-radius:12px;background:#fff;font-weight:900;font-size:14px;border:2px solid transparent}.word-chip.done{text-decoration:line-through;opacity:.45;border-color:#cfe5db}
+  #wordGrid{width:min(78vw,700px);aspect-ratio:1/1;display:grid;margin:auto;user-select:none;touch-action:none;background:#fff;border:2px solid var(--ink);border-radius:16px;overflow:hidden}
+  .letter{display:grid;place-items:center;border-right:1px solid #dde3de;border-bottom:1px solid #dde3de;font-weight:1000;font-size:clamp(17px,3vw,28px);background:#fff;position:relative}
+  .letter.sel{background:#d9efe6}.letter.hit{background:#f6d97e;color:#3e3514}.letter.preview{background:#e8f2f7}
+  .canvas-wrap{display:grid;place-items:center;width:100%;overflow:hidden}
+  canvas{max-width:100%;background:#fff;border-radius:18px;touch-action:none;border:2px solid var(--ink)}
+  .big-action{display:inline-flex;align-items:center;justify-content:center;min-height:50px;border-radius:16px;padding:0 18px;background:var(--ink);color:#fff;font-weight:1000;margin-top:12px}
+  .secondary{background:#fff;color:var(--ink);border:2px solid #d8ddd8}
+  .message{margin-top:12px;padding:12px 14px;border-radius:14px;background:#edf5f1;font-weight:800;display:none}.message.show{display:block}
+  .scramble-area{display:grid;gap:14px;max-width:740px;margin:0 auto}
+  .scramble-card{background:#f4f1e9;border-radius:24px;padding:24px;text-align:center}
+  .scrambled{font-size:clamp(34px,7vw,72px);font-weight:1000;letter-spacing:.12em;margin:8px 0 16px;color:var(--accent)}
+  .answer-row{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+  .answer-row input{height:54px;border-radius:16px;border:2px solid #d5dad4;padding:0 16px;font-size:20px;font-weight:900;text-transform:uppercase;min-width:220px;background:#fff}
+  .logic-question{text-align:center;padding:10px}.logic-question h2{font-size:clamp(28px,4vw,46px);margin:8px 0 22px}
+  .logic-options{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.logic-opt{min-height:110px;border-radius:22px;background:#f3f1e9;font-size:clamp(32px,5vw,56px);font-weight:1000;border:3px solid transparent}.logic-opt.correct{border-color:var(--accent);background:#e6f3ed}.logic-opt.wrong{border-color:var(--red);background:#f7e7e5}
+  .quick-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.quick-card{min-height:150px;background:#f3f1e9;border-radius:22px;padding:20px;text-align:left}.quick-card b{font-size:20px;display:block;margin-bottom:8px}.quick-card span{color:var(--muted);line-height:1.35}
+  .footer-note{text-align:center;color:var(--muted);font-size:12px;margin-top:18px}
+  @media (max-width:850px){.hero{grid-template-columns:1fr}.grid{grid-template-columns:repeat(2,1fr)}.game-layout{grid-template-columns:1fr}.sidebox{order:-1}.hero-main{min-height:210px}.hero-side{min-height:auto}.brandtext span{display:none}}
+  @media (max-width:560px){header{height:70px}.brandmark{width:44px;height:44px;border-radius:15px}.pillbtn{display:none}.grid{grid-template-columns:1fr}.game-card{min-height:145px}.game-card p{max-width:85%}.logic-options{grid-template-columns:repeat(2,1fr)}.quick-grid{grid-template-columns:1fr}.status{display:none}}
+</style>
+</head>
+<body>
+<div class="app">
+<header>
+  <div class="brand"><div class="brandmark">R</div><div class="brandtext"><b>Rätselwelt</b><span>Finger · Kopf · Spass</span></div></div>
+  <div class="header-actions"><button class="pillbtn" onclick="showHome()">Alle Rätsel</button><button class="iconbtn" onclick="toggleFull()" title="Vollbild">⛶</button></div>
+</header>
+<main>
+  <section class="screen active" id="home">
+    <div class="hero">
+      <div class="hero-main"><div class="eyebrow">Tablet-Rätselbuch · V0.1</div><h1>Rätseln wie auf Papier. Nur mit dem Finger.</h1><p>Kurze Spiele, grosse Touchflächen und möglichst wenig Ablenkung. Ideal für Tablet und iPad – komplett in einer HTML-Datei.</p></div>
+      <div class="hero-side"><div><h3>Schwierigkeit</h3><p>Die Stufe verändert Wortlängen, Labyrinthgrösse und Denkaufgaben.</p></div><div class="difficulty"><button class="diff" data-d="1">Leicht</button><button class="diff on" data-d="2">Mittel</button><button class="diff" data-d="3">Knifflig</button></div></div>
+    </div>
+    <div class="grid">
+      <button class="game-card word" onclick="openGame('word')"><span class="num">01 · Wörter</span><h2>Wortsuche</h2><p>Wörter mit dem Finger markieren – waagrecht, senkrecht oder diagonal.</p><span class="symbol">ABC</span></button>
+      <button class="game-card maze" onclick="openGame('maze')"><span class="num">02 · Finger</span><h2>Labyrinth</h2><p>Vom Start zum Ziel. Die Linie wird direkt mit dem Finger gezogen.</p><span class="symbol">↝</span></button>
+      <button class="game-card mix" onclick="openGame('mix')"><span class="num">03 · Buchstaben</span><h2>Wortsalat</h2><p>Buchstaben ordnen und das versteckte Wort herausfinden.</p><span class="symbol">A?</span></button>
+      <button class="game-card logic" onclick="openGame('logic')"><span class="num">04 · Denken</span><h2>Was kommt als Nächstes?</h2><p>Reihen, Muster und kleine Logikaufgaben lösen.</p><span class="symbol">◆</span></button>
+      <button class="game-card dots" onclick="openGame('dots')"><span class="num">05 · Zeichnen</span><h2>Punkte verbinden</h2><p>Zahlen in der richtigen Reihenfolge antippen und das Bild entdecken.</p><span class="symbol">1·2·3</span></button>
+      <button class="game-card quick" onclick="openGame('quick')"><span class="num">06 · Mix</span><h2>Mini-Rätsel</h2><p>Kleine „Was passt nicht?“- und Suchaufgaben für zwischendurch.</p><span class="symbol">!</span></button>
+    </div>
+    <div class="footer-note">Keine Anmeldung · kein Internet nötig · keine Werbung</div>
+  </section>
+
+  <section class="screen" id="word">
+    <div class="topline"><button class="back" onclick="showHome()">← Zurück</button><div class="screen-title">Wortsuche</div><div class="spacer"></div><div class="status" id="wordStatus">0 gefunden</div></div>
+    <div class="panel game-layout">
+      <div><div id="wordGrid"></div><div class="message" id="wordMsg">Geschafft – alle Wörter gefunden!</div></div>
+      <aside class="sidebox"><h3>Finde diese Wörter</h3><div class="word-list" id="wordList"></div><p>Finger auf den ersten Buchstaben legen und bis zum letzten ziehen.</p><button class="big-action secondary" onclick="buildWordGame()">Neue Wortsuche</button></aside>
+    </div>
+  </section>
+
+  <section class="screen" id="maze">
+    <div class="topline"><button class="back" onclick="showHome()">← Zurück</button><div class="screen-title">Labyrinth</div><div class="spacer"></div><div class="status">Start oben links · Ziel unten rechts</div></div>
+    <div class="panel game-layout">
+      <div class="canvas-wrap"><canvas id="mazeCanvas" width="720" height="560"></canvas><div class="message" id="mazeMsg">Ziel erreicht!</div></div>
+      <aside class="sidebox"><h3>So geht's</h3><p>Setze den Finger auf START und fahre durch die Gänge. Du kannst auch zurückfahren, wenn du in einer Sackgasse landest.</p><button class="big-action secondary" onclick="buildMaze()">Neues Labyrinth</button><button class="big-action secondary" onclick="resetMazePath()">Linie löschen</button></aside>
+    </div>
+  </section>
+
+  <section class="screen" id="mix">
+    <div class="topline"><button class="back" onclick="showHome()">← Zurück</button><div class="screen-title">Wortsalat</div><div class="spacer"></div><div class="status" id="mixStatus">1 / 5</div></div>
+    <div class="panel"><div class="scramble-area"><div class="scramble-card"><div class="eyebrow" style="color:var(--muted)">Bringe die Buchstaben in Ordnung</div><div class="scrambled" id="scrambleWord">—</div><div class="answer-row"><input id="scrambleInput" autocomplete="off" autocapitalize="characters" placeholder="Dein Wort" /><button class="big-action" onclick="checkScramble()">Prüfen</button></div><div class="message" id="mixMsg"></div></div><div style="text-align:center"><button class="big-action secondary" onclick="newScrambleRound()">Neue Runde</button></div></div></div>
+  </section>
+
+  <section class="screen" id="logic">
+    <div class="topline"><button class="back" onclick="showHome()">← Zurück</button><div class="screen-title">Was kommt als Nächstes?</div><div class="spacer"></div></div>
+    <div class="panel"><div class="logic-question"><div class="eyebrow" style="color:var(--muted)">Muster erkennen</div><h2 id="logicPrompt">2 · 4 · 6 · 8 · ?</h2><div class="logic-options" id="logicOptions"></div><div class="message" id="logicMsg"></div><button class="big-action secondary" onclick="newLogic()">Nächste Aufgabe</button></div></div>
+  </section>
+
+  <section class="screen" id="dots">
+    <div class="topline"><button class="back" onclick="showHome()">← Zurück</button><div class="screen-title">Punkte verbinden</div><div class="spacer"></div><div class="status" id="dotsStatus">Als Nächstes: 1</div></div>
+    <div class="panel game-layout">
+      <div class="canvas-wrap"><canvas id="dotsCanvas" width="720" height="560"></canvas><div class="message" id="dotsMsg">Bild fertig!</div></div>
+      <aside class="sidebox"><h3>Verbinde 1 → 2 → 3 …</h3><p>Tippe die Punkte der Reihe nach an. So entsteht nach und nach ein Bild.</p><button class="big-action secondary" onclick="buildDots()">Neues Punktebild</button></aside>
+    </div>
+  </section>
+
+  <section class="screen" id="quick">
+    <div class="topline"><button class="back" onclick="showHome()">← Zurück</button><div class="screen-title">Mini-Rätsel</div><div class="spacer"></div></div>
+    <div class="panel"><div class="quick-grid" id="quickGrid"></div><div style="text-align:center"><button class="big-action secondary" onclick="buildQuick()">Neue Mini-Rätsel</button></div></div>
+  </section>
+</main>
+</div>
+<script>
+let difficulty=2;
+const screens=[...document.querySelectorAll('.screen')];
+function show(id){screens.forEach(s=>s.classList.toggle('active',s.id===id));window.scrollTo({top:0,behavior:'instant'});}
+function showHome(){show('home')}
+function openGame(id){show(id); if(id==='word') buildWordGame(); if(id==='maze') buildMaze(); if(id==='mix') newScrambleRound(); if(id==='logic') newLogic(); if(id==='dots') buildDots(); if(id==='quick') buildQuick();}
+function toggleFull(){ if(!document.fullscreenElement){document.documentElement.requestFullscreen?.()}else{document.exitFullscreen?.()} }
+document.querySelectorAll('.diff').forEach(b=>b.addEventListener('click',()=>{difficulty=+b.dataset.d;document.querySelectorAll('.diff').forEach(x=>x.classList.toggle('on',x===b));}));
+
+// WORD SEARCH
+const banks={
+  1:['APFEL','BANANE','MELONE','ZITRONE','BIRNE'],
+  2:['KROKODIL','GIRAFFE','ZITRONE','PFIRSICH','BANANE','ORANGE','PANDA'],
+  3:['ABENTEUER','SCHMETTERLING','DINOSAURIER','SCHATZKARTE','FERNGLAS','KOMPASS','RAKETE']
+};
+let wg={size:10,grid:[],words:[],placed:[],found:new Set(),drag:null};
+function shuffled(a){return [...a].sort(()=>Math.random()-.5)}
+function buildWordGame(){
+  const size=difficulty===1?9:difficulty===2?11:13; const words=shuffled(banks[difficulty]).slice(0,difficulty===1?5:difficulty===2?7:7);
+  const dirs=[[1,0],[0,1],[1,1],[-1,1],[1,-1],[-1,0],[0,-1],[-1,-1]];
+  let grid, placed;
+  for(let attempt=0;attempt<80;attempt++){
+    grid=Array.from({length:size},()=>Array(size).fill('')); placed=[];
+    let ok=true;
+    for(const word of words){
+      let done=false;
+      for(let t=0;t<300&&!done;t++){
+        const [dx,dy]=dirs[Math.floor(Math.random()*dirs.length)]; const x=Math.floor(Math.random()*size),y=Math.floor(Math.random()*size);
+        const ex=x+dx*(word.length-1), ey=y+dy*(word.length-1); if(ex<0||ey<0||ex>=size||ey>=size) continue;
+        let fits=true;
+        for(let i=0;i<word.length;i++){const c=grid[y+dy*i][x+dx*i]; if(c&&c!==word[i]){fits=false;break}}
+        if(!fits) continue;
+        for(let i=0;i<word.length;i++) grid[y+dy*i][x+dx*i]=word[i];
+        placed.push({word,x,y,dx,dy,cells:Array.from({length:word.length},(_,i)=>`${x+dx*i},${y+dy*i}`)});done=true;
+      }
+      if(!done){ok=false;break}
+    }
+    if(ok) break;
+  }
+  const abc='ABCDEFGHIJKLMNOPQRSTUVWXYZ'; for(let y=0;y<size;y++)for(let x=0;x<size;x++)if(!grid[y][x])grid[y][x]=abc[Math.floor(Math.random()*abc.length)];
+  wg={size,grid,words,placed,found:new Set(),drag:null}; renderWordGame();
+}
+function renderWordGame(){
+  const el=document.getElementById('wordGrid');el.innerHTML='';el.style.gridTemplateColumns=`repeat(${wg.size},1fr)`;
+  wg.grid.forEach((row,y)=>row.forEach((ch,x)=>{const d=document.createElement('div');d.className='letter';d.textContent=ch;d.dataset.x=x;d.dataset.y=y;el.appendChild(d)}));
+  document.getElementById('wordList').innerHTML=wg.words.map(w=>`<span class="word-chip" data-w="${w}">${w}</span>`).join('');
+  document.getElementById('wordStatus').textContent='0 gefunden';document.getElementById('wordMsg').classList.remove('show');
+  el.onpointerdown=startWordDrag;el.onpointermove=moveWordDrag;el.onpointerup=endWordDrag;el.onpointercancel=endWordDrag;
+}
+function cellFromPoint(e){const el=document.elementFromPoint(e.clientX,e.clientY);return el?.classList.contains('letter')?el:null}
+function startWordDrag(e){e.preventDefault(); const c=cellFromPoint(e); if(!c)return; wg.drag={sx:+c.dataset.x,sy:+c.dataset.y,ex:+c.dataset.x,ey:+c.dataset.y}; e.currentTarget.setPointerCapture?.(e.pointerId);previewWord();}
+function moveWordDrag(e){if(!wg.drag)return;e.preventDefault();const c=cellFromPoint(e);if(!c)return;wg.drag.ex=+c.dataset.x;wg.drag.ey=+c.dataset.y;previewWord()}
+function lineCells(d){const dx=d.ex-d.sx,dy=d.ey-d.sy; const ax=Math.abs(dx),ay=Math.abs(dy); if(!(dx===0||dy===0||ax===ay))return[]; const n=Math.max(ax,ay); const stepx=Math.sign(dx),stepy=Math.sign(dy); return Array.from({length:n+1},(_,i)=>`${d.sx+stepx*i},${d.sy+stepy*i}`)}
+function previewWord(){document.querySelectorAll('.letter.preview').forEach(x=>x.classList.remove('preview')); lineCells(wg.drag).forEach(k=>{const [x,y]=k.split(',');document.querySelector(`.letter[data-x="${x}"][data-y="${y}"]`)?.classList.add('preview')})}
+function endWordDrag(e){if(!wg.drag)return; const cells=lineCells(wg.drag); document.querySelectorAll('.letter.preview').forEach(x=>x.classList.remove('preview'));
+  const match=wg.placed.find(p=>{const a=p.cells.join('|'),b=[...p.cells].reverse().join('|'),c=cells.join('|');return !wg.found.has(p.word)&&(a===c||b===c)});
+  if(match){wg.found.add(match.word);match.cells.forEach(k=>{const[x,y]=k.split(',');document.querySelector(`.letter[data-x="${x}"][data-y="${y}"]`)?.classList.add('hit')});document.querySelector(`.word-chip[data-w="${match.word}"]`)?.classList.add('done');document.getElementById('wordStatus').textContent=`${wg.found.size} gefunden`;if(wg.found.size===wg.words.length)document.getElementById('wordMsg').classList.add('show')}
+  wg.drag=null;
+}
+
+// MAZE
+const mc=document.getElementById('mazeCanvas'),mctx=mc.getContext('2d');
+let maze={cols:12,rows:9,cells:[],path:[],drawing:false};
+function makeMaze(cols,rows){
+ const cells=Array.from({length:rows},(_,y)=>Array.from({length:cols},(_,x)=>({x,y,w:[1,1,1,1],v:false}))); const stack=[cells[0][0]];cells[0][0].v=true;
+ const dirs=[[0,-1,0,2],[1,0,1,3],[0,1,2,0],[-1,0,3,1]];
+ while(stack.length){const c=stack[stack.length-1];const opts=[];for(const d of dirs){const nx=c.x+d[0],ny=c.y+d[1];if(nx>=0&&ny>=0&&nx<cols&&ny<rows&&!cells[ny][nx].v)opts.push(d)}if(!opts.length){stack.pop();continue}const d=opts[Math.floor(Math.random()*opts.length)],n=cells[c.y+d[1]][c.x+d[0]];c.w[d[2]]=0;n.w[d[3]]=0;n.v=true;stack.push(n)}
+ return cells;
+}
+function buildMaze(){const cols=difficulty===1?9:difficulty===2?13:17,rows=difficulty===1?7:difficulty===2?10:12;maze={cols,rows,cells:makeMaze(cols,rows),path:[{x:0,y:0}],drawing:false};document.getElementById('mazeMsg').classList.remove('show');drawMaze()}
+function mazeDims(){const pad=28,w=(mc.width-pad*2)/maze.cols,h=(mc.height-pad*2)/maze.rows;return{pad,cw:w,ch:h}}
+function drawMaze(){const {pad,cw,ch}=mazeDims();mctx.clearRect(0,0,mc.width,mc.height);mctx.fillStyle='#fff';mctx.fillRect(0,0,mc.width,mc.height);
+  // start/goal zones
+  mctx.fillStyle='#dff1e8';mctx.fillRect(pad+2,pad+2,cw-4,ch-4);mctx.fillStyle='#f7df9c';mctx.fillRect(pad+(maze.cols-1)*cw+2,pad+(maze.rows-1)*ch+2,cw-4,ch-4);
+  mctx.strokeStyle='#1e2a2f';mctx.lineWidth=4;mctx.lineCap='round';
+  maze.cells.forEach((row,y)=>row.forEach((c,x)=>{const L=pad+x*cw,T=pad+y*ch,R=L+cw,B=T+ch;mctx.beginPath();if(c.w[0]){mctx.moveTo(L,T);mctx.lineTo(R,T)}if(c.w[1]){mctx.moveTo(R,T);mctx.lineTo(R,B)}if(c.w[2]){mctx.moveTo(R,B);mctx.lineTo(L,B)}if(c.w[3]){mctx.moveTo(L,B);mctx.lineTo(L,T)}mctx.stroke()}));
+  mctx.fillStyle='#2f7d67';mctx.font='900 16px system-ui';mctx.textAlign='center';mctx.textBaseline='middle';mctx.fillText('START',pad+cw/2,pad+ch/2);mctx.fillStyle='#8f6a17';mctx.fillText('ZIEL',pad+(maze.cols-.5)*cw,pad+(maze.rows-.5)*ch);
+  if(maze.path.length){mctx.strokeStyle='#427aa1';mctx.lineWidth=Math.max(8,Math.min(cw,ch)*.3);mctx.lineJoin='round';mctx.lineCap='round';mctx.beginPath();maze.path.forEach((p,i)=>{const x=pad+(p.x+.5)*cw,y=pad+(p.y+.5)*ch;if(!i)mctx.moveTo(x,y);else mctx.lineTo(x,y)});mctx.stroke()}
+}
+function mazeCellFromEvent(e){const r=mc.getBoundingClientRect(),sx=mc.width/r.width,sy=mc.height/r.height,{pad,cw,ch}=mazeDims();const x=(e.clientX-r.left)*sx,y=(e.clientY-r.top)*sy;const cx=Math.floor((x-pad)/cw),cy=Math.floor((y-pad)/ch);return(cx>=0&&cy>=0&&cx<maze.cols&&cy<maze.rows)?{x:cx,y:cy}:null}
+function adjacentOpen(a,b){const dx=b.x-a.x,dy=b.y-a.y,c=maze.cells[a.y][a.x];if(dx===1&&dy===0)return !c.w[1];if(dx===-1&&dy===0)return !c.w[3];if(dx===0&&dy===1)return !c.w[2];if(dx===0&&dy===-1)return !c.w[0];return false}
+mc.addEventListener('pointerdown',e=>{e.preventDefault();const c=mazeCellFromEvent(e);const last=maze.path.at(-1);if(!c)return;if(maze.path.length===1&&c.x===0&&c.y===0)maze.drawing=true;else if(last&&c.x===last.x&&c.y===last.y)maze.drawing=true;mc.setPointerCapture?.(e.pointerId)});
+mc.addEventListener('pointermove',e=>{if(!maze.drawing)return;e.preventDefault();const c=mazeCellFromEvent(e);if(!c)return;const last=maze.path.at(-1);if(c.x===last.x&&c.y===last.y)return;const prev=maze.path.at(-2);if(prev&&c.x===prev.x&&c.y===prev.y){maze.path.pop();drawMaze();return}if(adjacentOpen(last,c)&&!maze.path.some(p=>p.x===c.x&&p.y===c.y)){maze.path.push(c);drawMaze();if(c.x===maze.cols-1&&c.y===maze.rows-1){maze.drawing=false;document.getElementById('mazeMsg').classList.add('show')}}});
+mc.addEventListener('pointerup',()=>maze.drawing=false);mc.addEventListener('pointercancel',()=>maze.drawing=false);
+function resetMazePath(){maze.path=[{x:0,y:0}];maze.drawing=false;document.getElementById('mazeMsg').classList.remove('show');drawMaze()}
+
+// SCRAMBLE
+const scrambleBanks={1:['APFEL','MOND','FISCH','HAUS','HUND','AUTO'],2:['PIRAT','RAKETE','VULKAN','SCHATZ','KOMPASS','DRACHE'],3:['ABENTEUER','FERNROHR','GEHEIMNIS','LABYRINTH','DINOSAURIER','SCHMETTERLING']};
+let mixRound={words:[],i:0,current:''};
+function scramble(w){let s=w;for(let i=0;i<15&&s===w;i++)s=shuffled(w.split('')).join('');return s}
+function newScrambleRound(){mixRound={words:shuffled(scrambleBanks[difficulty]).slice(0,5),i:0,current:''};nextScramble()}
+function nextScramble(){if(mixRound.i>=mixRound.words.length){document.getElementById('scrambleWord').textContent='FERTIG';document.getElementById('mixStatus').textContent='5 / 5';return}mixRound.current=mixRound.words[mixRound.i];document.getElementById('scrambleWord').textContent=scramble(mixRound.current);document.getElementById('scrambleInput').value='';document.getElementById('mixMsg').classList.remove('show');document.getElementById('mixStatus').textContent=`${mixRound.i+1} / ${mixRound.words.length}`;document.getElementById('scrambleInput').focus()}
+function checkScramble(){const v=document.getElementById('scrambleInput').value.trim().toUpperCase(),m=document.getElementById('mixMsg');m.classList.add('show');if(v===mixRound.current){m.textContent='Richtig!';mixRound.i++;setTimeout(nextScramble,600)}else m.textContent='Noch nicht – probier es nochmals.'}
+document.getElementById('scrambleInput').addEventListener('keydown',e=>{if(e.key==='Enter')checkScramble()});
+
+// LOGIC
+const logicSets={
+1:[
+ {q:'2 · 4 · 6 · 8 · ?',a:'10',o:['9','10','11','12']},
+ {q:'● · ▲ · ● · ▲ · ?',a:'●',o:['▲','●','■','◆']},
+ {q:'1 · 2 · 3 · 4 · ?',a:'5',o:['5','6','7','8']}],
+2:[
+ {q:'3 · 6 · 9 · 12 · ?',a:'15',o:['14','15','16','18']},
+ {q:'▲ · ▲ · ● · ▲ · ▲ · ● · ?',a:'▲',o:['●','▲','■','◆']},
+ {q:'1 · 2 · 4 · 8 · ?',a:'16',o:['10','12','16','18']}],
+3:[
+ {q:'2 · 3 · 5 · 8 · 12 · ?',a:'17',o:['15','16','17','18']},
+ {q:'1 · 4 · 9 · 16 · ?',a:'25',o:['20','24','25','36']},
+ {q:'A · C · F · J · ?',a:'O',o:['M','N','O','P']}]
+};
+let logicCurrent=null;
+function newLogic(){logicCurrent=logicSets[difficulty][Math.floor(Math.random()*logicSets[difficulty].length)];document.getElementById('logicPrompt').textContent=logicCurrent.q;const box=document.getElementById('logicOptions');box.innerHTML='';shuffled(logicCurrent.o).forEach(o=>{const b=document.createElement('button');b.className='logic-opt';b.textContent=o;b.onclick=()=>pickLogic(b,o);box.appendChild(b)});document.getElementById('logicMsg').classList.remove('show')}
+function pickLogic(btn,val){document.querySelectorAll('.logic-opt').forEach(b=>b.disabled=true);const ok=val===logicCurrent.a;btn.classList.add(ok?'correct':'wrong');if(!ok)[...document.querySelectorAll('.logic-opt')].find(b=>b.textContent===logicCurrent.a)?.classList.add('correct');const m=document.getElementById('logicMsg');m.textContent=ok?'Richtig!':'Fast – die grüne Antwort passt zur Regel.';m.classList.add('show')}
+
+// DOTS
+const dc=document.getElementById('dotsCanvas'),dctx=dc.getContext('2d');let dots={pts:[],next:0};
+const dotShapes=[
+ [[.20,.70],[.30,.45],[.42,.40],[.50,.20],[.58,.40],[.70,.45],[.80,.70],[.62,.63],[.50,.82],[.38,.63]],
+ [[.18,.58],[.30,.42],[.47,.42],[.56,.28],[.67,.42],[.82,.46],[.72,.60],[.78,.76],[.58,.70],[.46,.83],[.38,.67],[.22,.72]],
+ [[.20,.66],[.25,.42],[.40,.30],[.53,.43],[.67,.27],[.82,.42],[.77,.68],[.56,.76],[.40,.68]]
+];
+function buildDots(){const base=dotShapes[Math.floor(Math.random()*dotShapes.length)];dots={pts:base.map(([x,y],i)=>({x:x*dc.width,y:y*dc.height,n:i+1})),next:0};document.getElementById('dotsMsg').classList.remove('show');document.getElementById('dotsStatus').textContent='Als Nächstes: 1';drawDots()}
+function drawDots(){dctx.clearRect(0,0,dc.width,dc.height);dctx.fillStyle='#fff';dctx.fillRect(0,0,dc.width,dc.height);if(dots.next>1){dctx.strokeStyle='#2f7d67';dctx.lineWidth=7;dctx.lineCap='round';dctx.lineJoin='round';dctx.beginPath();dots.pts.slice(0,dots.next).forEach((p,i)=>i?dctx.lineTo(p.x,p.y):dctx.moveTo(p.x,p.y));dctx.stroke()}
+ dots.pts.forEach((p,i)=>{dctx.beginPath();dctx.arc(p.x,p.y,18,0,Math.PI*2);dctx.fillStyle=i<dots.next?'#2f7d67':'#f4cf58';dctx.fill();dctx.fillStyle=i<dots.next?'#fff':'#1e2a2f';dctx.font='900 17px system-ui';dctx.textAlign='center';dctx.textBaseline='middle';dctx.fillText(p.n,p.x,p.y)});}
+dc.addEventListener('pointerdown',e=>{e.preventDefault();const r=dc.getBoundingClientRect(),sx=dc.width/r.width,sy=dc.height/r.height,x=(e.clientX-r.left)*sx,y=(e.clientY-r.top)*sy,p=dots.pts[dots.next];if(!p)return;if(Math.hypot(x-p.x,y-p.y)<38){dots.next++;drawDots();if(dots.next===dots.pts.length){dctx.strokeStyle='#2f7d67';dctx.lineWidth=7;dctx.beginPath();dctx.moveTo(dots.pts.at(-1).x,dots.pts.at(-1).y);dctx.lineTo(dots.pts[0].x,dots.pts[0].y);dctx.stroke();document.getElementById('dotsStatus').textContent='Fertig!';document.getElementById('dotsMsg').classList.add('show')}else document.getElementById('dotsStatus').textContent=`Als Nächstes: ${dots.next+1}`}});
+
+// QUICK PUZZLES
+const quickSets=[
+ {q:'Was passt nicht?',items:['APFEL','BIRNE','BANANE','AUTO'],a:'AUTO'},
+ {q:'Welche Zahl fehlt?',items:['2','4','?','8'],a:'6',manual:true},
+ {q:'Was ist am grössten?',items:['AMEISE','KATZE','ELEFANT','MAUS'],a:'ELEFANT'},
+ {q:'Welches Wort reimt sich auf HAUS?',items:['MAUS','BAUM','FISCH','MOND'],a:'MAUS'},
+ {q:'Was kann fliegen?',items:['STUHL','ADLER','SCHUH','TASSE'],a:'ADLER'},
+ {q:'Welche Form hat keine Ecke?',items:['KREIS','DREIECK','QUADRAT','RECHTECK'],a:'KREIS'}
+];
+function buildQuick(){const box=document.getElementById('quickGrid');box.innerHTML='';shuffled(quickSets).slice(0,4).forEach(s=>{const card=document.createElement('div');card.className='quick-card';card.innerHTML=`<b>${s.q}</b><span>${s.items.join(' · ')}</span>`;card.onclick=()=>{const guess=prompt(`${s.q}\n${s.items.join(' / ')}${s.manual?'\nWelche Zahl gehört an die Stelle von ?':''}`);if(guess===null)return;alert(guess.trim().toUpperCase()===s.a?'Richtig!':`Die Lösung ist: ${s.a}`)};box.appendChild(card)})}
+
+// initialize some canvases after fonts/layout are ready
+buildMaze();buildDots();
+</script>
+</body>
+</html>
