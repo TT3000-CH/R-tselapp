@@ -1,0 +1,535 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover" />
+<meta name="theme-color" content="#f7f1e5" />
+<title>Rätselwelt – V2</title>
+<style>
+  :root{
+    --bg:#f7f1e5; --paper:#fffdf8; --ink:#223038; --muted:#6c7a7f; --line:#e3e3dc;
+    --accent:#2e7d67; --accent2:#ef9b37; --good:#3ea86f; --bad:#d95b5b; --sky:#d9eef6;
+    --shadow:0 14px 40px rgba(35,48,56,.12); --r:26px; --top:90px;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;min-height:100%;font-family:ui-rounded,"SF Pro Rounded","Avenir Next",system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--ink)}
+  body{overscroll-behavior:none}
+  button,input,select{font:inherit}
+  button{border:0;cursor:pointer}
+  .app{min-height:100svh;display:flex;flex-direction:column}
+  header{position:sticky;top:0;z-index:30;height:var(--top);display:flex;align-items:center;gap:14px;padding:14px clamp(16px,3vw,34px);background:rgba(247,241,229,.92);backdrop-filter:blur(14px);border-bottom:1px solid rgba(34,48,56,.08)}
+  .brand{display:flex;align-items:center;gap:12px;min-width:0}
+  .brandmark{width:56px;height:56px;border-radius:18px;background:linear-gradient(135deg,var(--accent),#5fbf9a);color:#fff;display:grid;place-items:center;font-size:29px;font-weight:1000;box-shadow:inset 0 -4px 0 rgba(0,0,0,.08)}
+  .brandtext{line-height:1.02}
+  .brandtext b{display:block;font-size:clamp(22px,2.2vw,30px);letter-spacing:-.04em}
+  .brandtext span{display:block;color:var(--muted);font-size:13px;margin-top:5px}
+  .header-actions{margin-left:auto;display:flex;gap:10px;align-items:center}
+  .pill,.iconbtn,.small-pill{height:50px;border-radius:16px;background:#fff;padding:0 16px;font-weight:900;color:var(--ink);box-shadow:0 8px 18px rgba(35,48,56,.08)}
+  .iconbtn{width:50px;padding:0;font-size:22px}
+  .small-pill{height:42px;border-radius:14px;font-size:14px;padding:0 14px}
+  main{width:min(1240px,100%);margin:0 auto;padding:clamp(16px,2.8vw,32px);flex:1}
+  .screen{display:none}
+  .screen.active{display:block}
+  .hero{display:grid;grid-template-columns:1.2fr .8fr;gap:18px;margin-bottom:18px}
+  .hero-main,.hero-side{border-radius:32px;overflow:hidden;box-shadow:var(--shadow)}
+  .hero-main{position:relative;min-height:250px;background:linear-gradient(145deg,#236f5a,#50a182);color:#fff;padding:clamp(24px,4vw,42px)}
+  .hero-main:after{content:"✦";position:absolute;right:26px;bottom:-28px;font-size:200px;line-height:1;color:rgba(255,255,255,.1);font-weight:1000;transform:rotate(15deg)}
+  .eyebrow{font-size:13px;font-weight:1000;text-transform:uppercase;letter-spacing:.14em;opacity:.78}
+  h1{font-size:clamp(34px,5vw,66px);line-height:.94;letter-spacing:-.06em;margin:12px 0 12px;max-width:760px}
+  .hero-main p{font-size:clamp(16px,1.8vw,21px);line-height:1.42;margin:0;max-width:650px;color:rgba(255,255,255,.92)}
+  .hero-side{background:var(--paper);padding:24px;display:flex;flex-direction:column;gap:18px}
+  .hero-side h3{margin:0;font-size:22px}
+  .hero-side p{margin:0;color:var(--muted);line-height:1.42}
+  .difficulty{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+  .diff{height:54px;border-radius:16px;background:#f0efe9;font-weight:1000;color:var(--ink)}
+  .diff.on{background:var(--ink);color:#fff}
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  select{height:52px;border-radius:16px;border:2px solid #e1e1d7;background:#fff;padding:0 14px;font-weight:900;color:var(--ink)}
+  .world-strip{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;margin:8px 0 22px}
+  .world-card{min-height:160px;border-radius:28px;padding:20px;position:relative;text-align:left;color:#fff;box-shadow:var(--shadow);overflow:hidden;border:3px solid transparent}
+  .world-card.active{border-color:#fff;outline:4px solid rgba(34,48,56,.14)}
+  .world-card span{font-size:48px;display:block;margin-bottom:12px}
+  .world-card b{display:block;font-size:28px;letter-spacing:-.04em}
+  .world-card small{display:block;margin-top:8px;font-size:14px;line-height:1.35;max-width:85%;opacity:.95}
+  .world-card em{position:absolute;right:12px;bottom:-4px;font-style:normal;font-size:92px;line-height:1;opacity:.16;font-weight:1000}
+  .world-jungle{background:linear-gradient(135deg,#4b9654,#88c95b)}
+  .world-space{background:linear-gradient(135deg,#304b9e,#6d5ee5)}
+  .world-sea{background:linear-gradient(135deg,#1587a1,#41b3d0)}
+  .world-greek{background:linear-gradient(135deg,#1993af,#56c9d4)}
+  .section-title{display:flex;align-items:end;justify-content:space-between;gap:12px;margin:0 0 14px}
+  .section-title h2{margin:0;font-size:clamp(26px,3vw,40px);letter-spacing:-.05em}
+  .section-title p{margin:0;color:var(--muted)}
+  .grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}
+  .game-card{min-height:176px;border-radius:28px;background:var(--paper);box-shadow:var(--shadow);padding:20px;position:relative;text-align:left;border:2px solid transparent;overflow:hidden;transition:transform .15s ease,border-color .15s ease}
+  .game-card:active{transform:scale(.985)}
+  .game-card .num{font-size:12px;font-weight:1000;letter-spacing:.12em;color:var(--muted);text-transform:uppercase}
+  .game-card h3{margin:10px 0 8px;font-size:24px;letter-spacing:-.03em}
+  .game-card p{margin:0;max-width:82%;color:var(--muted);line-height:1.35}
+  .game-card .sym{position:absolute;right:14px;bottom:8px;font-size:76px;line-height:1;font-weight:1000;opacity:.12}
+  .game-card .tag{position:absolute;top:16px;right:16px;font-size:11px;border-radius:999px;padding:6px 9px;background:#f1f0ea;font-weight:1000;color:var(--muted)}
+  .topline{display:flex;align-items:center;gap:12px;margin-bottom:18px;flex-wrap:wrap}
+  .back{background:#fff;border-radius:16px;padding:12px 16px;font-weight:1000;box-shadow:0 6px 14px rgba(35,48,56,.08)}
+  .screen-title{font-size:clamp(28px,3.2vw,42px);font-weight:1000;letter-spacing:-.05em}
+  .spacer{flex:1}
+  .status{background:#fff;border-radius:14px;padding:10px 14px;font-weight:900;color:var(--muted);box-shadow:0 6px 14px rgba(35,48,56,.06)}
+  .panel{background:var(--paper);border-radius:30px;padding:clamp(16px,2.4vw,28px);box-shadow:var(--shadow)}
+  .game-layout{display:grid;grid-template-columns:minmax(0,1fr) 290px;gap:20px}
+  .sidebox{background:#f4f1e9;border-radius:24px;padding:18px;height:max-content}
+  .sidebox h3{margin:0 0 12px;font-size:18px}
+  .sidebox p{margin:0 0 14px;color:var(--muted);line-height:1.42;font-size:14px}
+  .big-action{display:inline-flex;align-items:center;justify-content:center;min-height:52px;padding:0 18px;border-radius:16px;background:var(--ink);color:#fff;font-weight:1000}
+  .secondary{background:#fff;color:var(--ink);border:2px solid #dbddd5}
+  .message{display:none;margin-top:12px;padding:12px 14px;border-radius:14px;background:#eef6f2;font-weight:900}
+  .message.show{display:block}
+  .footer-note{text-align:center;color:var(--muted);font-size:12px;margin-top:18px}
+
+  /* word search */
+  .word-list{display:flex;flex-wrap:wrap;gap:8px}
+  .word-chip{padding:9px 11px;border-radius:12px;background:#fff;border:2px solid transparent;font-weight:900;font-size:14px}
+  .word-chip.done{opacity:.45;text-decoration:line-through;border-color:#cfe5db}
+  #wordGrid{width:min(80vw,720px);aspect-ratio:1/1;display:grid;margin:auto;user-select:none;touch-action:none;background:#fff;border:2px solid var(--ink);border-radius:18px;overflow:hidden}
+  .letter{display:grid;place-items:center;border-right:1px solid #dfe3dd;border-bottom:1px solid #dfe3dd;font-weight:1000;font-size:clamp(17px,3vw,28px);background:#fff}
+  .letter.preview{background:#e8f2f7}
+  .letter.hit{background:#f6d97e;color:#413615}
+
+  /* maze */
+  .canvas-wrap{display:grid;place-items:center;width:100%;overflow:hidden}
+  canvas{max-width:100%;background:#fff;border-radius:18px;touch-action:none;border:2px solid var(--ink)}
+
+  /* general cards */
+  .scramble-area{display:grid;gap:14px;max-width:760px;margin:0 auto}
+  .scramble-card{background:#f4f1e9;border-radius:24px;padding:24px;text-align:center}
+  .scrambled{font-size:clamp(34px,7vw,74px);font-weight:1000;letter-spacing:.12em;margin:8px 0 16px;color:var(--accent)}
+  .answer-row{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+  .answer-row input{height:56px;border-radius:16px;border:2px solid #d5dad4;padding:0 16px;font-size:22px;font-weight:900;text-transform:uppercase;min-width:220px;background:#fff}
+  .logic-question{text-align:center}
+  .logic-question h2{font-size:clamp(28px,4vw,48px);margin:10px 0 22px}
+  .logic-options{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+  .logic-opt{min-height:104px;border-radius:22px;background:#f3f1e9;border:3px solid transparent;font-size:clamp(30px,5vw,52px);font-weight:1000}
+  .logic-opt.correct{border-color:var(--good);background:#e8f5ee}
+  .logic-opt.wrong{border-color:var(--bad);background:#faeaea}
+  #quickGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+  .quick-card{min-height:156px;background:#f4f1e9;border-radius:24px;padding:20px;display:flex;flex-direction:column;gap:14px}
+  .quick-card b{font-size:20px}
+  .quick-card .opts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+  .quick-opt{min-height:48px;border-radius:14px;background:#fff;border:2px solid #dde0d8;font-weight:900;padding:10px}
+  .quick-opt.good{border-color:var(--good);background:#e8f5ee}
+  .quick-opt.bad{border-color:var(--bad);background:#faeaea}
+
+  /* memory */
+  #memoryBoard{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;max-width:720px;margin:0 auto}
+  .mem-card{aspect-ratio:1/1;border-radius:20px;background:#ebede6;position:relative;transform-style:preserve-3d;transition:transform .25s ease;box-shadow:0 6px 12px rgba(35,48,56,.08)}
+  .mem-card.flipped{transform:rotateY(180deg)}
+  .mem-face{position:absolute;inset:0;border-radius:20px;display:grid;place-items:center;backface-visibility:hidden;font-size:clamp(28px,6vw,54px);font-weight:1000}
+  .mem-front{background:linear-gradient(135deg,#2f7d67,#56b191);color:#fff}
+  .mem-back{background:#fff;transform:rotateY(180deg)}
+  .mem-front::after{content:"?";font-size:clamp(26px,6vw,50px)}
+
+  /* sudoku */
+  #sudokuBoard{width:min(82vw,640px);display:grid;grid-template-columns:repeat(4,1fr);margin:auto;border:4px solid var(--ink);border-radius:16px;overflow:hidden;background:#fff}
+  .sudoku-cell{aspect-ratio:1/1;border-right:1px solid #dde1db;border-bottom:1px solid #dde1db;display:grid;place-items:center;font-size:clamp(26px,6vw,52px);font-weight:1000;background:#fff;position:relative}
+  .sudoku-cell.fixed{background:#f3f1e9}
+  .sudoku-cell.empty button{width:100%;height:100%;background:none;border:0;font-size:clamp(26px,6vw,52px);font-weight:1000}
+  .sudoku-cell.sep-r{border-right:4px solid var(--ink)}
+  .sudoku-cell.sep-b{border-bottom:4px solid var(--ink)}
+  .pick-row{display:flex;justify-content:center;gap:12px;flex-wrap:wrap;margin-top:16px}
+  .pick-btn{width:72px;height:72px;border-radius:20px;background:#fff;border:2px solid #dfe1d8;font-size:34px;font-weight:1000}
+  .pick-btn.on{border-color:var(--accent);box-shadow:0 0 0 4px rgba(46,125,103,.14)}
+
+  /* dots */
+  .hint-box{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-bottom:10px}
+  .theme-pill{padding:8px 12px;border-radius:999px;background:#f1f0ea;font-size:13px;font-weight:1000;color:var(--muted)}
+
+  .home-footer{margin-top:18px;padding:18px 20px;border-radius:24px;background:#efe8d8;color:var(--ink);display:flex;gap:14px;align-items:flex-start}
+  .home-footer .star{font-size:28px}
+  .home-footer b{display:block;margin-bottom:4px}
+  .hidden{display:none!important}
+
+  @media (max-width:980px){.hero{grid-template-columns:1fr}.grid{grid-template-columns:repeat(2,minmax(0,1fr))}.world-strip{grid-template-columns:repeat(2,minmax(0,1fr))}.game-layout{grid-template-columns:1fr}.sidebox{order:-1}}
+  @media (max-width:620px){header{height:76px}.brandmark{width:46px;height:46px;border-radius:15px}.brandtext span{display:none}.pill{display:none}.world-strip,.grid{grid-template-columns:1fr}.difficulty{grid-template-columns:1fr}.row2{grid-template-columns:1fr}.logic-options{grid-template-columns:repeat(2,1fr)}#quickGrid{grid-template-columns:1fr}#memoryBoard{grid-template-columns:repeat(3,minmax(0,1fr))}.pick-btn{width:64px;height:64px}}
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div class="brand">
+      <div class="brandmark">R</div>
+      <div class="brandtext"><b>Rätselwelt</b><span>V2 · Tablet-Rätselbuch mit Fingersteuerung</span></div>
+    </div>
+    <div class="header-actions">
+      <button class="pill" onclick="showHome()">Alle Rätsel</button>
+      <button class="iconbtn" onclick="toggleFull()" title="Vollbild">⛶</button>
+    </div>
+  </header>
+
+  <main>
+    <section class="screen active" id="home">
+      <div class="hero">
+        <div class="hero-main">
+          <div class="eyebrow">Rätsel-App · Offline · Eine HTML-Datei</div>
+          <h1>Finger drauf und losrätseln.</h1>
+          <p>V2 ist spielerischer, touchfreundlicher und thematischer aufgebaut: Welten auswählen, Schwierigkeit wählen und direkt in kurze Rätsel eintauchen – ideal fürs Tablet.</p>
+        </div>
+        <div class="hero-side">
+          <div>
+            <h3>Deine Einstellungen</h3>
+            <p>Wähle Schwierigkeit, Thema und wie viele Aufgaben pro Runde erscheinen sollen.</p>
+          </div>
+          <div class="difficulty" id="difficultyButtons">
+            <button class="diff" data-d="1">Leicht</button>
+            <button class="diff on" data-d="2">Mittel</button>
+            <button class="diff" data-d="3">Knifflig</button>
+          </div>
+          <div class="row2">
+            <select id="worldSelect">
+              <option value="jungle">Dschungel</option>
+              <option value="space">Weltraum</option>
+              <option value="sea">Meer</option>
+              <option value="greek">Griechenland</option>
+            </select>
+            <select id="roundSelect">
+              <option value="4">4 Aufgaben</option>
+              <option value="6" selected>6 Aufgaben</option>
+              <option value="8">8 Aufgaben</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-title">
+        <div>
+          <h2>Themenwelten</h2>
+          <p>Alle Rätsel passen sich sprachlich an die gewählte Welt an.</p>
+        </div>
+      </div>
+      <div class="world-strip" id="worldStrip"></div>
+
+      <div class="section-title" style="margin-top:8px">
+        <div>
+          <h2>Rätselarten</h2>
+          <p>Acht touchfreundliche Formate für Wort-, Logik- und Fingerrätsel.</p>
+        </div>
+        <div class="hint-box">
+          <span class="theme-pill" id="homeThemeLabel">Thema: Dschungel</span>
+          <span class="theme-pill" id="homeRoundLabel">Runde: 6 Aufgaben</span>
+        </div>
+      </div>
+      <div class="grid" id="gameGrid"></div>
+
+      <div class="home-footer">
+        <div class="star">⭐</div>
+        <div>
+          <b>Neu in V2</b>
+          Themensystem, Memory, Symbol-Sudoku, grössere Touchflächen, lokale Speicherung der Einstellungen und eine klarere Tablet-Navigation.
+        </div>
+      </div>
+    </section>
+
+    <section class="screen" id="word">
+      <div class="topline"><button class="back" onclick="showHome()">← Zurück</button><div class="screen-title">Wortsuche</div><div class="spacer"></div><div class="status" id="wordStatus">0 gefunden</div></div>
+      <div class="panel game-layout">
+        <div>
+          <div class="canvas-wrap"><div id="wordGrid"></div></div>
+          <div class="message" id="wordMsg">Super! Alle Wörter gefunden.</div>
+        </div>
+        <aside class="sidebox">
+          <h3>Suche die Wörter</h3>
+          <p>Streiche Wörter waagrecht, senkrecht oder diagonal mit dem Finger durch.</p>
+          <div class="word-list" id="wordList"></div>
+          <button class="big-action secondary" style="margin-top:14px" onclick="buildWordGame()">Neue Aufgabe</button>
+        </aside>
+      </div>
+    </section>
+
+    <section class="screen" id="maze">
+      <div class="topline"><button class="back" onclick="showHome()">← Zurück</button><div class="screen-title">Labyrinth</div><div class="spacer"></div><div class="status" id="mazeStatus">Vom START zum ZIEL</div></div>
+      <div class="panel game-layout">
+        <div class="canvas-wrap"><canvas id="mazeCanvas" width="980" height="720"></canvas><div class="message" id="mazeMsg">Geschafft! Der Weg stimmt.</div></div>
+        <aside class="sidebox"><h3>Fingerpfad</h3><p>Ziehe nur durch freie Gänge. In Sackgassen darfst du zurückfahren.</p><button class="big-action secondary" onclick="buildMaze()">Neues Labyrinth</button></aside>
+      </div>
+    </section>
+
+    <section class="screen" id="mix">
+      <div class="topline"><button class="back" onclick="showHome()">← Zurück</button><div class="screen-title">Wortsalat</div><div class="spacer"></div><div class="status" id="mixStatus">1 / 1</div></div>
+      <div class="panel"><div class="scramble-area"><div class="scramble-card"><div class="eyebrow" style="color:var(--muted)">Bringe die Buchstaben in Ordnung</div><div class="scrambled" id="scrambleWord">—</div><div class="answer-row"><input id="scrambleInput" autocomplete="off" autocapitalize="characters" placeholder="Dein Wort" /><button class="big-action" onclick="checkScramble()">Prüfen</button></div><div class="message" id="mixMsg"></div></div><div style="text-align:center"><button class="big-action secondary" onclick="newScrambleRound()">Neue Aufgabe</button></div></div></div>
+    </section>
+
+    <section class="screen" id="logic">
+      <div class="topline"><button class="back" onclick="showHome()">← Zurück</button><div class="screen-title">Muster erkennen</div><div class="spacer"></div></div>
+      <div class="panel"><div class="logic-question"><div class="eyebrow" style="color:var(--muted)">Was kommt als Nächstes?</div><h2 id="logicPrompt">2 · 4 · 6 · 8 · ?</h2><div class="logic-options" id="logicOptions"></div><div class="message" id="logicMsg"></div><button class="big-action secondary" style="margin-top:14px" onclick="newLogic()">Nächste Aufgabe</button></div></div>
+    </section>
+
+    <section class="screen" id="memory">
+      <div class="topline"><button class="back" onclick="showHome()">← Zurück</button><div class="screen-title">Memory</div><div class="spacer"></div><div class="status" id="memoryStatus">Paare: 0 / 0</div></div>
+      <div class="panel game-layout">
+        <div><div id="memoryBoard"></div><div class="message" id="memoryMsg">Alle Paare gefunden!</div></div>
+        <aside class="sidebox"><h3>Merk dir die Symbole</h3><p>Tippe zwei Karten an. Wenn sie gleich sind, bleiben sie offen.</p><button class="big-action secondary" onclick="buildMemory()">Neue Runde</button></aside>
+      </div>
+    </section>
+
+    <section class="screen" id="sudoku">
+      <div class="topline"><button class="back" onclick="showHome()">← Zurück</button><div class="screen-title">Symbol-Sudoku</div><div class="spacer"></div><div class="status" id="sudokuStatus">Wähle ein Symbol</div></div>
+      <div class="panel game-layout">
+        <div>
+          <div class="canvas-wrap"><div id="sudokuBoard"></div></div>
+          <div class="pick-row" id="pickRow"></div>
+          <div class="message" id="sudokuMsg">Perfekt! Das Sudoku stimmt.</div>
+        </div>
+        <aside class="sidebox"><h3>Regel</h3><p>In jeder Zeile, jeder Spalte und jedem 2×2-Feld darf jedes Symbol nur einmal vorkommen.</p><button class="big-action secondary" onclick="buildSudoku()">Neue Aufgabe</button></aside>
+      </div>
+    </section>
+
+    <section class="screen" id="dots">
+      <div class="topline"><button class="back" onclick="showHome()">← Zurück</button><div class="screen-title">Punkte verbinden</div><div class="spacer"></div><div class="status" id="dotsStatus">Als Nächstes: 1</div></div>
+      <div class="panel game-layout">
+        <div class="canvas-wrap"><canvas id="dotsCanvas" width="820" height="580"></canvas><div class="message" id="dotsMsg">Bild fertig!</div></div>
+        <aside class="sidebox"><h3>Punkt für Punkt</h3><p>Tippe die Zahlen der Reihe nach an. So entsteht ein Bild aus der aktuellen Themenwelt.</p><button class="big-action secondary" onclick="buildDots()">Neues Bild</button></aside>
+      </div>
+    </section>
+
+    <section class="screen" id="quick">
+      <div class="topline"><button class="back" onclick="showHome()">← Zurück</button><div class="screen-title">Mini-Rätsel</div><div class="spacer"></div></div>
+      <div class="panel"><div id="quickGrid"></div><div style="text-align:center;margin-top:14px"><button class="big-action secondary" onclick="buildQuick()">Neue Aufgaben</button></div></div>
+    </section>
+  </main>
+</div>
+
+<script>
+const worlds={
+  jungle:{name:'Dschungel',icon:'🌿',big:'🦜',desc:'Tiere, Pflanzen und Abenteuer',accent:'#4d9c58',cards:['🦁','🐒','🐍','🦜','🌴','🐆'],words1:['AFFE','LÖWE','LIANE','PALME','PANDA'],words2:['GIRAFFE','KROKODIL','ZITRONE','PAPAGEI','DSCHUNGEL','PANTHER'],words3:['ABENTEUER','SCHATZKARTE','FERNGLAS','SCHMETTERLING','KOMPASS','DINOSAURIER'],scramble:['PAPAGEI','PALME','LIANE','TIGER','KROKODIL','PANTHER'],memory:['🦁','🐒','🦜','🐍','🌴','🍌','🦋','🐘'],sudoku:['🦁','🐒','🦜','🌴'],dots:[{name:'Stern',pts:[[170,440],[280,150],[390,440],[120,250],[440,250]]},{name:'Blatt',pts:[[230,470],[310,150],[510,250],[430,460],[270,500],[170,380],[150,250]]}],quick:[
+    {q:'Welches Tier passt nicht?',opts:['🦁','🐘','🚀','🐒'],a:2},
+    {q:'Was wächst auf Bäumen?',opts:['🍎','🚗','🛏️','⚽'],a:0},
+    {q:'Womit schaut ein Forscher weit?',opts:['Fernrohr','Gabel','Kissen','Schaufel'],a:0},
+    {q:'Was ist grün?',opts:['🌴','🌙','❄️','🦴'],a:0}
+  ]},
+  space:{name:'Weltraum',icon:'🚀',big:'🪐',desc:'Planeten, Sterne und Raketen',accent:'#4f62d7',cards:['🚀','🪐','🌟','👽','🌙','☄️'],words1:['MOND','STERN','MARS','RAKETE','PLANET'],words2:['ASTRONAUT','SONNENWIND','SATURN','KOMET','RAKETE','GALAXIE'],words3:['MILCHSTRASSE','FERNROHR','SCHWERKRAFT','ASTEROID','RAUMSTATION','ABENTEUER'],scramble:['RAKETE','GALAXIE','SATURN','MOND','STERN','KOMET'],memory:['🚀','🪐','🌟','👽','🌙','☄️','🛰️','⭐'],sudoku:['🚀','🪐','🌙','⭐'],dots:[{name:'Rakete',pts:[[240,470],[240,300],[300,170],[360,300],[360,470],[420,520],[360,520],[300,560],[240,520],[180,520]]},{name:'Stern',pts:[[300,120],[350,260],[500,270],[380,360],[420,500],[300,420],[180,500],[220,360],[100,270],[250,260]]}],quick:[
+    {q:'Was leuchtet am Himmel?',opts:['⭐','🍎','🚲','🐟'],a:0},
+    {q:'Womit fliegt man ins All?',opts:['🚀','🚜','🚌','🛶'],a:0},
+    {q:'Was ist rund wie ein Planet?',opts:['⚽','📏','✏️','🪜'],a:0},
+    {q:'Wer trägt einen Raumanzug?',opts:['Astronaut','Bäcker','Pirat','Koch'],a:0}
+  ]},
+  sea:{name:'Meer',icon:'🐠',big:'🌊',desc:'Wellen, Fische und Unterwasserwelt',accent:'#1e9bb2',cards:['🐟','🐬','🐙','🦀','🌊','⚓'],words1:['FISCH','MEER','WELLE','KREBS','MUSCHEL'],words2:['DELFIN','SEESTERN','U-BOOT','SCHATZ','WASSER','OZEAN'],words3:['UNTERWASSER','KORALLENRIFF','SEEPFERDCHEN','SCHATZINSEL','ABENTEUER','LEUCHTTURM'],scramble:['DELFIN','KORALLE','MUSCHEL','WELLE','OZEAN','SEESTERN'],memory:['🐟','🐬','🐙','🦀','🌊','⚓','🦑','🐚'],sudoku:['🐟','🐙','🦀','🐚'],dots:[{name:'Fisch',pts:[[130,310],[250,220],[430,220],[540,310],[430,400],[250,400],[130,310],[80,240],[80,380]]},{name:'Anker',pts:[[300,120],[300,410],[250,470],[190,430],[180,350],[240,430],[300,470],[360,430],[420,350],[410,430],[350,470]]}],quick:[
+    {q:'Was schwimmt im Meer?',opts:['🐟','🚗','🌵','🏠'],a:0},
+    {q:'Was hört man am Strand?',opts:['🌊','🚂','📚','🧱'],a:0},
+    {q:'Was ist kein Meerestier?',opts:['🐬','🐙','🐘','🦀'],a:2},
+    {q:'Womit fährt ein U-Boot?',opts:['unter Wasser','auf Schienen','im Wald','im Himmel'],a:0}
+  ]},
+  greek:{name:'Griechenland',icon:'🏛️',big:'☀️',desc:'Mythologie, Meer und Feriengefühl',accent:'#1d9bb7',cards:['🏛️','⚡','🐂','🫒','🌊','☀️'],words1:['KRETA','ZEUS','MEER','OLIVE','TEMPEL'],words2:['MINOTAURUS','ATHENE','LABYRINTH','OLIVENBAUM','INSEL','SONNE'],words3:['GRIECHISCHE','MYTHOLOGIE','HERCULES','ODYSSEUS','ABENTEUER','BUCHSTABEN'],scramble:['ZEUS','KRETA','TEMPEL','OLIVE','LABYRINTH','ATHENE'],memory:['🏛️','⚡','🐂','🫒','🌊','☀️','🦉','🏺'],sudoku:['🏛️','⚡','🫒','🌊'],dots:[{name:'Tempel',pts:[[120,420],[500,420],[460,250],[160,250],[120,420],[300,120],[500,420],[420,420],[420,250],[360,250],[360,420],[300,420],[300,250],[240,250],[240,420],[180,420]]},{name:'Sonne',pts:[[300,150],[300,450],[150,300],[450,300],[210,210],[390,390],[210,390],[390,210]]}],quick:[
+    {q:'Wer gehört zur Mythologie?',opts:['Zeus','Lokführer','Bäcker','Taucher'],a:0},
+    {q:'Was wächst oft in Griechenland?',opts:['🫒','🌲 aus Eis','🍁','🎈'],a:0},
+    {q:'Kreta ist ...',opts:['eine Insel','ein Auto','ein Tier','eine Wolke'],a:0},
+    {q:'Was ist ein Labyrinth?',opts:['ein Irrweg','ein Getränk','ein Schuh','ein Motor'],a:0}
+  ]}
+};
+
+const gameCatalog=[
+  {id:'word',num:'01 · Wörter',title:'Wortsuche',desc:'Wörter mit dem Finger markieren.',sym:'ABC',tag:'touch'},
+  {id:'maze',num:'02 · Fingerpfad',title:'Labyrinth',desc:'Vom START zum ZIEL fahren.',sym:'↝',tag:'zeichnen'},
+  {id:'mix',num:'03 · Buchstaben',title:'Wortsalat',desc:'Durcheinander gemischte Wörter lösen.',sym:'AZ',tag:'denken'},
+  {id:'logic',num:'04 · Muster',title:'Logikreihen',desc:'Erkenne Zahlen-, Buchstaben- oder Symbolmuster.',sym:'◼︎',tag:'knobeln'},
+  {id:'memory',num:'05 · Merken',title:'Memory',desc:'Passende Paare finden.',sym:'◎',tag:'merken'},
+  {id:'sudoku',num:'06 · Ordnen',title:'Symbol-Sudoku',desc:'Vier Symbole logisch einsetzen.',sym:'⊞',tag:'logik'},
+  {id:'dots',num:'07 · Zeichnen',title:'Punkte verbinden',desc:'Tippe 1 → 2 → 3 und entdecke ein Bild.',sym:'⋯',tag:'zeichnen'},
+  {id:'quick',num:'08 · Kurz & clever',title:'Mini-Rätsel',desc:'Kurze Auswahl- und Denkfragen.',sym:'?',tag:'kurz'}
+];
+
+let difficulty=+(localStorage.getItem('rw_difficulty')||2);
+let currentWorld=localStorage.getItem('rw_world')||'jungle';
+let roundSize=+(localStorage.getItem('rw_round')||6);
+let currentGame='';
+const screens=[...document.querySelectorAll('.screen')];
+function show(id){screens.forEach(s=>s.classList.toggle('active',s.id===id));window.scrollTo({top:0,behavior:'instant'});currentGame=id}
+function showHome(){show('home'); syncHomeLabels()}
+function openGame(id){show(id); if(id==='word') buildWordGame(); if(id==='maze') buildMaze(); if(id==='mix') newScrambleRound(); if(id==='logic') newLogic(); if(id==='memory') buildMemory(); if(id==='sudoku') buildSudoku(); if(id==='dots') buildDots(); if(id==='quick') buildQuick();}
+function toggleFull(){ if(!document.fullscreenElement){document.documentElement.requestFullscreen?.()}else{document.exitFullscreen?.()} }
+function savePrefs(){localStorage.setItem('rw_difficulty',difficulty);localStorage.setItem('rw_world',currentWorld);localStorage.setItem('rw_round',roundSize)}
+function syncHomeLabels(){document.getElementById('homeThemeLabel').textContent='Thema: '+worlds[currentWorld].name;document.getElementById('homeRoundLabel').textContent='Runde: '+roundSize+' Aufgaben';document.getElementById('worldSelect').value=currentWorld;document.getElementById('roundSelect').value=String(roundSize);document.querySelectorAll('.diff').forEach(b=>b.classList.toggle('on',+b.dataset.d===difficulty));}
+function renderWorlds(){const wrap=document.getElementById('worldStrip');wrap.innerHTML='';Object.entries(worlds).forEach(([key,w])=>{const btn=document.createElement('button');btn.className='world-card world-'+key+(key===currentWorld?' active':'');btn.innerHTML=`<span>${w.icon}</span><b>${w.name}</b><small>${w.desc}</small><em>${w.big}</em>`;btn.onclick=()=>{currentWorld=key;savePrefs();renderWorlds();syncHomeLabels()};wrap.appendChild(btn)})}
+function renderGameGrid(){const grid=document.getElementById('gameGrid');grid.innerHTML='';gameCatalog.forEach((g,i)=>{const card=document.createElement('button');card.className='game-card';card.style.borderColor=['#d7eadf','#d6e5ee','#f5dfc9','#ead7d4','#dddbea','#e8e0b6','#d2ecf0','#e8dcd0'][i%8];card.innerHTML=`<span class="num">${g.num}</span><span class="tag">${g.tag}</span><h3>${g.title}</h3><p>${g.desc}</p><span class="sym">${g.sym}</span>`;card.onclick=()=>openGame(g.id);grid.appendChild(card)})}
+
+// Init controls
+renderWorlds(); renderGameGrid(); syncHomeLabels();
+document.querySelectorAll('.diff').forEach(b=>b.addEventListener('click',()=>{difficulty=+b.dataset.d;savePrefs();syncHomeLabels()}));
+document.getElementById('worldSelect').addEventListener('change',e=>{currentWorld=e.target.value;savePrefs();renderWorlds();syncHomeLabels()});
+document.getElementById('roundSelect').addEventListener('change',e=>{roundSize=+e.target.value;savePrefs();syncHomeLabels()});
+
+function shuffled(a){return [...a].sort(()=>Math.random()-.5)}
+function pickN(arr,n){return shuffled(arr).slice(0,Math.min(n,arr.length))}
+
+// WORD SEARCH
+let wg={size:10,grid:[],words:[],placed:[],found:new Set(),drag:null};
+function buildWordGame(){
+  const w=worlds[currentWorld];
+  const bank=difficulty===1?w.words1:difficulty===2?w.words2:w.words3;
+  const size=difficulty===1?9:difficulty===2?11:13;
+  const take=difficulty===1?5:difficulty===2?6:6;
+  const words=pickN(bank,take).map(x=>x.toUpperCase());
+  const dirs=[[1,0],[0,1],[1,1],[-1,1],[1,-1],[-1,0],[0,-1],[-1,-1]];
+  let grid, placed;
+  for(let attempt=0;attempt<90;attempt++){
+    grid=Array.from({length:size},()=>Array(size).fill('')); placed=[];
+    let ok=true;
+    for(const word of words){
+      let done=false;
+      for(let t=0;t<320&&!done;t++){
+        const [dx,dy]=dirs[Math.floor(Math.random()*dirs.length)];
+        const x=Math.floor(Math.random()*size), y=Math.floor(Math.random()*size);
+        const ex=x+dx*(word.length-1), ey=y+dy*(word.length-1);
+        if(ex<0||ey<0||ex>=size||ey>=size) continue;
+        let fits=true;
+        for(let i=0;i<word.length;i++){const c=grid[y+dy*i][x+dx*i]; if(c&&c!==word[i]){fits=false;break}}
+        if(!fits) continue;
+        for(let i=0;i<word.length;i++) grid[y+dy*i][x+dx*i]=word[i];
+        placed.push({word,cells:Array.from({length:word.length},(_,i)=>`${x+dx*i},${y+dy*i}`)}); done=true;
+      }
+      if(!done){ok=false;break}
+    }
+    if(ok) break;
+  }
+  const abc='ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  for(let y=0;y<size;y++)for(let x=0;x<size;x++) if(!grid[y][x]) grid[y][x]=abc[Math.floor(Math.random()*abc.length)];
+  wg={size,grid,words,placed,found:new Set(),drag:null};
+  const el=document.getElementById('wordGrid'); el.innerHTML=''; el.style.gridTemplateColumns=`repeat(${size},1fr)`;
+  wg.grid.forEach((row,y)=>row.forEach((ch,x)=>{const d=document.createElement('div');d.className='letter';d.dataset.x=x;d.dataset.y=y;d.textContent=ch;el.appendChild(d)}));
+  document.getElementById('wordList').innerHTML=wg.words.map(word=>`<span class="word-chip" data-w="${word}">${word}</span>`).join('');
+  document.getElementById('wordStatus').textContent='0 gefunden'; document.getElementById('wordMsg').classList.remove('show');
+  el.onpointerdown=startWordDrag; el.onpointermove=moveWordDrag; el.onpointerup=endWordDrag; el.onpointercancel=endWordDrag;
+}
+function cellFromPoint(e){const el=document.elementFromPoint(e.clientX,e.clientY);return el?.classList.contains('letter')?el:null}
+function startWordDrag(e){e.preventDefault();const c=cellFromPoint(e); if(!c)return; wg.drag={sx:+c.dataset.x,sy:+c.dataset.y,ex:+c.dataset.x,ey:+c.dataset.y}; e.currentTarget.setPointerCapture?.(e.pointerId); previewWord();}
+function moveWordDrag(e){if(!wg.drag)return; e.preventDefault(); const c=cellFromPoint(e); if(!c)return; wg.drag.ex=+c.dataset.x; wg.drag.ey=+c.dataset.y; previewWord();}
+function lineCells(d){const dx=d.ex-d.sx, dy=d.ey-d.sy; const ax=Math.abs(dx), ay=Math.abs(dy); if(!(dx===0||dy===0||ax===ay)) return []; const n=Math.max(ax,ay); const stepx=Math.sign(dx), stepy=Math.sign(dy); return Array.from({length:n+1},(_,i)=>`${d.sx+stepx*i},${d.sy+stepy*i}`)}
+function previewWord(){document.querySelectorAll('.letter.preview').forEach(x=>x.classList.remove('preview')); lineCells(wg.drag).forEach(k=>{const [x,y]=k.split(',');document.querySelector(`.letter[data-x="${x}"][data-y="${y}"]`)?.classList.add('preview')})}
+function endWordDrag(){if(!wg.drag)return; const cells=lineCells(wg.drag); document.querySelectorAll('.letter.preview').forEach(x=>x.classList.remove('preview')); const target=cells.join('|');
+  const match=wg.placed.find(p=>{const a=p.cells.join('|'),b=[...p.cells].reverse().join('|');return !wg.found.has(p.word)&&(a===target||b===target)});
+  if(match){wg.found.add(match.word);match.cells.forEach(k=>{const[x,y]=k.split(',');document.querySelector(`.letter[data-x="${x}"][data-y="${y}"]`)?.classList.add('hit')});document.querySelector(`.word-chip[data-w="${match.word}"]`)?.classList.add('done');document.getElementById('wordStatus').textContent=`${wg.found.size} gefunden`;if(wg.found.size===wg.words.length)document.getElementById('wordMsg').classList.add('show')}
+  wg.drag=null;
+}
+
+// MAZE
+const mc=document.getElementById('mazeCanvas'),mctx=mc.getContext('2d');
+let maze={cols:12,rows:9,cells:[],path:[{x:0,y:0}],drawing:false};
+function makeMaze(cols,rows){
+  const cells=Array.from({length:rows},(_,y)=>Array.from({length:cols},(_,x)=>({x,y,w:[1,1,1,1],v:false})));
+  const stack=[cells[0][0]]; cells[0][0].v=true;
+  const dirs=[[0,-1,0,2],[1,0,1,3],[0,1,2,0],[-1,0,3,1]];
+  while(stack.length){
+    const c=stack[stack.length-1];
+    const opts=[];
+    for(const d of dirs){const nx=c.x+d[0], ny=c.y+d[1]; if(nx>=0&&ny>=0&&nx<cols&&ny<rows&&!cells[ny][nx].v) opts.push(d)}
+    if(!opts.length){stack.pop();continue}
+    const d=opts[Math.floor(Math.random()*opts.length)], n=cells[c.y+d[1]][c.x+d[0]];
+    c.w[d[2]]=0; n.w[d[3]]=0; n.v=true; stack.push(n);
+  }
+  return cells;
+}
+function buildMaze(){
+  const cols=difficulty===1?9:difficulty===2?13:17, rows=difficulty===1?7:difficulty===2?10:12;
+  maze={cols,rows,cells:makeMaze(cols,rows),path:[{x:0,y:0}],drawing:false}; document.getElementById('mazeMsg').classList.remove('show'); drawMaze();
+}
+function mazeDims(){const pad=30,cw=(mc.width-pad*2)/maze.cols,ch=(mc.height-pad*2)/maze.rows;return{pad,cw,ch}}
+function drawMaze(){const{pad,cw,ch}=mazeDims(); mctx.clearRect(0,0,mc.width,mc.height); mctx.fillStyle='#fff'; mctx.fillRect(0,0,mc.width,mc.height);
+  mctx.fillStyle='#dff1e8'; mctx.fillRect(pad+2,pad+2,cw-4,ch-4); mctx.fillStyle='#f8e2a6'; mctx.fillRect(pad+(maze.cols-1)*cw+2,pad+(maze.rows-1)*ch+2,cw-4,ch-4);
+  mctx.strokeStyle='#223038'; mctx.lineWidth=4; mctx.lineCap='round';
+  maze.cells.forEach((row,y)=>row.forEach((c,x)=>{const L=pad+x*cw,T=pad+y*ch,R=L+cw,B=T+ch;mctx.beginPath(); if(c.w[0]){mctx.moveTo(L,T);mctx.lineTo(R,T)} if(c.w[1]){mctx.moveTo(R,T);mctx.lineTo(R,B)} if(c.w[2]){mctx.moveTo(R,B);mctx.lineTo(L,B)} if(c.w[3]){mctx.moveTo(L,B);mctx.lineTo(L,T)} mctx.stroke()}));
+  mctx.font='900 16px system-ui'; mctx.textAlign='center'; mctx.textBaseline='middle'; mctx.fillStyle='#2f7d67'; mctx.fillText('START',pad+cw/2,pad+ch/2); mctx.fillStyle='#967017'; mctx.fillText('ZIEL',pad+(maze.cols-.5)*cw,pad+(maze.rows-.5)*ch);
+  if(maze.path.length){mctx.strokeStyle='#4a7fa9'; mctx.lineWidth=Math.max(8,Math.min(cw,ch)*.32); mctx.lineJoin='round'; mctx.lineCap='round'; mctx.beginPath(); maze.path.forEach((p,i)=>{const x=pad+(p.x+.5)*cw,y=pad+(p.y+.5)*ch; if(!i)mctx.moveTo(x,y); else mctx.lineTo(x,y)}); mctx.stroke();}
+}
+function pointToCell(e){const r=mc.getBoundingClientRect(), sx=mc.width/r.width, sy=mc.height/r.height; const x=(e.clientX-r.left)*sx, y=(e.clientY-r.top)*sy; const {pad,cw,ch}=mazeDims(); const cx=Math.floor((x-pad)/cw), cy=Math.floor((y-pad)/ch); if(cx<0||cy<0||cx>=maze.cols||cy>=maze.rows) return null; return {x:cx,y:cy}}
+function canStep(a,b){if(!a||!b)return false; const dx=b.x-a.x, dy=b.y-a.y; if(Math.abs(dx)+Math.abs(dy)!==1) return false; const c=maze.cells[a.y][a.x]; if(dx===1)return !c.w[1]; if(dx===-1)return !c.w[3]; if(dy===1)return !c.w[2]; if(dy===-1)return !c.w[0]; return false}
+function mazeDown(e){const p=pointToCell(e); if(!p||p.x||p.y) return; maze.drawing=true; maze.path=[{x:0,y:0}]; mc.setPointerCapture?.(e.pointerId); drawMaze()}
+function mazeMove(e){if(!maze.drawing)return; const p=pointToCell(e); if(!p)return; const last=maze.path[maze.path.length-1]; if(p.x===last.x&&p.y===last.y) return; if(maze.path.length>1 && p.x===maze.path[maze.path.length-2].x && p.y===maze.path[maze.path.length-2].y){maze.path.pop(); drawMaze(); return;} if(canStep(last,p)){maze.path.push(p); drawMaze(); if(p.x===maze.cols-1&&p.y===maze.rows-1){document.getElementById('mazeMsg').classList.add('show'); maze.drawing=false;}}}
+function mazeUp(){maze.drawing=false}
+mc.addEventListener('pointerdown',mazeDown); mc.addEventListener('pointermove',mazeMove); mc.addEventListener('pointerup',mazeUp); mc.addEventListener('pointercancel',mazeUp);
+
+// WORD SALAD
+let scrambleAnswer='';
+function scrambleText(word){let chars=word.split(''); do{chars=shuffled(chars)}while(chars.join('')===word); return chars.join('')}
+function newScrambleRound(){const bank=(difficulty===1?worlds[currentWorld].words1:worlds[currentWorld].scramble).map(x=>x.toUpperCase()); scrambleAnswer=bank[Math.floor(Math.random()*bank.length)]; document.getElementById('scrambleWord').textContent=scrambleText(scrambleAnswer); const input=document.getElementById('scrambleInput'); input.value=''; input.focus(); const msg=document.getElementById('mixMsg'); msg.className='message'; msg.textContent='';}
+function checkScramble(){const input=document.getElementById('scrambleInput').value.trim().toUpperCase(); const msg=document.getElementById('mixMsg'); msg.className='message show'; if(input===scrambleAnswer){msg.textContent='Richtig!';} else {msg.textContent='Noch nicht – probier es nochmals.';}}
+
+// LOGIC
+let logicAnswer=null;
+function newLogic(){
+  const set=[];
+  set.push({prompt:'2 · 4 · 6 · 8 · ?',options:['9','10','12','6'],answer:'10'});
+  set.push({prompt:'A · C · E · G · ?',options:['I','H','J','K'],answer:'I'});
+  set.push({prompt:'🌙 · ⭐ · 🌙 · ⭐ · ?',options:['⭐','🌙','☀️','🚀'],answer:'🌙'});
+  set.push({prompt:'5 · 10 · 15 · 20 · ?',options:['24','25','30','22'],answer:'25'});
+  if(difficulty>=2){set.push({prompt:'3 · 6 · 12 · 24 · ?',options:['28','30','48','36'],answer:'48'}); set.push({prompt:'B · D · G · K · ?',options:['N','P','O','R'],answer:'P'});}
+  if(difficulty===3){set.push({prompt:'1 · 1 · 2 · 3 · 5 · ?',options:['6','7','8','9'],answer:'8'}); set.push({prompt:'⬜ · ◼︎ · ▲ · ⬜ · ◼︎ · ?',options:['⬜','▲','●','◻︎'],answer:'▲'});}
+  const q=set[Math.floor(Math.random()*set.length)]; logicAnswer=q.answer; document.getElementById('logicPrompt').textContent=q.prompt; const wrap=document.getElementById('logicOptions'); wrap.innerHTML=''; const msg=document.getElementById('logicMsg'); msg.className='message'; msg.textContent=''; shuffled(q.options).forEach(opt=>{const b=document.createElement('button'); b.className='logic-opt'; b.textContent=opt; b.onclick=()=>{wrap.querySelectorAll('button').forEach(x=>x.disabled=true); if(opt===logicAnswer){b.classList.add('correct'); msg.textContent='Stimmt!';} else {b.classList.add('wrong'); [...wrap.children].find(x=>x.textContent===logicAnswer)?.classList.add('correct'); msg.textContent='Fast – die richtige Antwort ist markiert.';} msg.classList.add('show');}; wrap.appendChild(b);});
+}
+
+// MEMORY
+let mem={cards:[],first:null,second:null,lock:false,pairs:0,total:0};
+function buildMemory(){
+  const symbols=pickN(worlds[currentWorld].memory,difficulty===1?6:difficulty===2?8:10);
+  const pairs=[...symbols,...symbols].map((s,i)=>({id:i,symbol:s,open:false,done:false}));
+  mem={cards:shuffled(pairs),first:null,second:null,lock:false,pairs:0,total:symbols.length};
+  const board=document.getElementById('memoryBoard'); board.style.gridTemplateColumns=`repeat(${difficulty===3?5:4},minmax(0,1fr))`; board.innerHTML=''; document.getElementById('memoryMsg').classList.remove('show');
+  mem.cards.forEach((c,idx)=>{const btn=document.createElement('button'); btn.className='mem-card'; btn.innerHTML=`<span class="mem-face mem-front"></span><span class="mem-face mem-back">${c.symbol}</span>`; btn.onclick=()=>flipMemory(idx); board.appendChild(btn);}); updateMemoryStatus();
+}
+function updateMemoryStatus(){document.getElementById('memoryStatus').textContent=`Paare: ${mem.pairs} / ${mem.total}`}
+function flipMemory(idx){
+  if(mem.lock) return; const c=mem.cards[idx]; if(c.done||mem.first===idx) return; c.open=true; renderMemory();
+  if(mem.first===null){mem.first=idx; return;}
+  mem.second=idx; mem.lock=true;
+  const a=mem.cards[mem.first], b=mem.cards[mem.second];
+  if(a.symbol===b.symbol){a.done=b.done=true; mem.pairs++; mem.first=mem.second=null; mem.lock=false; updateMemoryStatus(); if(mem.pairs===mem.total) document.getElementById('memoryMsg').classList.add('show'); return;}
+  setTimeout(()=>{a.open=false; b.open=false; mem.first=mem.second=null; mem.lock=false; renderMemory();},700);
+}
+function renderMemory(){[...document.querySelectorAll('#memoryBoard .mem-card')].forEach((el,idx)=>{const c=mem.cards[idx]; el.classList.toggle('flipped',c.open||c.done)}); updateMemoryStatus();}
+
+// SUDOKU 4x4
+let sudoku={solution:[],puzzle:[],symbols:[],selected:null};
+function buildSudoku(){
+  const syms=[...worlds[currentWorld].sudoku];
+  const base=[
+    [0,1,2,3],
+    [2,3,0,1],
+    [1,0,3,2],
+    [3,2,1,0]
+  ];
+  const rowPerm=shuffled([0,1]).concat(shuffled([2,3]));
+  const colPerm=shuffled([0,1]).concat(shuffled([2,3]));
+  const symPerm=shuffled([0,1,2,3]);
+  const solution=rowPerm.map(r=>colPerm.map(c=>syms[symPerm[base[r][c]]]));
+  let puzzle=solution.map(r=>r.map(v=>({value:v,fixed:true}))); 
+  const blanks=difficulty===1?5:difficulty===2?7:9;
+  pickN([...Array(16).keys()],blanks).forEach(i=>{const y=Math.floor(i/4),x=i%4; puzzle[y][x]={value:'',fixed:false}});
+  sudoku={solution,puzzle,symbols:syms,selected:syms[0]};
+  renderSudoku();
+}
+function renderSudoku(){
+  const board=document.getElementById('sudokuBoard'); board.innerHTML=''; document.getElementById('sudokuMsg').classList.remove('show');
+  sudoku.puzzle.forEach((row,y)=>row.forEach((cell,x)=>{const div=document.createElement('div'); div.className='sudoku-cell'+(cell.fixed?' fixed':' empty')+(x===1?' sep-r':'')+(y===1?' sep-b':''); if(cell.fixed){div.textContent=cell.value;} else {const b=document.createElement('button'); b.textContent=cell.value||'·'; b.onclick=()=>placeSudoku(x,y); div.appendChild(b);} board.appendChild(div)}));
+  const pick=document.getElementById('pickRow'); pick.innerHTML=''; sudoku.symbols.forEach(sym=>{const b=document.createElement('button'); b.className='pick-btn'+(sudoku.selected===sym?' on':''); b.textContent=sym; b.onclick=()=>{sudoku.selected=sym; renderSudoku()}; pick.appendChild(b)});
+  document.getElementById('sudokuStatus').textContent='Aktiv: '+sudoku.selected;
+}
+function placeSudoku(x,y){if(!sudoku.selected) return; sudoku.puzzle[y][x].value=sudoku.selected; renderSudoku(); checkSudoku();}
+function checkSudoku(){
+  for(let y=0;y<4;y++)for(let x=0;x<4;x++){if(sudoku.puzzle[y][x].value!==sudoku.solution[y][x]) return}
+  document.getElementById('sudokuMsg').classList.add('show');
+}
+
+// DOTS
+const dc=document.getElementById('dotsCanvas'),dctx=dc.getContext('2d');
+let dots={pts:[],next:1};
+function buildDots(){const item=worlds[currentWorld].dots[Math.floor(Math.random()*worlds[currentWorld].dots.length)]; dots={pts:item.pts.map((p,i)=>({x:p[0],y:p[1],n:i+1})),next:1}; document.getElementById('dotsStatus').textContent='Als Nächstes: 1'; document.getElementById('dotsMsg').classList.remove('show'); drawDots();}
+function drawDots(){dctx.clearRect(0,0,dc.width,dc.height); dctx.fillStyle='#fff'; dctx.fillRect(0,0,dc.width,dc.height); dctx.lineWidth=6; dctx.strokeStyle='#427aa1'; dctx.beginPath(); for(let i=1;i<dots.next-1;i++){const a=dots.pts[i-1],b=dots.pts[i]; dctx.moveTo(a.x,a.y); dctx.lineTo(b.x,b.y);} dctx.stroke(); dots.pts.forEach(p=>{dctx.fillStyle=p.n<dots.next?'#2e7d67':'#f0efe9'; dctx.beginPath(); dctx.arc(p.x,p.y,18,0,Math.PI*2); dctx.fill(); dctx.fillStyle=p.n<dots.next?'#fff':'#223038'; dctx.font='900 16px system-ui'; dctx.textAlign='center'; dctx.textBaseline='middle'; dctx.fillText(p.n,p.x,p.y);});}
+function dotsPoint(e){const r=dc.getBoundingClientRect(), sx=dc.width/r.width, sy=dc.height/r.height; return {x:(e.clientX-r.left)*sx,y:(e.clientY-r.top)*sy}}
+dc.addEventListener('pointerdown',e=>{if(!dots.pts.length)return; const p=dotsPoint(e); const target=dots.pts[dots.next-1]; const dx=p.x-target.x,dy=p.y-target.y; if(Math.hypot(dx,dy)<=28){dots.next++; if(dots.next>dots.pts.length){drawDots(); document.getElementById('dotsMsg').classList.add('show'); document.getElementById('dotsStatus').textContent='Fertig';} else {drawDots(); document.getElementById('dotsStatus').textContent='Als Nächstes: '+dots.next;}}});
+
+// QUICK
+function buildQuick(){
+  const wrap=document.getElementById('quickGrid'); wrap.innerHTML='';
+  const items=pickN(worlds[currentWorld].quick, roundSize>=6?4:2);
+  items.forEach((q,idx)=>{const card=document.createElement('div'); card.className='quick-card'; card.innerHTML=`<b>${q.q}</b><div class="opts"></div>`; const opts=card.querySelector('.opts'); shuffled(q.opts.map((text,i)=>({text,correct:i===q.a}))).forEach(item=>{const b=document.createElement('button'); b.className='quick-opt'; b.textContent=item.text; b.onclick=()=>{[...opts.children].forEach(x=>x.disabled=true); if(item.correct){b.classList.add('good')} else {b.classList.add('bad'); [...opts.children].find(x=>x.textContent===q.opts[q.a])?.classList.add('good')}}; opts.appendChild(b)}); wrap.appendChild(card)});
+}
+
+// Home label updates on load
+showHome();
+</script>
+</body>
+</html>
