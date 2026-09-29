@@ -586,11 +586,7 @@ function drawDots(){
   dotsState.points.forEach(p=>{ const s=scaleDotPoint(p); const done = p.n < dotsState.next; dctx.fillStyle = done ? '#2f8a66' : '#f1efe7'; dctx.beginPath(); dctx.arc(s.x,s.y, done ? 11 : 10, 0, Math.PI*2); dctx.fill(); dctx.fillStyle = done ? '#fff' : '#223038'; dctx.font='900 10px system-ui'; dctx.textAlign='center'; dctx.textBaseline='middle'; dctx.fillText(p.n, s.x, s.y); });
 }
 function dotsPointer(e){ const rect=dotsCanvas.getBoundingClientRect(), sx=dotsCanvas.width/rect.width, sy=dotsCanvas.height/rect.height; return {x:(e.clientX-rect.left)*sx, y:(e.clientY-rect.top)*sy}; }
-dotsCanvas.addEventListener('pointerdown', e=>{
-  if(!dotsState.points.length) return;
-  const pointer=dotsPointer(e); const target = scaleDotPoint(dotsState.points[dotsState.next-1]);
-  if(Math.hypot(pointer.x-target.x, pointer.y-target.y) <= 20){ dotsState.next++; if(dotsState.next > dotsState.points.length){ drawDots(); document.getElementById('dotsMsg').classList.add('show'); awardReward('dots'); } else { drawDots(); } }
-});
+/* V4.3.2: click-only point handler replaced by continuous finger tracing below. */
 
 // QUICK
 function buildQuick(){
@@ -1025,7 +1021,7 @@ function buildDots(){
   if(!spaced.length) spaced=original.slice(0,Math.max(50,Math.min(original.length,70))).map(p=>{const sp=scaleDotPoint(p);return {...p,sx:sp.x,sy:sp.y};});
   spaced=spaced.map((p,i,arr)=>({...p,n:i+1,breakBefore:i>0&&p.stroke!==arr[i-1].stroke}));
   const radius=Math.max(3.4,Math.min(5.2,usedGap/2-1.2));
-  dotsState={points:spaced,next:1,shapeIndex:idx,name:spec.name,dotRadius:radius};
+  dotsState={points:spaced,next:1,shapeIndex:idx,name:spec.name,dotRadius:radius,completed:false};
   document.getElementById('dotsStatus').textContent=`Bild ${idx+1}/10 · Punkt 1/${spaced.length}`; document.getElementById('dotsMsg').classList.remove('show'); drawDots();
 }
 function scaleDotPoint(p){const W=dotsCanvas.width,H=dotsCanvas.height,mx=82,my=62;return{x:mx+(p.x/100)*(W-mx*2),y:my+(p.y/100)*(H-my*2)};}
@@ -1034,9 +1030,77 @@ function drawDots(){
   for(let i=1;i<dotsState.next-1;i++){const cur=dotsState.points[i],prev=dotsState.points[i-1];if(cur.breakBefore)continue;const a=scaleDotPoint(prev),b=scaleDotPoint(cur);dctx.beginPath();dctx.moveTo(a.x,a.y);dctx.lineTo(b.x,b.y);dctx.stroke();}
   const r=dotsState.dotRadius||4; dotsState.points.forEach(p=>{const s=scaleDotPoint(p),done=p.n<dotsState.next;dctx.fillStyle=done?worlds[currentWorld].accent:'#f4f1e8';dctx.beginPath();dctx.arc(s.x,s.y,r,0,Math.PI*2);dctx.fill();dctx.strokeStyle=done?'rgba(255,255,255,.7)':'#c7c5bc';dctx.lineWidth=1;dctx.stroke();dctx.fillStyle=done?'#fff':'#223038';dctx.font=`900 ${Math.max(7,Math.min(9,r+3))}px system-ui`;dctx.textAlign='center';dctx.textBaseline='middle';dctx.fillText(p.n,s.x,s.y);});
 }
-// replace existing dot click behavior with a capture guard; old listener uses our state/drawing and remains valid
-const oldDotsStatusUpdater=()=>{ if(dotsState.next<=dotsState.points.length)document.getElementById('dotsStatus').textContent=`Bild ${dotsState.shapeIndex+1}/10 · Punkt ${dotsState.next}/${dotsState.points.length}`; else document.getElementById('dotsStatus').textContent=dotsState.name; };
-dotsCanvas.addEventListener('pointerdown',()=>setTimeout(oldDotsStatusUpdater,0));
+// V4.3.2: points can be connected by dragging a finger continuously.
+let dotsTracingV432=false;
+let dotsLastPointerV432=null;
+function updateDotsStatusV432(){
+  if(dotsState.next<=dotsState.points.length) document.getElementById('dotsStatus').textContent=`Bild ${dotsState.shapeIndex+1}/10 · Punkt ${dotsState.next}/${dotsState.points.length}`;
+  else document.getElementById('dotsStatus').textContent=dotsState.name;
+}
+function distToSegmentV432(p,a,b){
+  const vx=b.x-a.x,vy=b.y-a.y,wx=p.x-a.x,wy=p.y-a.y,den=vx*vx+vy*vy;
+  if(!den) return Math.hypot(p.x-a.x,p.y-a.y);
+  const t=Math.max(0,Math.min(1,(wx*vx+wy*vy)/den));
+  const qx=a.x+t*vx,qy=a.y+t*vy;
+  return Math.hypot(p.x-qx,p.y-qy);
+}
+function finishDotsV432(){
+  if(dotsState.completed) return;
+  dotsState.completed=true;
+  drawDots();
+  document.getElementById('dotsMsg').classList.add('show');
+  document.getElementById('dotsStatus').textContent=dotsState.name;
+  awardReward('dots');
+}
+function advanceDotsAtPointV432(pointer,allowBreakStart=true){
+  if(!dotsState.points.length||dotsState.next>dotsState.points.length) return false;
+  const targetData=dotsState.points[dotsState.next-1];
+  if(targetData.breakBefore&&!allowBreakStart) return false;
+  const target=scaleDotPoint(targetData);
+  const hit=Math.max(18,(dotsState.dotRadius||4.2)*4.2);
+  if(Math.hypot(pointer.x-target.x,pointer.y-target.y)<=hit){
+    dotsState.next++;
+    if(dotsState.next>dotsState.points.length) finishDotsV432(); else {drawDots();updateDotsStatusV432();}
+    return true;
+  }
+  return false;
+}
+function advanceDotsAlongSegmentV432(from,to){
+  if(!dotsState.points.length||dotsState.next>dotsState.points.length) return;
+  let guard=0;
+  while(dotsState.next<=dotsState.points.length&&guard++<8){
+    const targetData=dotsState.points[dotsState.next-1];
+    // New separate outline/interior stroke: lift once and start directly on its first point.
+    if(targetData.breakBefore) break;
+    const target=scaleDotPoint(targetData);
+    const hit=Math.max(18,(dotsState.dotRadius||4.2)*4.2);
+    if(distToSegmentV432(target,from,to)<=hit){
+      dotsState.next++;
+      if(dotsState.next>dotsState.points.length){finishDotsV432();break;}
+      drawDots();updateDotsStatusV432();
+    } else break;
+  }
+}
+dotsCanvas.addEventListener('pointerdown',e=>{
+  if(!dotsState.points.length||dotsState.completed) return;
+  e.preventDefault();
+  const p=dotsPointer(e);
+  // A new stroke may start by touching its first numbered point.
+  const hit=advanceDotsAtPointV432(p,true);
+  dotsTracingV432=hit||dotsState.next>1;
+  dotsLastPointerV432=p;
+  if(dotsTracingV432) dotsCanvas.setPointerCapture?.(e.pointerId);
+});
+dotsCanvas.addEventListener('pointermove',e=>{
+  if(!dotsTracingV432||dotsState.completed) return;
+  e.preventDefault();
+  const p=dotsPointer(e),prev=dotsLastPointerV432||p;
+  advanceDotsAlongSegmentV432(prev,p);
+  dotsLastPointerV432=p;
+});
+function stopDotsTraceV432(){dotsTracingV432=false;dotsLastPointerV432=null;}
+dotsCanvas.addEventListener('pointerup',stopDotsTraceV432);
+dotsCanvas.addEventListener('pointercancel',stopDotsTraceV432);
 
 // QUIZ: one challenging question at a time, pass threshold for reward
 let quizRoundV43={items:[],idx:0,correct:0,answered:false};
@@ -1255,10 +1319,10 @@ function checkQuizV43(){
 }
 function answerQuizV43(btn,ok,q){quizSelectFinal=btn;[...btn.parentElement.children].forEach(x=>x.classList.toggle('selected',x===btn));}
 
-// Sudoku: classic sizes 4x4 / 6x6 / 9x9, symbols or original numbers.
+// Sudoku: classic 9x9 in all four worlds; difficulty changes clue density. Symbols or original numbers.
 let sudokuModeV43=localStorage.getItem('rw43_sudoku_mode')||'symbols';
 let sudokuActiveCellV43=null;
-function sudokuDimensionsV43(){return difficulty===1?{n:4,boxR:2,boxC:2,blanks:6}:difficulty===2?{n:6,boxR:2,boxC:3,blanks:18}:{n:9,boxR:3,boxC:3,blanks:50};}
+function sudokuDimensionsV43(){return difficulty===1?{n:9,boxR:3,boxC:3,blanks:38}:difficulty===2?{n:9,boxR:3,boxC:3,blanks:46}:{n:9,boxR:3,boxC:3,blanks:52};}
 function sudokuPatternV43(r,c,n,boxR,boxC){return (boxC*(r%boxR)+Math.floor(r/boxR)+c)%n;}
 function shuffledGroupsV43(n,box){return shuffled([...Array(n/box).keys()]).flatMap(g=>shuffled([...Array(box).keys()]).map(v=>g*box+v));}
 function countSudokuSolutionsV43(grid,n,boxR,boxC,limit=2){
@@ -1269,6 +1333,17 @@ function countSudokuSolutionsV43(grid,n,boxR,boxC,limit=2){
 function generateSudokuPuzzleV43(n,boxR,boxC,targetBlanks){
   const rows=shuffledGroupsV43(n,boxR),cols=shuffledGroupsV43(n,boxC),nums=shuffled([...Array(n).keys()].map(i=>i+1));
   const solution=rows.map(r=>cols.map(c=>nums[sudokuPatternV43(r,c,n,boxR,boxC)]));
+  // Pre-verified unique 9x9 masks keep generation instant on tablets. Row/column/number permutations preserve uniqueness.
+  if(n===9){
+    const masks={
+      easy:['000011110','100110101','011101110','111101010','100111100','100111000','011001101','110000100','111000110'],
+      medium:['101010011','000000010','001000110','111100100','000001100','101011111','101100110','100110000','100011001'],
+      hard:['100010000','011010101','101000100','000111101','000100010','000001010','000001100','110100000','101011001']
+    };
+    const mask=targetBlanks<=40?masks.easy:targetBlanks<=48?masks.medium:masks.hard;
+    const puzzle=solution.map((row,r)=>row.map((v,c)=>mask[r][c]==='1'?v:0));
+    return {solution,puzzle,removed:puzzle.flat().filter(v=>!v).length};
+  }
   const puzzle=solution.map(r=>[...r]);let removed=0;
   for(const idx of shuffled([...Array(n*n).keys()])){if(removed>=targetBlanks)break;const r=Math.floor(idx/n),c=idx%n,keep=puzzle[r][c];puzzle[r][c]=0;const test=puzzle.map(row=>[...row]);if(countSudokuSolutionsV43(test,n,boxR,boxC,2)===1)removed++;else puzzle[r][c]=keep;}
   return {solution,puzzle,removed};
@@ -1303,7 +1378,7 @@ function buildDots(){
   dense.forEach((stroke,si)=>{let c=si===dense.length-1?remaining:Math.max(5,Math.round(spec.target*(lens[si]/totalLen)));const minLeft=(dense.length-si-1)*5;c=Math.min(c,remaining-minLeft);remaining-=c;sampleStroke(stroke,c).forEach((p,j)=>raw.push({x:p.x,y:p.y,stroke:si,breakBefore:si>0&&j===0}));});
   let spaced=[];for(let gap=16;gap>=11;gap--){const cand=[];for(const p of raw){const sp=scaleDotPoint(p);if(cand.every(q=>Math.hypot(sp.x-q.sx,sp.y-q.sy)>=gap))cand.push({...p,sx:sp.x,sy:sp.y});}if(cand.length>=50){spaced=cand;break;}}
   if(spaced.length<50){const cand=[];for(const p of raw){const sp=scaleDotPoint(p);if(cand.every(q=>Math.hypot(sp.x-q.sx,sp.y-q.sy)>=9))cand.push({...p,sx:sp.x,sy:sp.y});}spaced=cand.slice(0,Math.max(50,Math.min(cand.length,90)));}
-  spaced=spaced.map((p,i,a)=>({...p,n:i+1,breakBefore:i>0&&p.stroke!==a[i-1].stroke}));dotsState={points:spaced,next:1,shapeIndex:idx,name:spec.name,dotRadius:4.2};document.getElementById('dotsStatus').textContent=`${spec.name} · 1/${spaced.length}`;document.getElementById('dotsMsg').classList.remove('show');drawDots();
+  spaced=spaced.map((p,i,a)=>({...p,n:i+1,breakBefore:i>0&&p.stroke!==a[i-1].stroke}));dotsState={points:spaced,next:1,shapeIndex:idx,name:spec.name,dotRadius:4.2,completed:false};document.getElementById('dotsStatus').textContent=`${spec.name} · 1/${spaced.length}`;document.getElementById('dotsMsg').classList.remove('show');drawDots();
 }
 function drawDots(){
   dctx.clearRect(0,0,dotsCanvas.width,dotsCanvas.height);dctx.fillStyle='#fff';dctx.fillRect(0,0,dotsCanvas.width,dotsCanvas.height);dctx.strokeStyle=worlds[currentWorld].accent;dctx.lineWidth=4;dctx.lineCap='round';dctx.lineJoin='round';for(let i=1;i<dotsState.next-1;i++){const cur=dotsState.points[i],prev=dotsState.points[i-1];if(cur.breakBefore)continue;const a=scaleDotPoint(prev),b=scaleDotPoint(cur);dctx.beginPath();dctx.moveTo(a.x,a.y);dctx.lineTo(b.x,b.y);dctx.stroke();}
