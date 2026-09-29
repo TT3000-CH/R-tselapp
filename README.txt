@@ -1,96 +1,80 @@
-Rätselwelt V4.3 – Galaxy Tab A11+ Edition
-==========================================
+Rätselwelt V4.3 Final
+=====================
 
-Dateien
-- index.html  -> Hauptdatei
-- logo.svg    -> Logo
-- app.js      -> JavaScript-Kopie zur technischen Prüfung
-- README.txt  -> diese Übersicht
-
-Zielgerät
-- Galaxy Tab A11+
-- 11 Zoll
-- 16:10 / 1920 x 1200
-- Nutzung im Querformat und idealerweise im Vollbild
-
-V4.3 – wichtigste Änderungen
-
-1. Übersicht komplett vereinfacht
-- Schritt 1: Schwierigkeit
-- Schritt 2: Welt
-- Schritt 3: Spiel
-- kein zusätzlicher Start-Screen
-- weniger Text und grössere Bedienflächen
-
-2. Bildschirm-Layout
-- speziell auf 16:10 ausgelegt
-- getestet auch mit 960 x 600 CSS-Viewport (typische skalierte Darstellung)
-- alle Hauptseiten und Spiele ohne Seiten-Scrollen
-- Hochformat zeigt bewusst einen Hinweis zum Drehen
-
-3. Logikreihen
-- komplette Runden statt Einzelaufgabe
-- zahlreiche Regeltypen:
-  - konstante Schritte
-  - wechselnde Schritte
-  - wachsende Abstände
-  - zwei ineinander verschachtelte Reihen
-  - Multiplikation/Addition im Wechsel
-  - Fibonacci-artige Reihen
-  - Quadratzahlen, Primzahlen, Dreieckszahlen
-  - Buchstabenmuster
-  - Pfeil-/Symbolfolgen
-  - visuelle Mengenmuster
-- Belohnung erst nach erfolgreicher Runde
-
-4. Quiz
-- nur noch eine Frage pro Bildschirm
-- grössere Antwortflächen
-- deutlich anspruchsvollere Fragen
-- je Welt und Schwierigkeitsstufe eigener Fragenpool
-- Belohnung erst nach bestandener Runde
-
-5. Wortsuche
-- grössere Gitter
-- längere Wortlisten
-- Wörter werden bewusst über Kreuz gelegt
-- starke Bevorzugung diagonaler Wörter
-- vorwärts und rückwärts
-- im kniffligen Modus 13 Suchwörter
-
-6. Punkte verbinden
-- 10 Bilder pro Welt / 40 total
-- Bilder bestehen aus komplexeren Silhouetten und mehreren getrennten Linien
-- 50 bis ca. 80 Punkte je Bild
-- Punkte werden vor Anzeige auf Mindestabstand geprüft
-- keine übereinanderliegenden Punktmarker
-- Beispiele: Papagei, Tiger, Astronaut, Marsrover, Schildkröte, Leuchtturm, Minotaurus, Amphore
-
-7. Sudoku
-- Leicht: 4 x 4
-- Mittel / Knifflig: 6 x 6
-- grössere Symbolauswahl
-
-8. Memory
-- 8 / 10 / 12 Paare nach Schwierigkeit
-- zufällige Auswahl aus grossem Symbolpool je Welt
-
-9. Stickeralbum
-- 4 Seiten mit je 10 Stickern
-- Sticker deutlich schwerer erreichbar
-- erst nach 4 erfolgreich abgeschlossenen Rätselrunden in derselben Welt gibt es einen neuen Sticker
-- Album zeigt den Fortschritt bis zum nächsten Sticker
-- Fortschritt lokal im Browser gespeichert
-
-10. Labyrinth
-- Finger darf losgelassen werden
-- Weg bleibt gespeichert
-- am letzten Feld weiterfahren
-- frühere Wegstelle antippen = dorthin zurückkürzen
-- grössere Labyrinthe je Schwierigkeitsgrad
+Optimiert für Galaxy Tab A11+ im Querformat (16:10).
 
 Start
-1. Paket entpacken
+-----
+1. ZIP entpacken
 2. index.html im Browser öffnen
-3. Tablet ins Querformat drehen
-4. Vollbild aktivieren
+3. für die beste Darstellung Vollbild verwenden
+
+Wichtigste Änderungen dieser V4.3
+----------------------------------
+
+STARTSEITE
+- bewusst reduziert auf 3 Schritte:
+  1. Schwierigkeit
+  2. Welt
+  3. Spiel
+- weniger Begleittext
+- Stickeralbum separat oben erreichbar
+
+SUDOKU
+- Leicht: 4x4 mit 2x2-Blöcken
+- Mittel: 6x6 mit 2x3-Blöcken
+- Knifflig: klassisches 9x9-Sudoku mit 3x3-Blöcken
+- umschaltbar zwischen Welt-Symbolen und klassischen Zahlen
+- bei 9x9 Zahlen 1-9
+- Konflikte werden markiert, die richtige Lösung aber nicht automatisch verraten
+- eigener Prüfen-Button
+- generierte Aufgaben werden auf eindeutige Lösbarkeit geprüft
+
+LOGIKREIHEN
+- deutlich grössere Aufgabenvielfalt
+- konstante und wachsende Abstände
+- alternierende Regeln
+- verschachtelte Reihen
+- zwei ineinander laufende Folgen
+- Quadrate, Fakultäten und Multiplikationsmuster
+- Buchstabenfolgen
+- Symbol- und Mini-Matrix-Aufgaben
+- falsche Antwort zeigt nicht automatisch die Lösung
+- gewertet wird der erste Versuch
+
+QUIZ
+- anspruchsvollere Wissens- und Schlussfolgerungsfragen
+- pro Welt und Schwierigkeitsgrad eigene Fragenpools
+- falsche Antwort verrät die richtige Lösung nicht
+- gewertet wird der erste Versuch
+
+WORTSUCHE
+- gesuchte Wörter dürfen und sollen sich kreuzen
+- Überlappungen werden vom Generator aktiv bevorzugt
+- alle 8 Richtungen möglich
+- Diagonalen werden besonders auf Mittel/Knifflig bevorzugt
+- grössere Gitter und längere Begriffe
+
+PUNKTE VERBINDEN
+- 10 Motive je Welt / 40 insgesamt
+- komplexe, mehrteilige Motive mit Innenlinien
+- 60+ Punkte in den getesteten Motiven
+- globale Abstandsprüfung verhindert überlappende Punktmarker
+
+STICKERALBUM
+- 4 Seiten mit je 10 Stickern
+- ein Sticker benötigt jetzt gleichzeitig:
+  - mindestens 4 erfolgreich abgeschlossene Runden in derselben Welt
+  - mindestens 3 unterschiedliche Spielarten
+- Fortschritt bleibt lokal im Browser gespeichert
+
+LABYRINTH
+- der gezeichnete Weg bleibt beim Loslassen des Fingers erhalten
+- am letzten erreichten Feld kann weitergefahren werden
+- frühere Wegpunkte können zum Zurücksetzen der Route angetippt werden
+
+Technik
+-------
+- komplett lokal/offline nutzbar
+- keine externen Bibliotheken nötig
+- Fortschritt, Sterne und Sticker werden in localStorage gespeichert

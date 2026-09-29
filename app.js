@@ -1030,4 +1030,272 @@ function answerQuizV43(btn,ok,q){if(quizRoundV43.answered)return;quizRoundV43.an
 const scrambleInputV43=document.getElementById('scrambleInput'); if(scrambleInputV43) scrambleInputV43.addEventListener('keydown',e=>{if(e.key==='Enter')checkScramble();});
 
 
+
+/* ========================= V4.3 FINAL refinements ========================= */
+
+// Harder sticker progression: 4 wins AND 3 different games per sticker.
+let stickerChallengeV43 = JSON.parse(localStorage.getItem('rw43_sticker_challenge') || '{}');
+function challengeForWorldV43(key){
+  let c=stickerChallengeV43[key];
+  if(!c || typeof c!=='object') c={wins:0,games:[]};
+  c.wins=Math.max(0,Math.min(99,+c.wins||0));
+  c.games=[...new Set(Array.isArray(c.games)?c.games:[])];
+  stickerChallengeV43[key]=c;
+  return c;
+}
+function saveChallengeV43(){localStorage.setItem('rw43_sticker_challenge',JSON.stringify(stickerChallengeV43));}
+function challengeTextV43(key){const c=challengeForWorldV43(key);return `${Math.min(c.wins,4)}/4 Siege · ${Math.min(c.games.length,3)}/3 Spiele`;}
+function awardReward(gameId){
+  if(instanceCompletedV43[gameId]) return;
+  instanceCompletedV43[gameId]=true;
+  stars+=1; document.getElementById('starCount').textContent=stars;
+  const c=challengeForWorldV43(currentWorld); c.wins+=1; if(!c.games.includes(gameId)) c.games.push(gameId);
+  let unlocked=null;
+  if(c.wins>=4 && c.games.length>=3){
+    unlocked=unlockSticker(currentWorld); c.wins=0; c.games=[];
+  }
+  saveChallengeV43(); savePrefs(); updateStickerCounts();
+  if(unlocked){showStickerToast(unlocked);sparkle('🧩');}
+  else if(worldStickerCount(currentWorld)>=10){showProgressToast('Albumseite vollständig!','🏆');}
+  else showProgressToast(challengeTextV43(currentWorld));
+}
+function updateStickerCounts(){
+  const total=totalStickerCount();
+  const stat=document.getElementById('statStickers'); if(stat)stat.textContent=`${total}/40`;
+  const home=document.getElementById('homeAlbumCount'); if(home)home.textContent=`${total}/40`;
+  const albumStatus=document.getElementById('albumStatus'); if(albumStatus)albumStatus.textContent=`${total}/40 · ${challengeTextV43(currentAlbumWorld)}`;
+  const mini=document.getElementById('albumTotalMini'); if(mini)mini.textContent=`${total}/40`;
+}
+function renderAlbum(){
+  normalizeStickers(); const tabs=document.getElementById('albumTabs'),grid=document.getElementById('albumGrid'); tabs.innerHTML='';
+  Object.entries(worlds).forEach(([key,w])=>{const b=document.createElement('button');b.className='album-tab'+(key===currentAlbumWorld?' on':'');b.innerHTML=`${w.icon} ${w.name}<small>${worldStickerCount(key)}/10 · ${challengeTextV43(key)}</small>`;b.onclick=()=>{currentAlbumWorld=key;savePrefs();renderAlbum();};tabs.appendChild(b);});
+  const entries=stickerCatalog[currentAlbumWorld],unlocked=new Set(stickers[currentAlbumWorld]||[]);
+  document.getElementById('albumTitle').textContent=worlds[currentAlbumWorld].name;
+  document.getElementById('albumSubtitle').textContent=challengeTextV43(currentAlbumWorld);
+  document.getElementById('albumProgress').textContent=`${unlocked.size}/10`;
+  grid.innerHTML=''; entries.forEach((st,i)=>{const div=document.createElement('div'),on=unlocked.has(i);div.className='sticker '+(on?'unlocked':'locked');if(on){div.style.background=`linear-gradient(145deg,${st.colors[0]},${st.colors[1]})`;div.style.color='#fff';div.innerHTML=`<div class="sticker-top"><span class="sticker-icon">${st.icon}</span><span class="sticker-num">${i+1}</span></div><div class="sticker-name">${st.name}</div>`;}else div.innerHTML=`<div class="sticker-top"><span class="sticker-icon">🔒</span><span class="sticker-num">${i+1}</span></div><div class="sticker-name">Noch offen</div>`;grid.appendChild(div);});
+  updateStickerCounts();
+}
+
+// Stronger word-search generation: crossings are actively optimized and diagonals preferred.
+function buildWordGame(){
+  resetInstanceV43('word');
+  const raw=wordBank().map(x=>x.toUpperCase().replace(/[^A-ZÄÖÜ]/g,''));
+  const count=difficulty===1?9:difficulty===2?11:13;
+  const chosen=pickN(raw,count).sort((a,b)=>b.length-a.length);
+  const maxLen=Math.max(...chosen.map(w=>w.length));
+  const size=Math.max(difficulty===1?13:difficulty===2?15:17,maxLen+2);
+  const diagonal=[[1,1],[-1,-1],[1,-1],[-1,1]],straight=[[1,0],[-1,0],[0,1],[0,-1]],all=[...diagonal,...straight];
+  const overlapGoal=difficulty===1?.45:difficulty===2?.65:.78, diagGoal=difficulty===1?.4:difficulty===2?.58:.72;
+  let best=null;
+  for(let outer=0;outer<150;outer++){
+    const grid=Array.from({length:size},()=>Array(size).fill('')),use=Array.from({length:size},()=>Array(size).fill(0)),placed=[];
+    let diagWords=0,overlapWords=0,overlapLetters=0,failed=false;
+    for(let wi=0;wi<chosen.length;wi++){
+      const word=chosen[wi]; let candidates=[];
+      if(wi===0){
+        for(const [dx,dy] of diagonal){
+          for(let t=0;t<50;t++){
+            const sx=Math.floor(size*.18+Math.random()*size*.35),sy=Math.floor(size*.18+Math.random()*size*.35),ex=sx+dx*(word.length-1),ey=sy+dy*(word.length-1);
+            if(ex>=0&&ey>=0&&ex<size&&ey<size)candidates.push({sx,sy,dx,dy,overlaps:0,score:5+Math.random()});
+          }
+        }
+      }else{
+        for(let gy=0;gy<size;gy++)for(let gx=0;gx<size;gx++)if(grid[gy][gx]){
+          for(let ci=0;ci<word.length;ci++)if(word[ci]===grid[gy][gx]){
+            for(const [dx,dy] of all){
+              const sx=gx-dx*ci,sy=gy-dy*ci,ex=sx+dx*(word.length-1),ey=sy+dy*(word.length-1);
+              if(sx<0||sy<0||ex<0||ey<0||sx>=size||sy>=size||ex>=size||ey>=size)continue;
+              let ok=true,overlaps=0,crowded=0;
+              for(let i=0;i<word.length;i++){const x=sx+dx*i,y=sy+dy*i,c=grid[y][x];if(c&&c!==word[i]){ok=false;break;}if(c===word[i]){overlaps++;if(use[y][x]>=2)crowded++;}}
+              if(ok&&overlaps>0&&crowded===0){const centerPenalty=(Math.abs((sx+ex)/2-size/2)+Math.abs((sy+ey)/2-size/2))*.08;const diagBonus=Math.abs(dx)+Math.abs(dy)===2?(difficulty===3?12:8):0;candidates.push({sx,sy,dx,dy,overlaps,score:overlaps*18+diagBonus-centerPenalty+Math.random()*2});}
+            }
+          }
+        }
+      }
+      if(!candidates.length){
+        for(let t=0;t<900;t++){
+          const dirs=shuffled([...diagonal,...diagonal,...straight]),[dx,dy]=dirs[t%dirs.length],sx=Math.floor(Math.random()*size),sy=Math.floor(Math.random()*size),ex=sx+dx*(word.length-1),ey=sy+dy*(word.length-1);
+          if(ex<0||ey<0||ex>=size||ey>=size)continue;let ok=true,overlaps=0,crowded=0;
+          for(let i=0;i<word.length;i++){const x=sx+dx*i,y=sy+dy*i,c=grid[y][x];if(c&&c!==word[i]){ok=false;break;}if(c===word[i]){overlaps++;if(use[y][x]>=2)crowded++;}}
+          if(ok&&crowded===0){candidates.push({sx,sy,dx,dy,overlaps,score:overlaps*18+(Math.abs(dx)+Math.abs(dy)===2?(difficulty===3?12:8):0)+Math.random()});if(candidates.length>30)break;}
+        }
+      }
+      if(!candidates.length){failed=true;break;}
+      candidates.sort((a,b)=>b.score-a.score);const top=Math.min(difficulty===3?2:4,candidates.length),c=candidates[Math.floor(Math.random()*top)];
+      const cells=[];for(let i=0;i<word.length;i++){const x=c.sx+c.dx*i,y=c.sy+c.dy*i;grid[y][x]=word[i];use[y][x]++;cells.push(`${x},${y}`);}placed.push({word,cells});if(Math.abs(c.dx)+Math.abs(c.dy)===2)diagWords++;if(c.overlaps>0){overlapWords++;overlapLetters+=c.overlaps;}
+    }
+    if(!failed){const score=overlapWords*12+overlapLetters*3+diagWords*5;const candidate={grid,placed,score,overlapWords,diagWords};if(!best||score>best.score)best=candidate;if(overlapWords>=Math.ceil(chosen.length*overlapGoal)&&diagWords>=Math.ceil(chosen.length*diagGoal))break;}
+  }
+  if(!best){return setTimeout(buildWordGame,0);}
+  const abc='ABCDEFGHIJKLMNOPQRSTUVWXYZ',grid=best.grid,placed=best.placed;
+  for(let y=0;y<size;y++)for(let x=0;x<size;x++)if(!grid[y][x])grid[y][x]=abc[Math.floor(Math.random()*abc.length)];
+  wg={size,words:placed.map(p=>p.word),grid,placed,found:new Set(),drag:null};
+  const el=document.getElementById('wordGrid');el.innerHTML='';el.style.gridTemplateColumns=`repeat(${size},1fr)`;grid.forEach((row,y)=>row.forEach((ch,x)=>{const d=document.createElement('div');d.className='letter';d.dataset.x=x;d.dataset.y=y;d.textContent=ch;el.appendChild(d);}));
+  document.getElementById('wordList').innerHTML=wg.words.map(w=>`<span class="word-chip" data-w="${w}">${w}</span>`).join('');document.getElementById('wordStatus').textContent=`0/${wg.words.length}`;document.getElementById('wordMsg').classList.remove('show');el.onpointerdown=startWordDrag;el.onpointermove=moveWordDrag;el.onpointerup=endWordDrag;el.onpointercancel=endWordDrag;
+}
+
+// Logic: more varied rule families. Wrong answers never reveal the solution.
+let logicSelectFinal=null,logicMistakeFinal=false;
+function opt4Final(answer,values){const set=new Set([String(answer),...values.map(String)]);const n=Number(answer);let k=1;while(set.size<4&&Number.isFinite(n)){set.add(String(n+k));if(set.size<4&&n-k>=0)set.add(String(n-k));k++;}return shuffled([...set].slice(0,4));}
+function makeLogicFinal(level){
+  const easy=[
+    ()=>{const a=2+Math.floor(Math.random()*5),d=2+Math.floor(Math.random()*5),ans=a+4*d;return {p:`${a} · ${a+d} · ${a+2*d} · ${a+3*d} · ?`,a:String(ans),o:opt4Final(ans,[ans-d,ans+d,ans+2])};},
+    ()=>({p:'↑ · → · ↓ · ← · ?',a:'↑',o:['↑','→','↓','←']}),
+    ()=>({p:'A · C · E · G · ?',a:'I',o:['H','I','J','K']}),
+    ()=>({p:'● · ●● · ●●● · ?',a:'●●●●',o:['●●','●●●','●●●●','●●●●●']})
+  ];
+  const medium=[
+    ()=>{const a=3+Math.floor(Math.random()*4),seq=[a],diff=2+Math.floor(Math.random()*3);let c=a,d=diff;for(let i=0;i<4;i++){c+=d;seq.push(c);d++;}const ans=c+d;return {p:seq.join(' · ')+' · ?',a:String(ans),o:opt4Final(ans,[ans-2,ans+2,ans+4])};},
+    ()=>({p:'2 · 9 · 4 · 18 · 6 · 27 · ?',a:'8',o:['7','8','9','36']}),
+    ()=>({p:'2 · 4 · 7 · 14 · 17 · 34 · ?',a:'37',o:['36','37','40','68']}),
+    ()=>({p:'1 · 4 · 9 · 16 · 25 · ?',a:'36',o:['30','32','36','49']}),
+    ()=>({p:'2→6 · 3→12 · 4→20 · 5→?',a:'30',o:['25','28','30','35']}),
+    ()=>({p:'↗ · ↘ · ↙ · ↖ · ↗ · ?',a:'↘',o:['↗','↘','↙','↖']}),
+    ()=>({p:'1 · 1 · 2 · 3 · 5 · 8 · ?',a:'13',o:['11','12','13','16']}),
+    ()=>({p:'▲  ●  ■\n●  ■  ▲\n■  ▲  ?',a:'●',o:['▲','●','■','◆']})
+  ];
+  const hard=[
+    ()=>({p:'2 · 3 · 6 · 11 · 18 · ?',a:'27',o:['25','26','27','29']}),
+    ()=>({p:'3 · 6 · 18 · 72 · ?',a:'360',o:['144','216','288','360']}),
+    ()=>({p:'4 · 7 · 13 · 25 · 49 · ?',a:'97',o:['96','97','98','99']}),
+    ()=>({p:'1 · 4 · 10 · 22 · 46 · ?',a:'94',o:['90','92','94','96']}),
+    ()=>({p:'2 · 30 · 6 · 25 · 18 · 20 · ?',a:'54',o:['45','50','54','60']}),
+    ()=>({p:'3 · 4 · 8 · 9 · 18 · 19 · ?',a:'38',o:['36','37','38','40']}),
+    ()=>({p:'2 · 5 · 10 · 17 · 26 · ?',a:'37',o:['35','36','37','39']}),
+    ()=>({p:'100 · 96 · 88 · 76 · 60 · ?',a:'40',o:['36','40','42','44']}),
+    ()=>({p:'A · C · F · J · O · ?',a:'U',o:['T','U','V','W']}),
+    ()=>({p:'Z · W · S · N · H · ?',a:'A',o:['A','B','C','D']}),
+    ()=>({p:'1 · 2 · 6 · 24 · ?',a:'120',o:['96','100','120','144']}),
+    ()=>({p:'▲ · ●● · ■■■ · ▲▲▲▲ · ●●●●● · ?',a:'■■■■■■',o:['▲▲▲▲▲▲','●●●●●●','■■■■■■','■■■■■']}),
+    ()=>({p:'3→8 · 4→15 · 5→24 · 6→?',a:'35',o:['30','32','35','36']}),
+    ()=>({p:'2 · 5 · 11 · 23 · 47 · ?',a:'95',o:['93','94','95','96']}),
+    ()=>({p:'↑  →  ↓\n→  ↓  ←\n↓  ←  ?',a:'↑',o:['↑','→','↓','←']}),
+    ()=>({p:'1  2  3\n2  4  6\n3  6  ?',a:'9',o:['8','9','10','12']})
+  ];
+  const pool=level===1?easy:level===2?medium:hard;return pool[Math.floor(Math.random()*pool.length)]();
+}
+function newLogic(){resetInstanceV43('logic');const n=difficulty===1?6:difficulty===2?7:8;logicRoundV43={items:Array.from({length:n},()=>makeLogicFinal(difficulty)),idx:0,correct:0,answered:false};showLogicV43();}
+function showLogicV43(){
+  logicSelectFinal=null;logicMistakeFinal=false;const msg=document.getElementById('logicMsg');msg.className='message';msg.textContent='';
+  if(logicRoundV43.idx>=logicRoundV43.items.length){const need=Math.ceil(logicRoundV43.items.length*.7);document.getElementById('logicPrompt').textContent=`${logicRoundV43.correct}/${logicRoundV43.items.length} im ersten Versuch`;document.getElementById('logicOptions').innerHTML='';document.getElementById('logicStatus').textContent='Runde beendet';document.getElementById('logicScore').textContent=`${logicRoundV43.correct} richtig`;if(logicRoundV43.correct>=need){msg.textContent='Runde geschafft!';msg.classList.add('show');awardReward('logic');}else{msg.textContent=`Für den Sieg brauchst du ${need} richtige im ersten Versuch.`;msg.classList.add('show');}return;}
+  const q=logicRoundV43.items[logicRoundV43.idx];logicAnswer=q.a;document.getElementById('logicPrompt').textContent=q.p;document.getElementById('logicStatus').textContent=`${logicRoundV43.idx+1}/${logicRoundV43.items.length}`;document.getElementById('logicScore').textContent=`${logicRoundV43.correct} richtig`;
+  const wrap=document.getElementById('logicOptions');wrap.innerHTML='';shuffled(q.o).forEach(opt=>{const b=document.createElement('button');b.className='logic-opt';b.textContent=opt;b.onclick=()=>{logicSelectFinal=opt;[...wrap.children].forEach(x=>x.classList.toggle('selected',x===b));};wrap.appendChild(b);});
+}
+function checkLogicV43(){
+  const msg=document.getElementById('logicMsg');if(logicSelectFinal===null){msg.textContent='Wähle zuerst eine Antwort.';msg.className='message show';return;}
+  const wrap=document.getElementById('logicOptions'),btn=[...wrap.children].find(x=>x.textContent===logicSelectFinal);
+  if(logicSelectFinal===logicAnswer){btn?.classList.add('correct');if(!logicMistakeFinal)logicRoundV43.correct++;document.getElementById('logicScore').textContent=`${logicRoundV43.correct} richtig`;setTimeout(()=>{logicRoundV43.idx++;showLogicV43();},520);}
+  else{logicMistakeFinal=true;btn?.classList.add('retry');btn?.classList.remove('selected');logicSelectFinal=null;msg.textContent='Noch nicht. Versuche eine andere Antwort.';msg.className='message show';}
+}
+function answerLogicV43(btn,opt){logicSelectFinal=opt;[...btn.parentElement.children].forEach(x=>x.classList.toggle('selected',x===btn));}
+
+// Quiz: extra reasoning questions + select/check workflow without revealing the right answer.
+quizBankV43.jungle.push(
+  {d:2,q:'Ein Frosch frisst Insekten. Werden deutlich weniger Insekten gefunden, was ist zuerst wahrscheinlich?',o:['Der Frosch findet weniger Nahrung','Der Frosch wird sofort grösser','Es regnet nie mehr','Alle Bäume verlieren ihre Wurzeln'],a:0},
+  {d:3,q:'Zwei gleich grosse Waldflächen sind getrennt. Warum kann eine bewachsene Verbindung zwischen ihnen helfen?',o:['Tiere können zwischen Lebensräumen wandern','Sie verhindert jede Krankheit','Sie stoppt den Regen','Sie macht alle Arten gleich'],a:0},
+  {d:3,q:'Ein Baum wächst sehr schnell nach oben. Welcher Vorteil ist im dichten Regenwald am naheliegendsten?',o:['Mehr Licht erreichen','Weniger Wasser aufnehmen','Wurzeln vermeiden','Sich vor jedem Tier verstecken'],a:0},
+  {d:3,q:'Wenn eine Frucht nur von einer Tierart verbreitet wird und diese verschwindet, was droht?',o:['Die Pflanze verbreitet ihre Samen schlechter','Die Frucht wird automatisch grösser','Der Baum braucht kein Licht mehr','Der Boden wird salzig'],a:0}
+);
+quizBankV43.space.push(
+  {d:2,q:'Ein Satellit wird weiter von der Erde entfernt. Was muss für eine kreisförmige Bahn typischerweise mit seiner Bahngeschwindigkeit passieren?',o:['Sie wird geringer','Sie wird beliebig grösser','Sie bleibt immer exakt gleich','Sie wird null'],a:0},
+  {d:3,q:'Ein Stern ist 100 Lichtjahre entfernt. Was sehen wir heute?',o:['Licht von vor etwa 100 Jahren','Den Stern exakt in diesem Moment','Licht von morgen','Nur sein Spiegelbild vom Mond'],a:0},
+  {d:3,q:'Warum ist eine Rakete nach dem Start nicht sofort schwerelos?',o:['Sie muss erst in einen geeigneten freien Fall gelangen','Schwerelosigkeit beginnt nur nachts','Die Atmosphäre zieht sie nach oben','Nur der Mond macht schwerelos'],a:0},
+  {d:3,q:'Ein Planet braucht doppelt so lange für eine Umdrehung um seine Achse. Was ändert sich direkt?',o:['Ein Tag dauert länger','Ein Jahr wird automatisch halb so lang','Seine Masse verdoppelt sich','Die Sonne wird kälter'],a:0}
+);
+quizBankV43.sea.push(
+  {d:2,q:'Kälteres Meerwasser kann meist mehr Sauerstoff lösen. Welche Folge ist daher plausibel?',o:['Manche Arten finden in kühlerem Wasser bessere Sauerstoffbedingungen','Salz verschwindet','Gezeiten hören auf','Fische brauchen keine Kiemen'],a:0},
+  {d:3,q:'Ein Küstengebiet verliert grosse Seegraswiesen. Welche Folge ist am plausibelsten?',o:['Weniger Kinderstube und Schutz für viele Meerestiere','Das Meer wird sofort süss','Alle Wellen verschwinden','Der Mond ändert seine Bahn'],a:0},
+  {d:3,q:'Warum kann ein Ölfilm auf der Meeresoberfläche problematisch sein?',o:['Er kann Licht- und Gasaustausch beeinträchtigen','Er macht Wasser zu Eis','Er zieht den Mond an','Er entfernt das Salz'],a:0},
+  {d:3,q:'Wenn kleine Beutefische stark abnehmen, was kann bei grossen Räubern passieren?',o:['Ihre Nahrungsgrundlage wird knapper','Sie produzieren mehr Sauerstoff','Sie werden automatisch Pflanzenfresser','Das Meer wird tiefer'],a:0}
+);
+quizBankV43.greek.push(
+  {d:2,q:'Theseus braucht Ariadnes Faden vor allem, weil ...',o:['ein Labyrinth viele ähnliche Wege hat','der Minotaurus Angst vor Fäden hat','der Faden Türen öffnet','der Faden leuchtet'],a:0},
+  {d:3,q:'Welche Aussage beschreibt einen Mythos am besten?',o:['Eine überlieferte Erzählung, die Welt, Götter oder Helden deutet','Ein exakt gemessenes Experiment','Eine moderne Wettervorhersage','Eine mathematische Tabelle'],a:0},
+  {d:3,q:'Warum waren Häfen für viele griechische Stadtstaaten wichtig?',o:['Handel und Verbindung über das Meer','Weil es keine Strassen gab und niemand gehen konnte','Nur für Tempel','Um Berge abzubauen'],a:0},
+  {d:3,q:'Athene wird mit Weisheit verbunden. Welches Symbol passt daher besonders gut?',o:['Eule','Dreizack','Blitz','Stier'],a:0}
+);
+
+let quizSelectFinal=null,quizMistakeFinal=false;
+function buildQuick(){resetInstanceV43('quick');const pool=quizBankV43[currentWorld].filter(q=>q.d===difficulty);const n=Math.min(difficulty===1?6:difficulty===2?7:8,pool.length);quizRoundV43={items:pickN(pool,n),idx:0,correct:0,answered:false};showQuizV43();}
+function showQuizV43(){
+  quizSelectFinal=null;quizMistakeFinal=false;const wrap=document.getElementById('quickGrid'),msg=document.getElementById('quizMsg');msg.className='message';msg.textContent='';
+  if(quizRoundV43.idx>=quizRoundV43.items.length){const need=Math.ceil(quizRoundV43.items.length*.7);wrap.innerHTML=`<div class="quiz-stage"><div class="quiz-question">${quizRoundV43.correct}/${quizRoundV43.items.length} im ersten Versuch</div></div>`;document.getElementById('quizStatus').textContent='Runde beendet';document.getElementById('quizScore').textContent=`${quizRoundV43.correct} richtig`;if(quizRoundV43.correct>=need){msg.textContent='Quiz geschafft!';msg.classList.add('show');awardReward('quick');}else{msg.textContent=`Für den Sieg brauchst du ${need} richtige im ersten Versuch.`;msg.classList.add('show');}return;}
+  const q=quizRoundV43.items[quizRoundV43.idx];document.getElementById('quizStatus').textContent=`${quizRoundV43.idx+1}/${quizRoundV43.items.length}`;document.getElementById('quizScore').textContent=`${quizRoundV43.correct} richtig`;wrap.innerHTML='<div class="quiz-stage"><div class="quiz-question"></div><div class="quiz-options"></div></div>';wrap.querySelector('.quiz-question').textContent=q.q;const opts=wrap.querySelector('.quiz-options');shuffled(q.o.map((t,i)=>({t,ok:i===q.a}))).forEach(o=>{const b=document.createElement('button');b.className='quiz-option';b.textContent=o.t;b.dataset.ok=o.ok?'1':'0';b.onclick=()=>{quizSelectFinal=b;[...opts.children].forEach(x=>x.classList.toggle('selected',x===b));};opts.appendChild(b);});
+}
+function checkQuizV43(){
+  const msg=document.getElementById('quizMsg');if(!quizSelectFinal){msg.textContent='Wähle zuerst eine Antwort.';msg.className='message show';return;}
+  if(quizSelectFinal.dataset.ok==='1'){quizSelectFinal.classList.add('good');if(!quizMistakeFinal)quizRoundV43.correct++;document.getElementById('quizScore').textContent=`${quizRoundV43.correct} richtig`;setTimeout(()=>{quizRoundV43.idx++;showQuizV43();},560);}
+  else{quizMistakeFinal=true;quizSelectFinal.classList.add('retry');quizSelectFinal.classList.remove('selected');quizSelectFinal=null;msg.textContent='Noch nicht. Überlege nochmals.';msg.className='message show';}
+}
+function answerQuizV43(btn,ok,q){quizSelectFinal=btn;[...btn.parentElement.children].forEach(x=>x.classList.toggle('selected',x===btn));}
+
+// Sudoku: classic sizes 4x4 / 6x6 / 9x9, symbols or original numbers.
+let sudokuModeV43=localStorage.getItem('rw43_sudoku_mode')||'symbols';
+let sudokuActiveCellV43=null;
+function sudokuDimensionsV43(){return difficulty===1?{n:4,boxR:2,boxC:2,blanks:6}:difficulty===2?{n:6,boxR:2,boxC:3,blanks:18}:{n:9,boxR:3,boxC:3,blanks:50};}
+function sudokuPatternV43(r,c,n,boxR,boxC){return (boxC*(r%boxR)+Math.floor(r/boxR)+c)%n;}
+function shuffledGroupsV43(n,box){return shuffled([...Array(n/box).keys()]).flatMap(g=>shuffled([...Array(box).keys()]).map(v=>g*box+v));}
+function countSudokuSolutionsV43(grid,n,boxR,boxC,limit=2){
+  let best=null,bestCand=null;
+  for(let r=0;r<n;r++)for(let c=0;c<n;c++)if(grid[r][c]===0){const used=new Set(grid[r]);for(let rr=0;rr<n;rr++)used.add(grid[rr][c]);const br=Math.floor(r/boxR)*boxR,bc=Math.floor(c/boxC)*boxC;for(let y=0;y<boxR;y++)for(let x=0;x<boxC;x++)used.add(grid[br+y][bc+x]);const cand=[];for(let v=1;v<=n;v++)if(!used.has(v))cand.push(v);if(cand.length===0)return 0;if(best===null||cand.length<bestCand.length){best=[r,c];bestCand=cand;if(cand.length===1)break;}}
+  if(best===null)return 1;let count=0;const [r,c]=best;for(const v of bestCand){grid[r][c]=v;count+=countSudokuSolutionsV43(grid,n,boxR,boxC,limit-count);grid[r][c]=0;if(count>=limit)break;}return count;
+}
+function generateSudokuPuzzleV43(n,boxR,boxC,targetBlanks){
+  const rows=shuffledGroupsV43(n,boxR),cols=shuffledGroupsV43(n,boxC),nums=shuffled([...Array(n).keys()].map(i=>i+1));
+  const solution=rows.map(r=>cols.map(c=>nums[sudokuPatternV43(r,c,n,boxR,boxC)]));
+  const puzzle=solution.map(r=>[...r]);let removed=0;
+  for(const idx of shuffled([...Array(n*n).keys()])){if(removed>=targetBlanks)break;const r=Math.floor(idx/n),c=idx%n,keep=puzzle[r][c];puzzle[r][c]=0;const test=puzzle.map(row=>[...row]);if(countSudokuSolutionsV43(test,n,boxR,boxC,2)===1)removed++;else puzzle[r][c]=keep;}
+  return {solution,puzzle,removed};
+}
+function sudokuSymbolSetV43(n){const all=[...new Set([...worlds[currentWorld].sudoku,...worlds[currentWorld].memory])];return all.slice(0,n);}
+function sudokuDisplayV43(v){if(!v)return '·';return sudokuModeV43==='numbers'?String(v):sudoku.symbols[v-1];}
+function buildSudoku(){
+  resetInstanceV43('sudoku');const d=sudokuDimensionsV43(),generated=generateSudokuPuzzleV43(d.n,d.boxR,d.boxC,d.blanks);const entries=generated.puzzle.map(row=>[...row]),givens=generated.puzzle.map(row=>row.map(v=>v!==0));sudoku={n:d.n,boxR:d.boxR,boxC:d.boxC,solution:generated.solution,entries,givens,symbols:sudokuSymbolSetV43(d.n),selected:1};sudokuActiveCellV43=null;renderSudoku();
+}
+function setSudokuModeV43(mode){sudokuModeV43=mode;localStorage.setItem('rw43_sudoku_mode',mode);renderSudoku();}
+function sudokuConflictsV43(){
+  const bad=new Set(),{n,boxR,boxC,entries}=sudoku;const markGroup=cells=>{const seen=new Map();for(const [r,c] of cells){const v=entries[r][c];if(!v)continue;if(seen.has(v)){bad.add(`${r},${c}`);bad.add(seen.get(v));}else seen.set(v,`${r},${c}`);}};
+  for(let r=0;r<n;r++)markGroup([...Array(n).keys()].map(c=>[r,c]));for(let c=0;c<n;c++)markGroup([...Array(n).keys()].map(r=>[r,c]));for(let br=0;br<n;br+=boxR)for(let bc=0;bc<n;bc+=boxC){const cells=[];for(let y=0;y<boxR;y++)for(let x=0;x<boxC;x++)cells.push([br+y,bc+x]);markGroup(cells);}return bad;
+}
+function renderSudoku(){
+  const {n,boxR,boxC}=sudoku,board=document.getElementById('sudokuBoard');board.dataset.n=n;board.style.gridTemplateColumns=`repeat(${n},1fr)`;board.innerHTML='';document.getElementById('sudokuMsg').classList.remove('show');const conflicts=sudokuConflictsV43();
+  for(let y=0;y<n;y++)for(let x=0;x<n;x++){const fixed=sudoku.givens[y][x],v=sudoku.entries[y][x],d=document.createElement('div');d.className='sudoku-cell'+(fixed?' fixed':' empty')+(!fixed&&v?' user':'')+(conflicts.has(`${y},${x}`)?' conflict':'')+(sudokuActiveCellV43&&sudokuActiveCellV43.x===x&&sudokuActiveCellV43.y===y?' active-cell':'');if((x+1)%boxC===0&&x<n-1)d.style.borderRight='4px solid var(--ink)';if((y+1)%boxR===0&&y<n-1)d.style.borderBottom='4px solid var(--ink)';if(fixed)d.textContent=sudokuDisplayV43(v);else{const b=document.createElement('button');b.textContent=sudokuDisplayV43(v);b.onclick=()=>{sudokuActiveCellV43={x,y};if(sudoku.selected){sudoku.entries[y][x]=sudoku.selected;}renderSudoku();};d.appendChild(b);}board.appendChild(d);}
+  const pick=document.getElementById('pickRow');pick.dataset.n=n;pick.innerHTML='';for(let v=1;v<=n;v++){const b=document.createElement('button');b.className='pick-btn'+(sudoku.selected===v?' on':'');b.textContent=sudokuDisplayV43(v);b.onclick=()=>{sudoku.selected=v;renderSudoku();};pick.appendChild(b);}
+  document.getElementById('modeSymbols').classList.toggle('on',sudokuModeV43==='symbols');document.getElementById('modeNumbers').classList.toggle('on',sudokuModeV43==='numbers');document.getElementById('sudokuStatus').textContent=`${n}×${n} · ${sudokuModeV43==='numbers'?'Zahlen':'Symbole'}`;
+}
+function eraseSudokuV43(){if(!sudokuActiveCellV43)return;const {x,y}=sudokuActiveCellV43;if(!sudoku.givens[y][x])sudoku.entries[y][x]=0;renderSudoku();}
+function checkSudokuV43(){
+  const msg=document.getElementById('sudokuMsg'),conf=sudokuConflictsV43();if(conf.size){msg.textContent='Es gibt noch einen Konflikt.';msg.className='message show';return;}
+  if(sudoku.entries.some(r=>r.some(v=>!v))){msg.textContent='Noch nicht fertig.';msg.className='message show';return;}
+  const ok=sudoku.entries.every((r,y)=>r.every((v,x)=>v===sudoku.solution[y][x]));if(ok){msg.textContent='Perfekt! Sudoku gelöst.';msg.className='message show';awardReward('sudoku');}else{msg.textContent='Fast – irgendwo stimmt noch ein Feld nicht.';msg.className='message show';}
+}
+function placeSudoku(x,y){sudokuActiveCellV43={x,y};if(!sudoku.givens[y][x])sudoku.entries[y][x]=sudoku.selected;renderSudoku();}
+
+// Dots: preserve complex multi-stroke motifs and enforce non-overlapping point markers.
+function buildDots(){
+  resetInstanceV43('dots');const set=dotShapesV43[currentWorld],idx=Math.floor(Math.random()*set.length),spec=set[idx];const dense=spec.strokes.map(buildDenseStrokeV43),lens=dense.map(p=>pathLength(p,false)),totalLen=lens.reduce((a,b)=>a+b,0);let remaining=spec.target,raw=[];
+  dense.forEach((stroke,si)=>{let c=si===dense.length-1?remaining:Math.max(5,Math.round(spec.target*(lens[si]/totalLen)));const minLeft=(dense.length-si-1)*5;c=Math.min(c,remaining-minLeft);remaining-=c;sampleStroke(stroke,c).forEach((p,j)=>raw.push({x:p.x,y:p.y,stroke:si,breakBefore:si>0&&j===0}));});
+  let spaced=[];for(let gap=16;gap>=11;gap--){const cand=[];for(const p of raw){const sp=scaleDotPoint(p);if(cand.every(q=>Math.hypot(sp.x-q.sx,sp.y-q.sy)>=gap))cand.push({...p,sx:sp.x,sy:sp.y});}if(cand.length>=50){spaced=cand;break;}}
+  if(spaced.length<50){const cand=[];for(const p of raw){const sp=scaleDotPoint(p);if(cand.every(q=>Math.hypot(sp.x-q.sx,sp.y-q.sy)>=9))cand.push({...p,sx:sp.x,sy:sp.y});}spaced=cand.slice(0,Math.max(50,Math.min(cand.length,90)));}
+  spaced=spaced.map((p,i,a)=>({...p,n:i+1,breakBefore:i>0&&p.stroke!==a[i-1].stroke}));dotsState={points:spaced,next:1,shapeIndex:idx,name:spec.name,dotRadius:4.2};document.getElementById('dotsStatus').textContent=`${spec.name} · 1/${spaced.length}`;document.getElementById('dotsMsg').classList.remove('show');drawDots();
+}
+function drawDots(){
+  dctx.clearRect(0,0,dotsCanvas.width,dotsCanvas.height);dctx.fillStyle='#fff';dctx.fillRect(0,0,dotsCanvas.width,dotsCanvas.height);dctx.strokeStyle=worlds[currentWorld].accent;dctx.lineWidth=4;dctx.lineCap='round';dctx.lineJoin='round';for(let i=1;i<dotsState.next-1;i++){const cur=dotsState.points[i],prev=dotsState.points[i-1];if(cur.breakBefore)continue;const a=scaleDotPoint(prev),b=scaleDotPoint(cur);dctx.beginPath();dctx.moveTo(a.x,a.y);dctx.lineTo(b.x,b.y);dctx.stroke();}
+  const r=dotsState.dotRadius||4.2;dotsState.points.forEach(p=>{const s=scaleDotPoint(p),done=p.n<dotsState.next;dctx.fillStyle=done?worlds[currentWorld].accent:'#f5f1e8';dctx.beginPath();dctx.arc(s.x,s.y,r,0,Math.PI*2);dctx.fill();dctx.strokeStyle=done?'rgba(255,255,255,.8)':'#aaa79d';dctx.lineWidth=.9;dctx.stroke();dctx.fillStyle=done?'#fff':'#26333a';dctx.font='900 7.5px system-ui';dctx.textAlign='center';dctx.textBaseline='middle';dctx.fillText(p.n,s.x,s.y);});
+}
+
+// Tablet QA/debug launch, harmless unless query parameters are supplied.
+(function v43DebugLaunch(){
+  const p=new URLSearchParams(location.search);if(!p.size)return;
+  if(p.get('difficulty'))difficulty=Math.max(1,Math.min(3,+p.get('difficulty'))||2);
+  if(p.get('world')&&worlds[p.get('world')])currentWorld=p.get('world');
+  if(p.get('mode'))sudokuModeV43=p.get('mode')==='numbers'?'numbers':'symbols';
+  const screen=p.get('screen');
+  setTimeout(()=>{
+    syncHome(); if(screen&&document.getElementById(screen))openGame(screen);
+    setTimeout(()=>{if(p.get('qa')==='1'){document.body.dataset.qaViewport=`${innerWidth}x${innerHeight}`;document.body.dataset.qaScroll=`${document.documentElement.scrollWidth}x${document.documentElement.scrollHeight}`;document.body.dataset.qaBody=`${document.body.scrollWidth}x${document.body.scrollHeight}`;}},260);
+  },0);
+})();
+
 syncHome(); showHome();
