@@ -1,80 +1,25 @@
-Rätselwelt V4.3 Final
-=====================
+Rätselwelt V4.3.1 – Maze Fix
+============================
 
-Optimiert für Galaxy Tab A11+ im Querformat (16:10).
+Diese Version basiert auf V4.3 Final und korrigiert gezielt das Labyrinth.
 
-Start
------
-1. ZIP entpacken
-2. index.html im Browser öffnen
-3. für die beste Darstellung Vollbild verwenden
+Korrekturen:
+- Das Labyrinth nutzt auf dem Tablet jetzt die gesamte verfügbare Spielfläche.
+- Die rechte Info-Spalte wird beim Labyrinth entfernt; Neu/Reset/Zurück sind oben erreichbar.
+- Das Canvas wird beim Öffnen und bei Grössen-/Vollbildänderungen dynamisch an den sichtbaren Bereich angepasst.
+- Der komplette Rand des Labyrinths bleibt sichtbar; keine abgeschnittene rechte oder untere Seite mehr.
+- Wenn der Finger einen bereits früher besuchten Bereich der Route kreuzt, springt der Cursor nicht mehr dorthin zurück.
+- Direktes bewusstes Zurückfahren um genau ein Feld bleibt möglich.
+- Zusätzlich gibt es oben den Button „1 zurück“.
+- Nach Loslassen kann weiterhin am gelben Endpunkt weitergefahren werden.
 
-Wichtigste Änderungen dieser V4.3
-----------------------------------
+Alle übrigen Funktionen aus V4.3 Final bleiben erhalten, inklusive:
+- schweres 9x9-Sudoku mit Zahlen-/Symbolmodus
+- schwierigere Logikreihen und Quiz
+- überlappende/diagonale Wortsuche
+- 40 komplexere Punktebilder
+- Stickeralbum mit erschwerter Freischaltung
 
-STARTSEITE
-- bewusst reduziert auf 3 Schritte:
-  1. Schwierigkeit
-  2. Welt
-  3. Spiel
-- weniger Begleittext
-- Stickeralbum separat oben erreichbar
-
-SUDOKU
-- Leicht: 4x4 mit 2x2-Blöcken
-- Mittel: 6x6 mit 2x3-Blöcken
-- Knifflig: klassisches 9x9-Sudoku mit 3x3-Blöcken
-- umschaltbar zwischen Welt-Symbolen und klassischen Zahlen
-- bei 9x9 Zahlen 1-9
-- Konflikte werden markiert, die richtige Lösung aber nicht automatisch verraten
-- eigener Prüfen-Button
-- generierte Aufgaben werden auf eindeutige Lösbarkeit geprüft
-
-LOGIKREIHEN
-- deutlich grössere Aufgabenvielfalt
-- konstante und wachsende Abstände
-- alternierende Regeln
-- verschachtelte Reihen
-- zwei ineinander laufende Folgen
-- Quadrate, Fakultäten und Multiplikationsmuster
-- Buchstabenfolgen
-- Symbol- und Mini-Matrix-Aufgaben
-- falsche Antwort zeigt nicht automatisch die Lösung
-- gewertet wird der erste Versuch
-
-QUIZ
-- anspruchsvollere Wissens- und Schlussfolgerungsfragen
-- pro Welt und Schwierigkeitsgrad eigene Fragenpools
-- falsche Antwort verrät die richtige Lösung nicht
-- gewertet wird der erste Versuch
-
-WORTSUCHE
-- gesuchte Wörter dürfen und sollen sich kreuzen
-- Überlappungen werden vom Generator aktiv bevorzugt
-- alle 8 Richtungen möglich
-- Diagonalen werden besonders auf Mittel/Knifflig bevorzugt
-- grössere Gitter und längere Begriffe
-
-PUNKTE VERBINDEN
-- 10 Motive je Welt / 40 insgesamt
-- komplexe, mehrteilige Motive mit Innenlinien
-- 60+ Punkte in den getesteten Motiven
-- globale Abstandsprüfung verhindert überlappende Punktmarker
-
-STICKERALBUM
-- 4 Seiten mit je 10 Stickern
-- ein Sticker benötigt jetzt gleichzeitig:
-  - mindestens 4 erfolgreich abgeschlossene Runden in derselben Welt
-  - mindestens 3 unterschiedliche Spielarten
-- Fortschritt bleibt lokal im Browser gespeichert
-
-LABYRINTH
-- der gezeichnete Weg bleibt beim Loslassen des Fingers erhalten
-- am letzten erreichten Feld kann weitergefahren werden
-- frühere Wegpunkte können zum Zurücksetzen der Route angetippt werden
-
-Technik
--------
-- komplett lokal/offline nutzbar
-- keine externen Bibliotheken nötig
-- Fortschritt, Sterne und Sticker werden in localStorage gespeichert
+Start:
+- index.html öffnen
+- Galaxy Tab A11+ vorzugsweise im Querformat und Vollbild nutzen

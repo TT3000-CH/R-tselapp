@@ -358,8 +358,19 @@ function buildMaze(){
   document.getElementById('mazeStatus').textContent = 'Fingerpfad gespeichert';
   drawMaze();
 }
-function resetMazePath(){ maze.path = [{x:0,y:0}]; maze.solved=false; document.getElementById('mazeMsg').classList.remove('show'); drawMaze(); }
-function mazeDims(){ const pad=24, cw=(mc.width-pad*2)/maze.cols, ch=(mc.height-pad*2)/maze.rows; return {pad,cw,ch}; }
+function resetMazePath(){ maze.path = [{x:0,y:0}]; maze.solved=false; maze.drawing=false; document.getElementById('mazeMsg').classList.remove('show'); document.getElementById('mazeStatus').textContent='Fingerpfad gespeichert'; drawMaze(); }
+function mazeUndoStep(){
+  if(maze.solved || maze.path.length<=1) return;
+  maze.path.pop(); maze.drawing=false; drawMaze();
+}
+function fitMazeCanvas(){
+  const stage=mc.closest('.stage'); if(!stage) return;
+  const r=stage.getBoundingClientRect();
+  const w=Math.max(320,Math.floor(r.width-2));
+  const h=Math.max(220,Math.floor(r.height-2));
+  if(mc.width!==w || mc.height!==h){ mc.width=w; mc.height=h; }
+}
+function mazeDims(){ const pad=Math.max(12,Math.min(22,Math.min(mc.width/maze.cols,mc.height/maze.rows)*0.42)), cw=(mc.width-pad*2)/maze.cols, ch=(mc.height-pad*2)/maze.rows; return {pad,cw,ch}; }
 function drawMaze(){
   const {pad,cw,ch} = mazeDims();
   mctx.clearRect(0,0,mc.width,mc.height);
@@ -382,11 +393,14 @@ function pointToMazeCell(e){ const rect=mc.getBoundingClientRect(), sx=mc.width/
 function canStep(a,b){ if(!a||!b) return false; const dx=b.x-a.x, dy=b.y-a.y; if(Math.abs(dx)+Math.abs(dy)!==1) return false; const c=maze.cells[a.y][a.x]; if(dx===1) return !c.w[1]; if(dx===-1) return !c.w[3]; if(dy===1) return !c.w[2]; if(dy===-1) return !c.w[0]; return false; }
 mc.addEventListener('pointerdown', e=>{
   const p = pointToMazeCell(e); if(!p || maze.solved) return;
-  const hitIndex = maze.path.findIndex(cell=>cell.x===p.x && cell.y===p.y);
-  if(hitIndex >= 0){ maze.path = maze.path.slice(0, hitIndex+1); maze.drawing = true; mc.setPointerCapture?.(e.pointerId); drawMaze(); return; }
   const last = maze.path[maze.path.length-1];
+  // Nach dem Loslassen darf nur am aktuellen gelben Endpunkt weitergefahren werden.
+  // Beruehrt man versehentlich einen alten Teil der Route, wird die Route NICHT mehr zurueckgeschnitten.
   if(p.x===last.x && p.y===last.y){ maze.drawing = true; mc.setPointerCapture?.(e.pointerId); return; }
-  if(canStep(last, p)){ maze.path.push(p); maze.drawing = true; mc.setPointerCapture?.(e.pointerId); drawMaze(); return; }
+  // Komfort: direkt im naechsten offenen Nachbarfeld wieder einsetzen.
+  if(canStep(last,p) && !maze.path.some(cell=>cell.x===p.x && cell.y===p.y)){
+    maze.path.push(p); maze.drawing=true; mc.setPointerCapture?.(e.pointerId); drawMaze();
+  }
 });
 mc.addEventListener('pointermove', e=>{
   if(!maze.drawing || maze.solved) return;
@@ -394,13 +408,23 @@ mc.addEventListener('pointermove', e=>{
   const last = maze.path[maze.path.length-1];
   if(p.x===last.x && p.y===last.y) return;
   const previous = maze.path[maze.path.length-2];
+  // Nur bewusstes direktes Zurueckfahren um genau EIN Feld ist erlaubt.
   if(previous && p.x===previous.x && p.y===previous.y){ maze.path.pop(); drawMaze(); return; }
+  // Alte Routenteile werden ignoriert. Damit springt der Cursor beim Kreuzen der eigenen Route nicht mehr zurueck.
   const existing = maze.path.findIndex(cell=>cell.x===p.x && cell.y===p.y);
-  if(existing >= 0){ maze.path = maze.path.slice(0, existing+1); drawMaze(); return; }
+  if(existing >= 0) return;
   if(canStep(last,p)){ maze.path.push(p); drawMaze(); if(p.x===maze.cols-1 && p.y===maze.rows-1){ maze.solved=true; maze.drawing=false; document.getElementById('mazeMsg').classList.add('show'); document.getElementById('mazeStatus').textContent='Ausgang erreicht'; awardReward('maze'); } }
 });
 mc.addEventListener('pointerup', ()=>{ maze.drawing=false; });
 mc.addEventListener('pointercancel', ()=>{ maze.drawing=false; });
+let mazeResizeTimer=null;
+function refitMaze(){
+  if(!document.getElementById('maze').classList.contains('active')) return;
+  clearTimeout(mazeResizeTimer);
+  mazeResizeTimer=setTimeout(()=>{fitMazeCanvas();drawMaze();},60);
+}
+window.addEventListener('resize',refitMaze);
+document.addEventListener('fullscreenchange',()=>setTimeout(refitMaze,80));
 
 // SCRAMBLE
 let scrambleAnswer='';
@@ -828,7 +852,8 @@ function buildMaze(){
   resetInstanceV43('maze');
   const cols=difficulty===1?13:difficulty===2?18:24, rows=difficulty===1?9:difficulty===2?12:15;
   maze={cols,rows,cells:makeMaze(cols,rows),path:[{x:0,y:0}],drawing:false,solved:false};
-  document.getElementById('mazeMsg').classList.remove('show'); document.getElementById('mazeStatus').textContent=`${cols}×${rows} · Weg bleibt`; drawMaze();
+  document.getElementById('mazeMsg').classList.remove('show'); document.getElementById('mazeStatus').textContent=`${cols}×${rows} · Weg bleibt`;
+  requestAnimationFrame(()=>{fitMazeCanvas();drawMaze();});
 }
 
 // Word scramble is now a 5-word round

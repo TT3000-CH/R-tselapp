@@ -4,7 +4,7 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover" />
 <meta name="theme-color" content="#f6f0e1" />
-<title>Rätselwelt V4.3 Final</title>
+<title>Rätselwelt V4.3.1</title>
 <style>
   :root{
     --bg:#f6f0e1;
@@ -155,6 +155,14 @@
 
   /* canvas common */
   canvas{max-width:100%;max-height:100%;background:#fff;border:2px solid var(--ink);border-radius:18px;touch-action:none;display:block}
+
+  /* V4.3.1 maze: always fit the complete maze into the visible game area */
+  #maze .game-shell{grid-template-columns:1fr!important}
+  #maze .panel.main{padding:5px!important;overflow:hidden;position:relative}
+  #maze .stage{width:100%;height:100%;min-width:0;min-height:0;display:flex;align-items:stretch;justify-content:stretch;overflow:hidden}
+  #mazeCanvas{width:100%!important;height:100%!important;max-width:none!important;max-height:none!important;border-radius:12px;box-sizing:border-box}
+  #maze .panel.side{display:none!important}
+  .maze-top-action{height:34px;padding:0 10px;border-radius:11px;background:#fff;color:var(--ink);font-size:11px;font-weight:1000;box-shadow:var(--shadow-soft)}
 
   /* scramble */
   .scramble-area{display:grid;grid-template-rows:auto auto auto;gap:14px;height:100%}
@@ -381,7 +389,7 @@
   <div class="splash-card">
     <div class="splash-brand"><img src="logo.svg" alt="Rätselwelt Logo"></div>
     <div class="splash-hero">
-      <span class="kicker">V4.3 · Galaxy Tab A11+ Edition</span>
+      <span class="kicker">V4.3.1 · Galaxy Tab A11+ Edition</span>
       <h1>Kniffliger. Klarer. Tablet-genau.</h1>
       <p>Optimiert auf das 16:10-Display des Galaxy Tab A11+: zuerst Schwierigkeit, dann Welt, dann Spiel. Mehr Anspruch, weniger Begleittext.</p>
       <div class="splash-list">
@@ -403,7 +411,7 @@
   <header>
     <div class="brand">
       <img src="logo.svg" alt="Rätselwelt">
-      <div class="brandcopy"><b>Rätselwelt</b><span>V4.3 Final · Galaxy Tab A11+ · 16:10</span></div>
+      <div class="brandcopy"><b>Rätselwelt</b><span>V4.3.1 · Galaxy Tab A11+ · 16:10</span></div>
     </div>
     <div class="header-right">
       <div class="counter">⭐ <span id="starCount">0</span> <span class="hide-mobile">Sterne</span></div>
@@ -450,7 +458,7 @@
     </section>
 
     <section class="screen" id="maze">
-      <div class="topline"><button class="back" onclick="showHome()">← Zurück</button><div class="screen-title">Labyrinth</div><div class="spacer"></div><div class="status" id="mazeStatus">Fingerpfad gespeichert</div></div>
+      <div class="topline"><button class="back" onclick="showHome()">← Zurück</button><div class="screen-title">Labyrinth</div><div class="spacer"></div><button class="maze-top-action" onclick="mazeUndoStep()">↶ 1 zurück</button><button class="maze-top-action" onclick="resetMazePath()">Weg löschen</button><button class="maze-top-action" onclick="buildMaze()">Neu</button><div class="status" id="mazeStatus">Fingerpfad gespeichert</div></div>
       <div class="game-shell">
         <div class="panel main"><div class="stage"><canvas id="mazeCanvas" width="1100" height="760"></canvas></div><div class="message" id="mazeMsg">Geschafft! Der Ausgang ist erreicht.</div></div>
         <aside class="panel side compact-side"><div class="side-title">🌀 Labyrinth</div><div class="hint-pills"><span class="pill">Finger darf losgelassen werden</span></div><button class="action secondary" onclick="buildMaze()">Neu</button><button class="action secondary" onclick="resetMazePath()">Weg löschen</button></aside>
@@ -893,8 +901,19 @@ function buildMaze(){
   document.getElementById('mazeStatus').textContent = 'Fingerpfad gespeichert';
   drawMaze();
 }
-function resetMazePath(){ maze.path = [{x:0,y:0}]; maze.solved=false; document.getElementById('mazeMsg').classList.remove('show'); drawMaze(); }
-function mazeDims(){ const pad=24, cw=(mc.width-pad*2)/maze.cols, ch=(mc.height-pad*2)/maze.rows; return {pad,cw,ch}; }
+function resetMazePath(){ maze.path = [{x:0,y:0}]; maze.solved=false; maze.drawing=false; document.getElementById('mazeMsg').classList.remove('show'); document.getElementById('mazeStatus').textContent='Fingerpfad gespeichert'; drawMaze(); }
+function mazeUndoStep(){
+  if(maze.solved || maze.path.length<=1) return;
+  maze.path.pop(); maze.drawing=false; drawMaze();
+}
+function fitMazeCanvas(){
+  const stage=mc.closest('.stage'); if(!stage) return;
+  const r=stage.getBoundingClientRect();
+  const w=Math.max(320,Math.floor(r.width-2));
+  const h=Math.max(220,Math.floor(r.height-2));
+  if(mc.width!==w || mc.height!==h){ mc.width=w; mc.height=h; }
+}
+function mazeDims(){ const pad=Math.max(12,Math.min(22,Math.min(mc.width/maze.cols,mc.height/maze.rows)*0.42)), cw=(mc.width-pad*2)/maze.cols, ch=(mc.height-pad*2)/maze.rows; return {pad,cw,ch}; }
 function drawMaze(){
   const {pad,cw,ch} = mazeDims();
   mctx.clearRect(0,0,mc.width,mc.height);
@@ -917,11 +936,14 @@ function pointToMazeCell(e){ const rect=mc.getBoundingClientRect(), sx=mc.width/
 function canStep(a,b){ if(!a||!b) return false; const dx=b.x-a.x, dy=b.y-a.y; if(Math.abs(dx)+Math.abs(dy)!==1) return false; const c=maze.cells[a.y][a.x]; if(dx===1) return !c.w[1]; if(dx===-1) return !c.w[3]; if(dy===1) return !c.w[2]; if(dy===-1) return !c.w[0]; return false; }
 mc.addEventListener('pointerdown', e=>{
   const p = pointToMazeCell(e); if(!p || maze.solved) return;
-  const hitIndex = maze.path.findIndex(cell=>cell.x===p.x && cell.y===p.y);
-  if(hitIndex >= 0){ maze.path = maze.path.slice(0, hitIndex+1); maze.drawing = true; mc.setPointerCapture?.(e.pointerId); drawMaze(); return; }
   const last = maze.path[maze.path.length-1];
+  // Nach dem Loslassen darf nur am aktuellen gelben Endpunkt weitergefahren werden.
+  // Beruehrt man versehentlich einen alten Teil der Route, wird die Route NICHT mehr zurueckgeschnitten.
   if(p.x===last.x && p.y===last.y){ maze.drawing = true; mc.setPointerCapture?.(e.pointerId); return; }
-  if(canStep(last, p)){ maze.path.push(p); maze.drawing = true; mc.setPointerCapture?.(e.pointerId); drawMaze(); return; }
+  // Komfort: direkt im naechsten offenen Nachbarfeld wieder einsetzen.
+  if(canStep(last,p) && !maze.path.some(cell=>cell.x===p.x && cell.y===p.y)){
+    maze.path.push(p); maze.drawing=true; mc.setPointerCapture?.(e.pointerId); drawMaze();
+  }
 });
 mc.addEventListener('pointermove', e=>{
   if(!maze.drawing || maze.solved) return;
@@ -929,13 +951,23 @@ mc.addEventListener('pointermove', e=>{
   const last = maze.path[maze.path.length-1];
   if(p.x===last.x && p.y===last.y) return;
   const previous = maze.path[maze.path.length-2];
+  // Nur bewusstes direktes Zurueckfahren um genau EIN Feld ist erlaubt.
   if(previous && p.x===previous.x && p.y===previous.y){ maze.path.pop(); drawMaze(); return; }
+  // Alte Routenteile werden ignoriert. Damit springt der Cursor beim Kreuzen der eigenen Route nicht mehr zurueck.
   const existing = maze.path.findIndex(cell=>cell.x===p.x && cell.y===p.y);
-  if(existing >= 0){ maze.path = maze.path.slice(0, existing+1); drawMaze(); return; }
+  if(existing >= 0) return;
   if(canStep(last,p)){ maze.path.push(p); drawMaze(); if(p.x===maze.cols-1 && p.y===maze.rows-1){ maze.solved=true; maze.drawing=false; document.getElementById('mazeMsg').classList.add('show'); document.getElementById('mazeStatus').textContent='Ausgang erreicht'; awardReward('maze'); } }
 });
 mc.addEventListener('pointerup', ()=>{ maze.drawing=false; });
 mc.addEventListener('pointercancel', ()=>{ maze.drawing=false; });
+let mazeResizeTimer=null;
+function refitMaze(){
+  if(!document.getElementById('maze').classList.contains('active')) return;
+  clearTimeout(mazeResizeTimer);
+  mazeResizeTimer=setTimeout(()=>{fitMazeCanvas();drawMaze();},60);
+}
+window.addEventListener('resize',refitMaze);
+document.addEventListener('fullscreenchange',()=>setTimeout(refitMaze,80));
 
 // SCRAMBLE
 let scrambleAnswer='';
@@ -1363,7 +1395,8 @@ function buildMaze(){
   resetInstanceV43('maze');
   const cols=difficulty===1?13:difficulty===2?18:24, rows=difficulty===1?9:difficulty===2?12:15;
   maze={cols,rows,cells:makeMaze(cols,rows),path:[{x:0,y:0}],drawing:false,solved:false};
-  document.getElementById('mazeMsg').classList.remove('show'); document.getElementById('mazeStatus').textContent=`${cols}×${rows} · Weg bleibt`; drawMaze();
+  document.getElementById('mazeMsg').classList.remove('show'); document.getElementById('mazeStatus').textContent=`${cols}×${rows} · Weg bleibt`;
+  requestAnimationFrame(()=>{fitMazeCanvas();drawMaze();});
 }
 
 // Word scramble is now a 5-word round
