@@ -1030,77 +1030,7 @@ function drawDots(){
   for(let i=1;i<dotsState.next-1;i++){const cur=dotsState.points[i],prev=dotsState.points[i-1];if(cur.breakBefore)continue;const a=scaleDotPoint(prev),b=scaleDotPoint(cur);dctx.beginPath();dctx.moveTo(a.x,a.y);dctx.lineTo(b.x,b.y);dctx.stroke();}
   const r=dotsState.dotRadius||4; dotsState.points.forEach(p=>{const s=scaleDotPoint(p),done=p.n<dotsState.next;dctx.fillStyle=done?worlds[currentWorld].accent:'#f4f1e8';dctx.beginPath();dctx.arc(s.x,s.y,r,0,Math.PI*2);dctx.fill();dctx.strokeStyle=done?'rgba(255,255,255,.7)':'#c7c5bc';dctx.lineWidth=1;dctx.stroke();dctx.fillStyle=done?'#fff':'#223038';dctx.font=`900 ${Math.max(7,Math.min(9,r+3))}px system-ui`;dctx.textAlign='center';dctx.textBaseline='middle';dctx.fillText(p.n,s.x,s.y);});
 }
-// V4.3.2: points can be connected by dragging a finger continuously.
-let dotsTracingV432=false;
-let dotsLastPointerV432=null;
-function updateDotsStatusV432(){
-  if(dotsState.next<=dotsState.points.length) document.getElementById('dotsStatus').textContent=`Bild ${dotsState.shapeIndex+1}/10 · Punkt ${dotsState.next}/${dotsState.points.length}`;
-  else document.getElementById('dotsStatus').textContent=dotsState.name;
-}
-function distToSegmentV432(p,a,b){
-  const vx=b.x-a.x,vy=b.y-a.y,wx=p.x-a.x,wy=p.y-a.y,den=vx*vx+vy*vy;
-  if(!den) return Math.hypot(p.x-a.x,p.y-a.y);
-  const t=Math.max(0,Math.min(1,(wx*vx+wy*vy)/den));
-  const qx=a.x+t*vx,qy=a.y+t*vy;
-  return Math.hypot(p.x-qx,p.y-qy);
-}
-function finishDotsV432(){
-  if(dotsState.completed) return;
-  dotsState.completed=true;
-  drawDots();
-  document.getElementById('dotsMsg').classList.add('show');
-  document.getElementById('dotsStatus').textContent=dotsState.name;
-  awardReward('dots');
-}
-function advanceDotsAtPointV432(pointer,allowBreakStart=true){
-  if(!dotsState.points.length||dotsState.next>dotsState.points.length) return false;
-  const targetData=dotsState.points[dotsState.next-1];
-  if(targetData.breakBefore&&!allowBreakStart) return false;
-  const target=scaleDotPoint(targetData);
-  const hit=Math.max(18,(dotsState.dotRadius||4.2)*4.2);
-  if(Math.hypot(pointer.x-target.x,pointer.y-target.y)<=hit){
-    dotsState.next++;
-    if(dotsState.next>dotsState.points.length) finishDotsV432(); else {drawDots();updateDotsStatusV432();}
-    return true;
-  }
-  return false;
-}
-function advanceDotsAlongSegmentV432(from,to){
-  if(!dotsState.points.length||dotsState.next>dotsState.points.length) return;
-  let guard=0;
-  while(dotsState.next<=dotsState.points.length&&guard++<8){
-    const targetData=dotsState.points[dotsState.next-1];
-    // New separate outline/interior stroke: lift once and start directly on its first point.
-    if(targetData.breakBefore) break;
-    const target=scaleDotPoint(targetData);
-    const hit=Math.max(18,(dotsState.dotRadius||4.2)*4.2);
-    if(distToSegmentV432(target,from,to)<=hit){
-      dotsState.next++;
-      if(dotsState.next>dotsState.points.length){finishDotsV432();break;}
-      drawDots();updateDotsStatusV432();
-    } else break;
-  }
-}
-dotsCanvas.addEventListener('pointerdown',e=>{
-  if(!dotsState.points.length||dotsState.completed) return;
-  e.preventDefault();
-  const p=dotsPointer(e);
-  // A new stroke may start by touching its first numbered point.
-  const hit=advanceDotsAtPointV432(p,true);
-  dotsTracingV432=hit||dotsState.next>1;
-  dotsLastPointerV432=p;
-  if(dotsTracingV432) dotsCanvas.setPointerCapture?.(e.pointerId);
-});
-dotsCanvas.addEventListener('pointermove',e=>{
-  if(!dotsTracingV432||dotsState.completed) return;
-  e.preventDefault();
-  const p=dotsPointer(e),prev=dotsLastPointerV432||p;
-  advanceDotsAlongSegmentV432(prev,p);
-  dotsLastPointerV432=p;
-});
-function stopDotsTraceV432(){dotsTracingV432=false;dotsLastPointerV432=null;}
-dotsCanvas.addEventListener('pointerup',stopDotsTraceV432);
-dotsCanvas.addEventListener('pointercancel',stopDotsTraceV432);
+// V4.3.3: continuous point tracing is installed in the final refinement block below.
 
 // QUIZ: one challenging question at a time, pass threshold for reward
 let quizRoundV43={items:[],idx:0,correct:0,answered:false};
@@ -1384,6 +1314,143 @@ function drawDots(){
   dctx.clearRect(0,0,dotsCanvas.width,dotsCanvas.height);dctx.fillStyle='#fff';dctx.fillRect(0,0,dotsCanvas.width,dotsCanvas.height);dctx.strokeStyle=worlds[currentWorld].accent;dctx.lineWidth=4;dctx.lineCap='round';dctx.lineJoin='round';for(let i=1;i<dotsState.next-1;i++){const cur=dotsState.points[i],prev=dotsState.points[i-1];if(cur.breakBefore)continue;const a=scaleDotPoint(prev),b=scaleDotPoint(cur);dctx.beginPath();dctx.moveTo(a.x,a.y);dctx.lineTo(b.x,b.y);dctx.stroke();}
   const r=dotsState.dotRadius||4.2;dotsState.points.forEach(p=>{const s=scaleDotPoint(p),done=p.n<dotsState.next;dctx.fillStyle=done?worlds[currentWorld].accent:'#f5f1e8';dctx.beginPath();dctx.arc(s.x,s.y,r,0,Math.PI*2);dctx.fill();dctx.strokeStyle=done?'rgba(255,255,255,.8)':'#aaa79d';dctx.lineWidth=.9;dctx.stroke();dctx.fillStyle=done?'#fff':'#26333a';dctx.font='900 7.5px system-ui';dctx.textAlign='center';dctx.textBaseline='middle';dctx.fillText(p.n,s.x,s.y);});
 }
+
+
+
+/* ========================= V4.3.3 correction layer ========================= */
+
+// Always a classic 9×9 Sudoku with nine 3×3 boxes. Numbers are the default;
+// the themed symbol set is an optional display mode for the same 1–9 values.
+const sudokuBankV433 = {"easy": [{"puzzle": ["000200037", "034506200", "982407506", "049050601", "300001040", "006048703", "003192800", "470360000", "291070065"], "solution": ["615289437", "734516289", "982437516", "849753621", "357621948", "126948753", "563192874", "478365192", "291874365"]}, {"puzzle": ["080309450", "042817300", "930400071", "094582700", "208000060", "000946520", "319600200", "405078000", "027090040"], "solution": ["781369452", "542817396", "936425871", "694582713", "258731964", "173946528", "319654287", "465278139", "827193645"]}, {"puzzle": ["018053020", "003904807", "024000306", "280000945", "500080631", "136040702", "400800500", "300470060", "061390270"], "solution": ["718653429", "653924817", "924718356", "287136945", "549287631", "136549782", "472861593", "395472168", "861395274"]}, {"puzzle": ["380000160", "106380079", "000000300", "070060415", "401073906", "060001800", "019034700", "720010543", "504028691"], "solution": ["385297164", "146385279", "297146358", "873962415", "451873926", "962451837", "619534782", "728619543", "534728691"]}], "medium": [{"puzzle": ["709040060", "005019040", "000205917", "500906180", "006080005", "000024000", "090100000", "107058096", "008600031"], "solution": ["719843562", "265719348", "843265917", "524976183", "976381425", "381524679", "692137854", "137458296", "458692731"]}, {"puzzle": ["041035090", "050026008", "060180500", "020470000", "700500000", "935612040", "000850936", "090000000", "078060100"], "solution": ["841735692", "357926418", "269184573", "126478359", "784593261", "935612847", "412857936", "693241785", "578369124"]}, {"puzzle": ["308460029", "000090830", "007000006", "830004102", "720008040", "009100000", "902071068", "000049010", "100586000"], "solution": ["318465729", "564792831", "297813456", "836954172", "721638945", "459127683", "942371568", "685249317", "173586294"]}, {"puzzle": ["310569000", "600004000", "000230050", "000612080", "100805007", "050047162", "000026040", "069008003", "504070200"], "solution": ["312569874", "695784321", "847231659", "473612985", "126895437", "958347162", "731926548", "269458713", "584173296"]}], "hard": [{"puzzle": ["700403200", "000000098", "200000530", "130680400", "007040020", "000300070", "050068040", "028790000", "900001080"], "solution": ["789453261", "543126798", "216879534", "132687459", "867945123", "495312876", "351268947", "628794315", "974531682"]}, {"puzzle": ["012000906", "750000000", "000004003", "009146720", "000080061", "001070809", "020030004", "960000050", "008000017"], "solution": ["412357986", "753698142", "896214573", "389146725", "275983461", "641572839", "127835694", "964721358", "538469217"]}, {"puzzle": ["000010020", "100402090", "040560007", "786241030", "003800400", "000053008", "860000003", "010004000", "000000270"], "solution": ["659718324", "178432695", "342569187", "786241539", "593876412", "421953768", "865127943", "217394856", "934685271"]}, {"puzzle": ["003095060", "000473900", "290600040", "030700000", "002000300", "000804570", "300000410", "009000200", "048300059"], "solution": ["473295861", "681473925", "295681743", "834752196", "752916384", "916834572", "327569418", "569148237", "148327659"]}]};
+sudokuModeV43 = localStorage.getItem('rw433_sudoku_mode') || 'numbers';
+function sudokuDimensionsV43(){return {n:9,boxR:3,boxC:3};}
+function rowsToGridV433(rows){return rows.map(row=>row.split('').map(Number));}
+function buildSudoku(){
+  resetInstanceV43('sudoku');
+  const level=difficulty===1?'easy':difficulty===2?'medium':'hard';
+  const bank=sudokuBankV433[level];
+  const item=bank[Math.floor(Math.random()*bank.length)];
+  const puzzle=rowsToGridV433(item.puzzle), solution=rowsToGridV433(item.solution);
+  sudoku={n:9,boxR:3,boxC:3,solution,entries:puzzle.map(r=>[...r]),givens:puzzle.map(r=>r.map(v=>v!==0)),symbols:sudokuSymbolSetV43(9),selected:1};
+  sudokuActiveCellV43=null;
+  renderSudoku();
+}
+function setSudokuModeV43(mode){
+  sudokuModeV43=mode==='symbols'?'symbols':'numbers';
+  localStorage.setItem('rw433_sudoku_mode',sudokuModeV43);
+  renderSudoku();
+}
+function renderSudoku(){
+  const board=document.getElementById('sudokuBoard');
+  board.dataset.n='9';
+  board.style.gridTemplateColumns='repeat(9,minmax(0,1fr))';
+  board.style.gridTemplateRows='repeat(9,minmax(0,1fr))';
+  board.innerHTML='';
+  document.getElementById('sudokuMsg').classList.remove('show');
+  const conflicts=sudokuConflictsV43();
+  for(let y=0;y<9;y++) for(let x=0;x<9;x++){
+    const fixed=sudoku.givens[y][x],v=sudoku.entries[y][x],d=document.createElement('div');
+    d.className='sudoku-cell'+(fixed?' fixed':' empty')+(!fixed&&v?' user':'')+(conflicts.has(`${y},${x}`)?' conflict':'')+(sudokuActiveCellV43&&sudokuActiveCellV43.x===x&&sudokuActiveCellV43.y===y?' active-cell':'');
+    if(fixed) d.textContent=sudokuDisplayV43(v);
+    else {const b=document.createElement('button');b.textContent=sudokuDisplayV43(v);b.onclick=()=>{sudokuActiveCellV43={x,y};if(sudoku.selected)sudoku.entries[y][x]=sudoku.selected;renderSudoku();};d.appendChild(b);}
+    board.appendChild(d);
+  }
+  const pick=document.getElementById('pickRow'); pick.dataset.n='9'; pick.innerHTML='';
+  for(let v=1;v<=9;v++){const b=document.createElement('button');b.className='pick-btn'+(sudoku.selected===v?' on':'');b.textContent=sudokuDisplayV43(v);b.onclick=()=>{sudoku.selected=v;renderSudoku();};pick.appendChild(b);}
+  document.getElementById('modeNumbers').classList.toggle('on',sudokuModeV43==='numbers');
+  document.getElementById('modeSymbols').classList.toggle('on',sudokuModeV43==='symbols');
+  document.getElementById('sudokuStatus').textContent=`9×9 · 3×3 · ${sudokuModeV43==='numbers'?'Zahlen':'Symbole'}`;
+}
+
+// Word search: first found word = yellow, a crossing of two words = turquoise,
+// a rare triple crossing = violet. The word list is deliberately larger on the tablet.
+function endWordDrag(){
+  if(!wg.drag)return;
+  const candidate=lineCells(wg.drag).join('|');
+  document.querySelectorAll('.letter.preview').forEach(x=>x.classList.remove('preview'));
+  const match=wg.placed.find(p=>{const a=p.cells.join('|'),b=[...p.cells].reverse().join('|');return !wg.found.has(p.word)&&(a===candidate||b===candidate);});
+  if(match){
+    wg.found.add(match.word);
+    match.cells.forEach(k=>{
+      const [x,y]=k.split(','),el=document.querySelector(`.letter[data-x="${x}"][data-y="${y}"]`);
+      if(!el)return;
+      const hits=(+(el.dataset.hitCount||0))+1;el.dataset.hitCount=hits;el.classList.add('hit');
+      el.classList.toggle('overlap',hits===2);el.classList.toggle('multi-overlap',hits>=3);
+    });
+    document.querySelector(`.word-chip[data-w="${match.word}"]`)?.classList.add('done');
+    document.getElementById('wordStatus').textContent=`${wg.found.size}/${wg.words.length}`;
+    if(wg.found.size===wg.words.length){document.getElementById('wordMsg').classList.add('show');awardReward('word');}
+  }
+  wg.drag=null;
+}
+
+// Continuous finger tracing in screen pixels. A generous finger hit-zone and
+// coalesced pointer events make fast tablet strokes reliable.
+let dotsTracingV433=false;
+let dotsLastClientV433=null;
+function dotsTargetClientV433(point){
+  const r=dotsCanvas.getBoundingClientRect(),c=scaleDotPoint(point);
+  return {x:r.left+(c.x/dotsCanvas.width)*r.width,y:r.top+(c.y/dotsCanvas.height)*r.height};
+}
+function clientPointV433(ev){return {x:ev.clientX,y:ev.clientY};}
+function distPointSegV433(p,a,b){
+  const vx=b.x-a.x,vy=b.y-a.y,wx=p.x-a.x,wy=p.y-a.y,den=vx*vx+vy*vy;
+  if(!den)return Math.hypot(p.x-a.x,p.y-a.y);
+  const t=Math.max(0,Math.min(1,(wx*vx+wy*vy)/den)),qx=a.x+t*vx,qy=a.y+t*vy;
+  return Math.hypot(p.x-qx,p.y-qy);
+}
+function dotsFingerRadiusV433(){
+  const r=dotsCanvas.getBoundingClientRect();
+  return Math.max(24,Math.min(38,Math.min(r.width,r.height)*0.055));
+}
+function finishDotsV433(){
+  if(dotsState.completed)return;
+  dotsState.completed=true;drawDots();document.getElementById('dotsMsg').classList.add('show');document.getElementById('dotsStatus').textContent=dotsState.name;awardReward('dots');
+}
+function advanceDotsSegmentV433(a,b,allowCurrent=true){
+  if(!dotsState.points.length||dotsState.completed)return 0;
+  const radius=dotsFingerRadiusV433();let advanced=0,guard=0;
+  while(dotsState.next<=dotsState.points.length&&guard++<60){
+    const target=dotsTargetClientV433(dotsState.points[dotsState.next-1]);
+    if(distPointSegV433(target,a,b)>radius)break;
+    dotsState.next++;advanced++;
+    if(dotsState.next>dotsState.points.length){finishDotsV433();break;}
+  }
+  if(advanced&&!dotsState.completed){drawDots();document.getElementById('dotsStatus').textContent=`${dotsState.name} · ${dotsState.next}/${dotsState.points.length}`;}
+  return advanced;
+}
+function beginDotsV433(e){
+  if(!dotsState.points.length||dotsState.completed)return;
+  e.preventDefault();
+  const p=clientPointV433(e),target=dotsTargetClientV433(dotsState.points[dotsState.next-1]);
+  if(Math.hypot(p.x-target.x,p.y-target.y)<=dotsFingerRadiusV433()*1.2){
+    dotsTracingV433=true;dotsLastClientV433=p;dotsCanvas.setPointerCapture?.(e.pointerId);
+    advanceDotsSegmentV433(p,p);
+  }
+}
+function moveDotsV433(e){
+  if(!dotsTracingV433||dotsState.completed)return;
+  e.preventDefault();
+  const events=(typeof e.getCoalescedEvents==='function'&&e.getCoalescedEvents().length)?e.getCoalescedEvents():[e];
+  let prev=dotsLastClientV433||clientPointV433(events[0]);
+  for(const ev of events){const p=clientPointV433(ev);advanceDotsSegmentV433(prev,p);prev=p;if(dotsState.completed)break;}
+  dotsLastClientV433=prev;
+}
+function stopDotsV433(){dotsTracingV433=false;dotsLastClientV433=null;}
+dotsCanvas.addEventListener('pointerdown',beginDotsV433,{passive:false});
+dotsCanvas.addEventListener('pointermove',moveDotsV433,{passive:false});
+dotsCanvas.addEventListener('pointerup',stopDotsV433);
+dotsCanvas.addEventListener('pointercancel',stopDotsV433);
+dotsCanvas.addEventListener('lostpointercapture',stopDotsV433);
+
+// Make the next point visibly easier to follow without changing the puzzle.
+const drawDotsBaseV433=drawDots;
+drawDots=function(){
+  drawDotsBaseV433();
+  if(!dotsState.points.length||dotsState.completed||dotsState.next>dotsState.points.length)return;
+  const t=scaleDotPoint(dotsState.points[dotsState.next-1]);
+  dctx.save();dctx.strokeStyle=worlds[currentWorld].accent;dctx.lineWidth=3;dctx.globalAlpha=.75;dctx.beginPath();dctx.arc(t.x,t.y,12,0,Math.PI*2);dctx.stroke();dctx.restore();
+};
 
 // Tablet QA/debug launch, harmless unless query parameters are supplied.
 (function v43DebugLaunch(){
