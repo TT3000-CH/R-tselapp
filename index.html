@@ -5,7 +5,8 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="theme-color" content="#f6f0e1">
 <link rel="manifest" href="manifest.webmanifest">
-<title>Rätselwelt V5.3</title>
+<meta name="app-build" content="5.3.1-renderfix-20261002">
+<title>Rätselwelt V5.3.1</title>
 <style>
 :root{--bg:#f6f0e1;--paper:#fffdf8;--ink:#20313a;--muted:#66757b;--line:#ddd8cb;--accent:#2f8a66;--accent2:#f2b247;--accent3:#88cf83;--soft:#e9f6ec;--good:#3ea86f;--bad:#d85f59;--blue:#4b82b0;--shadow:0 14px 36px rgba(31,48,57,.12);--h:68px}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -42,19 +43,36 @@ canvas{display:block;max-width:100%;max-height:100%;border-radius:14px;backgroun
 .rotate{display:none;position:fixed;inset:0;z-index:200;background:linear-gradient(145deg,var(--accent),var(--accent3));color:#fff;place-items:center;text-align:center;padding:30px}.rotate b{font-size:30px}.rotate span{display:block;margin-top:6px}
 @media(orientation:portrait){.rotate{display:grid}.app,.toast,.help{display:none!important}}
 @media(orientation:landscape) and (max-height:650px){:root{--h:58px}header{padding:6px 10px}.brand img{height:32px}.brand b{font-size:19px}.brand small{font-size:9px}.hbtn,.counter,.iconbtn{height:36px;border-radius:11px;font-size:11px}.iconbtn{width:36px}.crumb{height:40px}.choice{padding:12px}.choice .big{font-size:30px}.choice .desc{font-size:10px}.worldstrip{grid-template-rows:repeat(2,39px);gap:5px}.worldpick{border-radius:11px;padding:0 8px}.worldpick .wi{font-size:20px}.worldpick .wn{font-size:10px}.game{padding:10px}.game b{font-size:16px}.game small{font-size:9px}.topbar{height:42px}.back,.tool,.status{height:36px}.gtitle{font-size:23px}.stagebox{padding:6px}.word-wrap{grid-template-columns:minmax(0,1fr) 180px}.wordchip{font-size:12.5px;padding:5px 6px}.sudoku-layout{grid-template-columns:minmax(0,1fr) 230px}.sudoku{width:min(100%,calc(100dvh - 108px),500px)}.nkey{height:39px}.sctrl{height:34px}.scontrols{gap:5px;padding:7px}.shelp{font-size:9px}.memory{gap:5px}.face{font-size:30px}.maze-stage canvas,.dots-stage canvas{border-radius:10px}}
+
+/* V5.3.1: contain drawing surfaces by measured viewport, never intrinsic size. */
+.app{height:var(--app-height,100dvh);min-height:0}
+main{flex:1 1 0;height:auto;min-height:0;min-width:0}
+.screen{min-height:0;min-width:0}
+.stagebox{min-width:0}
+#mazeStage,#dotsStage{position:relative;display:block;flex:1 1 0;min-width:0;min-height:0;overflow:hidden;contain:size layout}
+#mazeCanvas,#dotsCanvas{position:absolute;max-width:none;max-height:none;border:0;box-shadow:none;background:#fff;touch-action:none;-webkit-user-select:none;user-select:none}
+.maze-label{position:absolute;z-index:2;display:none;align-items:center;justify-content:center;width:62px;height:28px;border-radius:8px;border:2px solid currentColor;background:#fff;font:800 14px system-ui,sans-serif;letter-spacing:.02em;pointer-events:none;transform:translateY(-50%)}
+.maze-start{color:#177647;background:#ebf8ef}
+.maze-goal{color:#b33330;background:#fff0ed}
+.render-error{position:absolute;inset:18px;z-index:9;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;background:#fff9f0;border:2px solid #edcaa1;border-radius:18px;text-align:center;padding:20px;color:#452b17}
+.render-error p{margin:0;max-width:480px;font-size:16px}
+.render-error button{min-height:42px;padding:0 18px;border-radius:12px;background:#20313a;color:white;font-weight:700}
+.render-error code{font-size:12px;max-width:95%;overflow-wrap:anywhere}
+@media(orientation:landscape) and (max-height:480px){:root{--h:48px}header{padding:4px 10px}.topbar{height:38px}.brand img{height:28px}.stagebox{border-radius:18px}main{padding:5px 8px 8px}.screen.active{gap:5px}}
+
 </style>
 </head>
 <body>
-<div class="rotate"><div><b>↻ Bitte quer drehen</b><span>Rätselwelt V5.3 ist für dein 16:10-Tablet im Querformat optimiert.</span></div></div>
+<div class="rotate"><div><b>↻ Bitte quer drehen</b><span>Rätselwelt V5.3.1 ist für dein 16:10-Tablet im Querformat optimiert.</span></div></div>
 <div class="toast" id="toast">⭐ Geschafft</div>
 <div class="help" id="help"><div class="helpbox"><h3 id="helpTitle">Hilfe</h3><p id="helpText"></p><button onclick="hideHelp()">Schliessen</button></div></div>
 <div class="app">
-<header><div class="brand"><img src="logo.svg" alt="" onerror="this.style.display='none'"><div><b>Rätselwelt</b><small>V5.3 · 8 Welten · Junior bis Pro</small></div></div><div class="hright"><div class="counter">⭐ <span id="stars">0</span></div><button class="hbtn" onclick="showAlbum()">Sticker</button><button class="hbtn" onclick="goWizard(1)">Start</button><button class="hbtn iconbtn" onclick="toggleFull()">⛶</button></div></header>
+<header><div class="brand"><img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIj48ZGVmcz48bGluZWFyR3JhZGllbnQgaWQ9ImciIHgxPSIwIiB5MT0iMCIgeDI9IjEiIHkyPSIxIj48c3RvcCBzdG9wLWNvbG9yPSIjMmY4YTY2Ii8+PHN0b3Agb2Zmc2V0PSIxIiBzdG9wLWNvbG9yPSIjZjJiMjQ3Ii8+PC9saW5lYXJHcmFkaWVudD48L2RlZnM+PHJlY3Qgd2lkdGg9IjUxMiIgaGVpZ2h0PSI1MTIiIHJ4PSIxMTIiIGZpbGw9InVybCgjZykiLz48cGF0aCBkPSJNMTEyIDEyOGgyODh2NjRIMTc2djY0aDE2MHY2NEgxNzZ2NjRoMjI0djY0SDExMnoiIGZpbGw9IiNmZmYiIG9wYWNpdHk9Ii45NiIvPjxjaXJjbGUgY3g9IjM5MCIgY3k9IjExNiIgcj0iMzYiIGZpbGw9IiNmZmY0YzIiLz48L3N2Zz4=" alt="R"><div><b>Rätselwelt</b><small id="appVersion">V5.3.1 · Anzeige-Fix · 8 Welten</small></div></div><div class="hright"><div class="counter">⭐ <span id="stars">0</span></div><button class="hbtn" onclick="showAlbum()">Sticker</button><button class="hbtn" onclick="goWizard(1)">Start</button><button class="hbtn iconbtn" onclick="toggleFull()">⛶</button></div></header>
 <main>
 <section class="screen active" id="wizard"><div class="crumb"><button id="c1" class="on" onclick="goWizard(1)">1 Schwierigkeit</button><button id="c2" onclick="goWizard(2)">2 Welt &amp; Spiel</button><div class="spacer"></div><button class="album-mini" onclick="showAlbum()">📘 <span id="albumCount">0/80</span></button></div><div class="step step-difficulty on" id="step1"></div><div class="step step-play" id="step2"><div class="worldstrip" id="worldStrip"></div><div class="gamegrid" id="gameGrid"></div></div></section>
 
 <section class="screen" id="word"><div class="topbar"><button class="back" onclick="goWizard(2)">←</button><div class="gtitle">Wortsuche</div><div class="grow"></div><div class="status" id="wordStatus"></div><button class="tool" onclick="buildWord()">Neu</button><button class="tool" onclick="helpGame('word')">?</button></div><div class="stagebox"><div class="word-wrap"><div class="word-stage"><div class="wordgrid" id="wordGrid"></div></div><div class="wordlist" id="wordList"></div></div><div class="msg" id="wordMsg">Alles gefunden!</div></div></section>
-<section class="screen" id="maze"><div class="topbar"><button class="back" onclick="goWizard(2)">←</button><div class="gtitle">Labyrinth</div><div class="grow"></div><div class="status" id="mazeStatus">Pfad bleibt gespeichert</div><button class="tool" onclick="undoMaze()">1 zurück</button><button class="tool" onclick="buildMaze()">Neu</button><button class="tool" onclick="helpGame('maze')">?</button></div><div class="stagebox"><div class="stage canvas-stage maze-stage" id="mazeStage"><canvas id="mazeCanvas" width="1200" height="720"></canvas></div><div class="msg" id="mazeMsg">Ausgang gefunden!</div></div></section>
+<section class="screen" id="maze"><div class="topbar"><button class="back" onclick="goWizard(2)">←</button><div class="gtitle">Labyrinth</div><div class="grow"></div><div class="status" id="mazeStatus">Pfad bleibt gespeichert</div><button class="tool" onclick="undoMaze()">1 zurück</button><button class="tool" onclick="buildMaze()">Neu</button><button class="tool" onclick="helpGame('maze')">?</button></div><div class="stagebox"><div class="stage canvas-stage maze-stage" id="mazeStage"><canvas id="mazeCanvas" width="1200" height="720" aria-label="Labyrinth"></canvas><span class="maze-label maze-start" id="mazeStartLabel">START</span><span class="maze-label maze-goal" id="mazeGoalLabel">ZIEL</span></div><div class="msg" id="mazeMsg">Ausgang gefunden!</div></div></section>
 <section class="screen" id="mix"><div class="topbar"><button class="back" onclick="goWizard(2)">←</button><div class="gtitle">Wortsalat</div><div class="grow"></div><button class="tool" onclick="buildMix()">Neu</button><button class="tool" onclick="helpGame('mix')">?</button></div><div class="stagebox"><div class="scramble"><div class="scr-card"><div class="scrambled" id="mixLetters"></div><div class="answer"><input id="mixInput" placeholder="Lösung"><button class="action" onclick="checkMix()">Prüfen</button></div></div></div><div class="msg" id="mixMsg"></div></div></section>
 <section class="screen" id="logic"><div class="topbar"><button class="back" onclick="goWizard(2)">←</button><div class="gtitle">Logik</div><div class="grow"></div><div class="status" id="logicStatus"></div><button class="tool" onclick="buildLogicRound()">Neue Runde</button><button class="tool" onclick="helpGame('logic')">?</button></div><div class="stagebox"><div class="qstage"><div class="question" id="logicQuestion"></div><div class="options" id="logicOptions"></div><button class="action" onclick="checkLogic()">Prüfen</button></div><div class="msg" id="logicMsg"></div></div></section>
 <section class="screen" id="memory"><div class="topbar"><button class="back" onclick="goWizard(2)">←</button><div class="gtitle">Memory</div><div class="grow"></div><div class="status" id="memoryStatus"></div><button class="tool" onclick="buildMemory()">Neu</button><button class="tool" onclick="helpGame('memory')">?</button></div><div class="stagebox"><div class="stage"><div class="memory" id="memoryBoard"></div></div><div class="msg" id="memoryMsg">Alle Paare gefunden!</div></div></section>
@@ -64,6 +82,34 @@ canvas{display:block;max-width:100%;max-height:100%;border-radius:14px;backgroun
 <section class="screen" id="album"><div class="topbar"><button class="back" onclick="goWizard(2)">←</button><div class="gtitle">Stickeralbum</div><div class="grow"></div><div class="status" id="albumStatus"></div></div><div class="stagebox"><div class="album"><div class="atabs" id="albumTabs"></div><div class="agrid" id="albumGrid"></div></div></div></section>
 </main></div>
 <script>
+
+const APP_VERSION='5.3.1';
+function varColor(name,fallback){
+  try{
+    const value=getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+    return value && (!window.CSS || CSS.supports('color',value)) ? value : fallback;
+  }catch(error){return fallback;}
+}
+function canvasUnit(canvas){
+  const width=canvas.getBoundingClientRect().width;
+  return width>0 ? canvas.width/width : 1;
+}
+function canvasFailure(id,error){
+  console.error('[Raetselwelt '+APP_VERSION+'] '+id,error);
+  const stage=document.getElementById(id+'Stage');if(!stage)return;
+  stage.querySelector('.render-error')?.remove();
+  const box=document.createElement('div');box.className='render-error';box.setAttribute('role','alert');
+  const text=document.createElement('p');text.textContent='Die Zeichenfl\u00e4che konnte nicht aufgebaut werden.';
+  const button=document.createElement('button');button.textContent='Erneut versuchen';button.onclick=()=>openGame(id);
+  const detail=document.createElement('code');detail.textContent='V'+APP_VERSION+' / '+(error?.message||String(error));
+  box.append(text,button,detail);stage.appendChild(box);
+}
+function clearCanvasFailure(id){document.querySelector('#'+id+'Stage .render-error')?.remove();}
+function pointerEventsFor(event){
+  let list=[];try{list=event.getCoalescedEvents?.()||[];}catch(error){}
+  return list.length?list:[event];
+}
+
 const DIFFS=[
  {id:1,name:'Leicht',desc:'für Junior · klare Regeln',cls:'easy'},
  {id:2,name:'Mittel',desc:'mehr Kombinationen',cls:'mid'},
@@ -93,11 +139,52 @@ function renderStep1(){const el=document.getElementById('step1');el.innerHTML=''
 function renderStep2(){const strip=document.getElementById('worldStrip'),grid=document.getElementById('gameGrid');strip.innerHTML='';grid.innerHTML='';Object.entries(WORLDS).forEach(([k,w])=>{const b=document.createElement('button');b.className='worldpick'+(k===world?' on':'');b.style.background=`linear-gradient(145deg,${w.accent},${w.accent3})`;b.innerHTML=`<span class="wi">${w.icon}</span><span class="wn">${w.name}</span>`;b.onclick=()=>{world=k;saveBase();theme();renderStep2()};strip.appendChild(b)});GAMES.forEach(([id,name,sym,sub])=>{const b=document.createElement('button');b.className='game';b.innerHTML=`<span class="lvl">${difficultyName()} · ${WORLDS[world].name}</span><span class="sym">${sym}</span><b>${name}</b><small>${sub}</small>`;b.onclick=()=>openGame(id);grid.appendChild(b)})}
 function difficultyName(){return DIFFS.find(d=>d.id===difficulty).name}
 function activeScreen(){return document.querySelector(".screen.active")?.id||""}
-function fitCanvas(canvas,stageId,aspect){const box=document.getElementById(stageId);if(!box)return;const rect=box.getBoundingClientRect();const availW=Math.max(220,rect.width-6),availH=Math.max(180,rect.height-6);let w=availW,h=w/aspect;if(h>availH){h=availH;w=h*aspect}const dpr=Math.max(1,window.devicePixelRatio||1);canvas.style.width=`${Math.floor(w)}px`;canvas.style.height=`${Math.floor(h)}px`;canvas.width=Math.floor(w*dpr);canvas.height=Math.floor(h*dpr);}
-function fitMazeCanvas(){fitCanvas(mc,"mazeStage",1.6);if(maze)drawMaze()}
-function fitDotsCanvas(){fitCanvas(dc,"dotsStage",1.6);if(dots){computeDotLabels();drawDots()}}
-function openGame(id){show(id);theme();if(id==="maze")fitMazeCanvas();if(id==="dots")fitDotsCanvas();({word:buildWord,maze:buildMaze,mix:buildMix,logic:buildLogicRound,memory:buildMemory,sudoku:()=>newSudoku(false),dots:buildDots,quiz:buildQuizRound}[id])();setTimeout(()=>{if(id==="maze")fitMazeCanvas();if(id==="dots")fitDotsCanvas()},60);}
-window.addEventListener("resize",()=>{if(activeScreen()==="maze")fitMazeCanvas();if(activeScreen()==="dots")fitDotsCanvas()});
+
+function fitCanvas(canvas,stageId,aspect){
+  const box=document.getElementById(stageId);
+  if(!box||!box.closest('.screen')?.classList.contains('active'))return false;
+  const rect=box.getBoundingClientRect();
+  const aw=Math.floor(rect.width-4),ah=Math.floor(rect.height-4);
+  if(aw<20||ah<20)return false;
+  let w=aw,h=ah;
+  if(aspect>0){h=w/aspect;if(h>ah){h=ah;w=h*aspect;}}
+  w=Math.max(1,Math.floor(w));h=Math.max(1,Math.floor(h));
+  const dpr=Math.min(3,Math.max(1,window.devicePixelRatio||1));
+  canvas.style.width=w+'px';canvas.style.height=h+'px';
+  canvas.style.left=Math.floor((rect.width-w)/2)+'px';canvas.style.top=Math.floor((rect.height-h)/2)+'px';
+  const bw=Math.round(w*dpr),bh=Math.round(h*dpr);
+  if(canvas.width!==bw)canvas.width=bw;
+  if(canvas.height!==bh)canvas.height=bh;
+  return true;
+}
+function fitMazeCanvas(){if(fitCanvas(mc,'mazeStage',0)&&maze)drawMaze();}
+function fitDotsCanvas(){if(fitCanvas(dc,'dotsStage',0)&&dots){computeDotLabels();drawDots();}}
+let layoutFrame=0;
+function updateViewport(){
+  const height=Math.floor(window.visualViewport?.height||window.innerHeight);
+  if(height>0)document.documentElement.style.setProperty('--app-height',height+'px');
+}
+function scheduleCanvasLayout(){
+  if(layoutFrame)return;
+  layoutFrame=requestAnimationFrame(()=>{
+    layoutFrame=0;updateViewport();
+    const id=activeScreen();if(id!=='maze'&&id!=='dots')return;
+    try{if(id==='maze')fitMazeCanvas();else fitDotsCanvas();}catch(error){canvasFailure(id,error);}
+  });
+}
+function openGame(id){
+  show(id);theme();
+  const factory={word:buildWord,maze:buildMaze,mix:buildMix,logic:buildLogicRound,memory:buildMemory,sudoku:()=>newSudoku(false),dots:buildDots,quiz:buildQuizRound}[id];
+  if(!factory)return;
+  if(id==='maze'||id==='dots'){
+    clearCanvasFailure(id);updateViewport();
+    try{factory();scheduleCanvasLayout();}catch(error){canvasFailure(id,error);}
+  }else factory();
+}
+window.addEventListener('resize',scheduleCanvasLayout);
+window.addEventListener('orientationchange',scheduleCanvasLayout);
+document.addEventListener('fullscreenchange',scheduleCanvasLayout);
+window.visualViewport?.addEventListener('resize',scheduleCanvasLayout);
 function toggleFull(){if(!document.fullscreenElement)document.documentElement.requestFullscreen?.();else document.exitFullscreen?.()}
 function showHelp(title,text){document.getElementById('helpTitle').textContent=title;document.getElementById('helpText').textContent=text;document.getElementById('help').classList.add('show')}function hideHelp(){document.getElementById('help').classList.remove('show')}
 const HELP={word:'Ziehe vom ersten bis zum letzten Buchstaben. Wörter können waagrecht, senkrecht, diagonal und rückwärts liegen. Kreuzungen ändern die Farbe.',maze:'Setze beim grünen START an und finde das rote ZIEL. START kann links oben, mittig oder unten liegen. Du darfst den Finger loslassen und am gelben Endpunkt weiterfahren.',mix:'Ordne die Buchstaben zum gesuchten Begriff. Pro enthält längere Begriffe.',logic:'Wähle eine Lösung und tippe Prüfen. Pro mischt Zahlenfolgen, verschachtelte Reihen und Matrizen.',memory:'Finde gleiche Paare. Pro verwendet mehr und ähnlichere Motive.',sudoku:'Klassisches 9×9 mit 3×3-Blöcken. Im Notizmodus kannst du Kandidaten 1–9 klein eintragen. Undo und Löschen sind jederzeit möglich.',dots:'Finger auf Punkt 1 setzen und ziehen. Die App erkennt die Strecke zwischen Touchpunkten, auch wenn du schnell fährst. Bei schwereren Stufen gibt es keinen Hinweisring.',quiz:'Wähle eine Antwort und tippe Prüfen. Pro richtet sich an Erwachsene und enthält anspruchsvollere Wissens- und Schlussfolgerungsfragen.'};
@@ -193,28 +280,95 @@ function buildMaze(){
   maze={cols,rows,cells:best.cells,start:best.start,goal:best.goal,path:[{...best.start}],draw:false,solved:false,dead:best.dead};
   document.getElementById('mazeStatus').textContent=difficulty===4?`Pro · ${best.dead} Sackgassen`:'START → ZIEL';drawMaze();document.getElementById('mazeMsg').classList.remove('show')
 }
+
 function mazeGeom(){
-  const margin=Math.max(18,Math.min(mc.width,mc.height)*0.045),cw=(mc.width-margin*2)/maze.cols,ch=(mc.height-margin*2)/maze.rows,padX=(mc.width-cw*maze.cols)/2,padY=(mc.height-ch*maze.rows)/2;return{padX,padY,cw,ch}
+  const u=canvasUnit(mc),padX=Math.min(76*u,mc.width*.14),padY=18*u;
+  return {padX,padY,cw:(mc.width-2*padX)/maze.cols,ch:(mc.height-2*padY)/maze.rows};
 }
-function mazeTag(x,y,text,color,cw,ch){
-  const fs=Math.max(12,Math.min(24,Math.min(cw,ch)*.36)),w=fs*(text.length*.62+1.2),h=fs*1.35;mctx.font=`900 ${fs}px system-ui`;mctx.textAlign='center';mctx.textBaseline='middle';mctx.fillStyle='rgba(255,255,255,.92)';mctx.strokeStyle=color;mctx.lineWidth=Math.max(2,fs*.11);mctx.beginPath();mctx.roundRect?.(x-w/2,y-h/2,w,h,h*.35);if(mctx.roundRect){mctx.fill();mctx.stroke()}else{mctx.fillRect(x-w/2,y-h/2,w,h);mctx.strokeRect(x-w/2,y-h/2,w,h)}mctx.fillStyle=color;mctx.fillText(text,x,y)
+function positionMazeLabels(){
+  if(!maze)return;
+  const {padX,padY,cw,ch}=mazeGeom(),rect=mc.getBoundingClientRect(),stage=document.getElementById('mazeStage').getBoundingClientRect();
+  const sx=rect.width/mc.width,sy=rect.height/mc.height;
+  const labels=[['mazeStartLabel',rect.left-stage.left+6,padY+(maze.start.y+.5)*ch],['mazeGoalLabel',rect.right-stage.left-68,padY+(maze.goal.y+.5)*ch]];
+  for(const [id,x,y] of labels){const el=document.getElementById(id);el.style.left=x+'px';el.style.top=(rect.top-stage.top+y*sy)+'px';el.style.display='flex';}
 }
 function drawMaze(){
-  if(!maze)return;const{padX,padY,cw,ch}=mazeGeom();mctx.clearRect(0,0,mc.width,mc.height);mctx.fillStyle='#fff';mctx.fillRect(0,0,mc.width,mc.height);mctx.strokeStyle='#23323a';mctx.lineWidth=Math.max(2,Math.min(cw,ch)*.08);mctx.lineCap='round';
-  maze.cells.forEach((r,y)=>r.forEach((c,x)=>{const L=padX+x*cw,T=padY+y*ch,R=L+cw,B=T+ch;mctx.beginPath();if(c.w[0]){mctx.moveTo(L,T);mctx.lineTo(R,T)}if(c.w[1]){mctx.moveTo(R,T);mctx.lineTo(R,B)}if(c.w[2]){mctx.moveTo(L,B);mctx.lineTo(R,B)}if(c.w[3]){mctx.moveTo(L,T);mctx.lineTo(L,B)}mctx.stroke()}));
-  mctx.lineWidth=Math.max(6,Math.min(cw,ch)*.30);mctx.strokeStyle=varColor('--blue','#4b82b0');mctx.beginPath();maze.path.forEach((p,i)=>{const X=padX+p.x*cw+cw/2,Y=padY+p.y*ch+ch/2;i?mctx.lineTo(X,Y):mctx.moveTo(X,Y)});mctx.stroke();
-  const cur=maze.path.at(-1),sx=padX+maze.start.x*cw+cw/2,sy=padY+maze.start.y*ch+ch/2,gx=padX+maze.goal.x*cw+cw/2,gy=padY+maze.goal.y*ch+ch/2,cx=padX+cur.x*cw+cw/2,cy=padY+cur.y*ch+ch/2;
-  mctx.fillStyle='#34a66b';mctx.beginPath();mctx.arc(sx,sy,Math.max(6,Math.min(cw,ch)*.13),0,Math.PI*2);mctx.fill();mctx.fillStyle='#e05c54';mctx.beginPath();mctx.arc(gx,gy,Math.max(6,Math.min(cw,ch)*.13),0,Math.PI*2);mctx.fill();
-  if(!(cur.x===maze.start.x&&cur.y===maze.start.y)){mctx.fillStyle='#f2b247';mctx.beginPath();mctx.arc(cx,cy,Math.max(5,Math.min(cw,ch)*.10),0,Math.PI*2);mctx.fill()}
-  mazeTag(sx,sy-Math.min(ch*.34,18),'START','#238554',cw,ch);mazeTag(gx,gy-Math.min(ch*.34,18),'ZIEL','#c84a43',cw,ch)
+  if(!maze?.cells?.length)return;
+  const {padX,padY,cw,ch}=mazeGeom(),u=canvasUnit(mc);
+  mctx.clearRect(0,0,mc.width,mc.height);mctx.fillStyle='#fff';mctx.fillRect(0,0,mc.width,mc.height);
+  mctx.lineCap='round';mctx.lineJoin='round';
+  mctx.strokeStyle='#23323a';mctx.lineWidth=Math.max(1.35*u,Math.min(cw,ch)*.065);
+  // Wall grid. Start/goal cells have open exterior edges from the generator.
+  mctx.beginPath();maze.cells.forEach((row,y)=>row.forEach((c,x)=>{
+    const L=padX+x*cw,T=padY+y*ch,R=L+cw,B=T+ch;
+    if(c.w[0]){mctx.moveTo(L,T);mctx.lineTo(R,T);}
+    if(c.w[1]){mctx.moveTo(R,T);mctx.lineTo(R,B);}
+    if(c.w[2]){mctx.moveTo(L,B);mctx.lineTo(R,B);}
+    if(c.w[3]){mctx.moveTo(L,T);mctx.lineTo(L,B);}
+  }));mctx.stroke();
+  const center=p=>({x:padX+(p.x+.5)*cw,y:padY+(p.y+.5)*ch});
+  const start=center(maze.start),goal=center(maze.goal),current=center(maze.path.at(-1));
+  // Short coloured entrance/exit guides join the HTML badges to the actual cells.
+  mctx.lineWidth=3*u;mctx.strokeStyle='#258550';mctx.beginPath();mctx.moveTo(69*u,start.y);mctx.lineTo(start.x,start.y);mctx.stroke();
+  mctx.strokeStyle='#c5413d';mctx.beginPath();mctx.moveTo(goal.x,goal.y);mctx.lineTo(mc.width-69*u,goal.y);mctx.stroke();
+  mctx.lineWidth=Math.max(4*u,Math.min(cw,ch)*.29);mctx.strokeStyle=varColor('--blue','#4b82b0');mctx.beginPath();
+  maze.path.forEach((p,i)=>{const c=center(p);if(i)mctx.lineTo(c.x,c.y);else mctx.moveTo(c.x,c.y);});mctx.stroke();
+  for(const [c,col] of [[start,'#258550'],[goal,'#d4433f'],[current,'#e9ad32']]){
+    const rad=Math.max(4*u,Math.min(cw,ch)*.17);mctx.fillStyle=col;mctx.beginPath();mctx.arc(c.x,c.y,rad,0,Math.PI*2);mctx.fill();
+  }
+  positionMazeLabels();
 }
-function mazeCell(e){const{padX,padY,cw,ch}=mazeGeom();const q=pointerCanvasGeneric(e,mc),x=Math.floor((q.x-padX)/cw),y=Math.floor((q.y-padY)/ch);if(x<0||y<0||x>=maze.cols||y>=maze.rows)return null;return{x,y}}
-function canMaze(a,b){const dx=b.x-a.x,dy=b.y-a.y;if(Math.abs(dx)+Math.abs(dy)!==1)return false;const c=maze.cells[a.y][a.x];if(dx===1)return!c.w[1];if(dx===-1)return!c.w[3];if(dy===1)return!c.w[2];return!c.w[0]}
-function mazeTryCell(p){if(!p||maze.solved)return;const last=maze.path.at(-1);if(p.x===last.x&&p.y===last.y)return;const prev=maze.path.at(-2);if(prev&&p.x===prev.x&&p.y===prev.y){maze.path.pop();drawMaze();return}if(maze.path.some(c=>c.x===p.x&&c.y===p.y))return;if(canMaze(last,p)){maze.path.push(p);drawMaze();if(p.x===maze.goal.x&&p.y===maze.goal.y){maze.solved=true;maze.draw=false;msg('mazeMsg','ZIEL erreicht!',2200);reward('maze')}}}
-function mazeDown(e){const p=mazeCell(e);if(!p||maze.solved)return;const last=maze.path.at(-1);if(p.x===last.x&&p.y===last.y){maze.draw=true;mc.setPointerCapture?.(e.pointerId)}else if(canMaze(last,p)){maze.path.push(p);maze.draw=true;mc.setPointerCapture?.(e.pointerId);drawMaze()}}
-function mazeMove(e){if(!maze.draw||maze.solved)return;const evs=e.getCoalescedEvents?.()||[e];for(const ev of evs)mazeTryCell(mazeCell(ev))}
-function undoMaze(){if(maze?.path.length>1){maze.path.pop();drawMaze()}}
-mc.onpointerdown=mazeDown;mc.onpointermove=mazeMove;mc.onpointerup=()=>maze&&(maze.draw=false);mc.onpointercancel=()=>maze&&(maze.draw=false);
+function mazeCellFromPoint(q){
+  if(!maze)return null;
+  const {padX,padY,cw,ch}=mazeGeom(),x=Math.floor((q.x-padX)/cw),y=Math.floor((q.y-padY)/ch);
+  return x<0||y<0||x>=maze.cols||y>=maze.rows?null:{x,y};
+}
+function mazeCell(e){return mazeCellFromPoint(pointerCanvasGeneric(e,mc));}
+function canMaze(a,b){const dx=b.x-a.x,dy=b.y-a.y;if(Math.abs(dx)+Math.abs(dy)!==1)return false;const c=maze.cells[a.y][a.x];if(dx===1)return!c.w[1];if(dx===-1)return!c.w[3];if(dy===1)return!c.w[2];return!c.w[0];}
+function mazeTryCell(p){
+  if(!p||!maze||maze.solved)return false;
+  const last=maze.path.at(-1);if(p.x===last.x&&p.y===last.y)return true;
+  const prev=maze.path.at(-2);
+  if(prev&&p.x===prev.x&&p.y===prev.y){maze.path.pop();return true;}
+  // Never jump to an arbitrary earlier position when the finger crosses a route.
+  if(maze.path.some(c=>c.x===p.x&&c.y===p.y)||!canMaze(last,p))return false;
+  maze.path.push(p);
+  if(p.x===maze.goal.x&&p.y===maze.goal.y){
+    maze.solved=true;maze.draw=false;msg('mazeMsg','ZIEL erreicht!',2200);
+    if(!maze.rewarded){maze.rewarded=true;reward('maze');}
+  }
+  return true;
+}
+function mazeDown(e){
+  if(!maze||maze.solved||e.isPrimary===false)return;
+  const p=mazeCell(e),last=maze.path.at(-1);
+  if(!p||p.x!==last.x||p.y!==last.y)return;
+  if(e.cancelable)e.preventDefault();
+  maze.draw=true;maze.pointerId=e.pointerId;maze.lastPointer=pointerCanvasGeneric(e,mc);
+  try{mc.setPointerCapture(e.pointerId);}catch(error){}
+}
+function mazeMove(e){
+  if(!maze?.draw||maze.solved||e.pointerId!==maze.pointerId)return;
+  if(e.cancelable)e.preventDefault();
+  const {cw,ch}=mazeGeom(),step=Math.max(2,Math.min(cw,ch)*.22);
+  for(const event of pointerEventsFor(e)){
+    const p=pointerCanvasGeneric(event,mc),a=maze.lastPointer||p;
+    const n=Math.max(1,Math.ceil(Math.hypot(p.x-a.x,p.y-a.y)/step));
+    for(let i=1;i<=n&&!maze.solved;i++){
+      const cell=mazeCellFromPoint({x:a.x+(p.x-a.x)*i/n,y:a.y+(p.y-a.y)*i/n});
+      if(!mazeTryCell(cell))break;
+    }
+    maze.lastPointer=p;
+  }
+  drawMaze();
+}
+function endMazePointer(e){
+  if(!maze||e.pointerId!==maze.pointerId)return;
+  if(e.type==='pointerup'&&maze.draw)mazeMove(e);
+  maze.draw=false;maze.lastPointer=null;maze.pointerId=null;
+}
+function undoMaze(){if(maze?.path.length>1){maze.path.pop();maze.solved=false;maze.draw=false;drawMaze();}}
+mc.onpointerdown=mazeDown;mc.onpointermove=mazeMove;mc.onpointerup=endMazePointer;mc.onpointercancel=endMazePointer;mc.onlostpointercapture=endMazePointer;
 /* MIX */
 let mixAnswer='';function buildMix(){const bank=WORLDS[world].words.filter(w=>difficulty===1?w.length<=8:difficulty===2?w.length>=7&&w.length<=12:difficulty===3?w.length>=9:w.length>=10);mixAnswer=pick(bank.length?bank:WORLDS[world].words);let a;do{a=shuffled(mixAnswer.split('')).join('')}while(a===mixAnswer);document.getElementById('mixLetters').textContent=a;document.getElementById('mixInput').value='';document.getElementById('mixInput').focus()}function checkMix(){if(document.getElementById('mixInput').value.trim().toUpperCase()===mixAnswer){msg('mixMsg','Richtig!',1400);reward('mix');setTimeout(buildMix,800)}else msg('mixMsg','Noch nicht.',900)}
 /* LOGIC */
@@ -385,29 +539,119 @@ const DOT_NAMES={
  egypt:['Pyramide','Sphinx','Skarabäus','Pharao','Ankh','Kamel','Tempel','Horus','Obelisk','Mumie'],
  castle:['Burg','Ritterhelm','Drache','Schild','Schwert','Katapult','Krone','Burgturm','Zugbrücke','Ritter']
 };
+
 function buildDots(){
-  fitDotsCanvas();
-  const idx=Math.floor(Math.random()*10),counts=[0,52,70,92,118],pts=pathSample(motif(idx),counts[difficulty]);
-  const names=DOT_NAMES[world]||DOT_NAMES.jungle,name=names[idx]||`Punktebild ${idx+1}`;
-  dots={pts,next:0,name,draw:false,lastPointer:null,labels:[]};
-  computeDotLabels();document.getElementById('dotsStatus').textContent=`${name} · ${pts.length} Punkte`;document.getElementById('dotsMsg').classList.remove('show');drawDots();
+  clearCanvasFailure('dots');fitCanvas(dc,'dotsStage',0);
+  const idx=Math.floor(Math.random()*DOT_COMPLEX.length),counts=[0,52,70,92,118];
+  const pts=pathSample(motif(idx),counts[difficulty]||70);
+  if(!pts.length||pts.some(p=>!Number.isFinite(p.x)||!Number.isFinite(p.y)))throw new Error('DOT_DATA_INVALID');
+  const names=DOT_NAMES[world]||DOT_NAMES.jungle,name=names[idx]||('Punktebild '+(idx+1));
+  dots={pts,next:0,name,world,level:difficulty,draw:false,lastPointer:null,pointerId:null,labels:[],rewarded:false};
+  document.getElementById('dotsMsg').classList.remove('show');computeDotLabels();drawDots();
 }
-function dotScale(p){const mx=92,my=66;return{x:mx+p.x/100*(dc.width-2*mx),y:my+p.y/100*(dc.height-2*my)}}
+function dotScale(p){
+  const u=canvasUnit(dc),mx=28*u,my=28*u;
+  return{x:mx+p.x/100*(dc.width-2*mx),y:my+p.y/100*(dc.height-2*my)};
+}
 function computeDotLabels(){
-  if(!dots)return;const boxes=[],font=difficulty===4?18:difficulty===3?19:20;
-  const offsets=[[0,-21],[20,-13],[22,8],[15,22],[0,24],[-16,22],[-23,7],[-20,-13],[29,-22],[-28,24],[30,2],[-30,2]];
-  dots.labels=dots.pts.map((p,i)=>{const s=dotScale(p),txt=String(i+1),w=(txt.length===3?34:txt.length===2?26:19),h=font+4;let chosen=offsets[0],placed=false;
-    for(const [dx,dy] of offsets){const box={x:s.x+dx-w/2,y:s.y+dy-h/2,w,h};const coll=boxes.some(b=>!(box.x+box.w+3<b.x||b.x+b.w+3<box.x||box.y+box.h+3<b.y||b.y+b.h+3<box.y));if(!coll){chosen=[dx,dy];boxes.push(box);placed=true;break}}
-    if(!placed){boxes.push({x:s.x+chosen[0]-w/2,y:s.y+chosen[1]-h/2,w,h})}
-    return{dx:chosen[0],dy:chosen[1]};
-  });
+  if(!dots?.pts?.length)return;
+  const u=canvasUnit(dc),W=dc.width/u,H=dc.height/u,font=dots.pts.length>88?16:18;
+  const points=dots.pts.map(p=>{const q=dotScale(p);return {x:q.x/u,y:q.y/u};});
+  const boxes=[];dctx.font='800 '+font*u+'px system-ui';
+  dots.font=font;dots.labels=[];
+  // Label metrics are CSS pixels, independent of pixel density on the tablet.
+  for(let i=0;i<points.length;i++){
+    const p=points[i],w=dctx.measureText(String(i+1)).width/u+4,h=font+3;
+    let best=null,bestScore=Infinity;
+    for(const radius of [15,21,28,36,46,58]){
+      for(let k=0;k<16;k++){
+        const angle=-Math.PI/2+k*Math.PI/8,cx=p.x+Math.cos(angle)*radius,cy=p.y+Math.sin(angle)*radius;
+        const box={x:cx-w/2,y:cy-h/2,w,h};
+        if(box.x<3||box.y<3||box.x+w>W-3||box.y+h>H-3)continue;
+        let overlap=0;
+        for(const b of boxes){const ox=Math.min(box.x+w,b.x+b.w)-Math.max(box.x,b.x)+2,oy=Math.min(box.y+h,b.y+b.h)-Math.max(box.y,b.y)+2;if(ox>0&&oy>0)overlap+=ox*oy;}
+        let dotHits=0;for(const q of points)if(q.x>box.x-5&&q.x<box.x+w+5&&q.y>box.y-5&&q.y<box.y+h+5)dotHits++;
+        const score=overlap*200+dotHits*900+radius+(k===0?0:2);
+        if(score<bestScore){bestScore=score;best={dx:cx-p.x,dy:cy-p.y,box,leader:radius>28};}
+      }
+      if(bestScore<100)break;
+    }
+    if(!best)best={dx:0,dy:-16,box:{x:p.x-w/2,y:p.y-24,w,h},leader:false};
+    boxes.push(best.box);dots.labels.push(best);
+  }
 }
-function drawDots(){dctx.clearRect(0,0,dc.width,dc.height);dctx.fillStyle='#fff';dctx.fillRect(0,0,dc.width,dc.height);dctx.lineCap='round';dctx.lineJoin='round';dctx.strokeStyle=varColor('--blue','#4b82b0');dctx.lineWidth=Math.max(3,dc.width/380);dctx.beginPath();for(let i=0;i<dots.next;i++){const b=dots.pts[i];if(b.prevGlobal===null||b.prevGlobal>=dots.next)continue;const a=dots.pts[b.prevGlobal],A=dotScale(a),B=dotScale(b);dctx.moveTo(A.x,A.y);dctx.lineTo(B.x,B.y)}dctx.stroke();dots.pts.forEach((p,i)=>{const s=dotScale(p),done=i<dots.next,L=dots.labels[i]||{dx:0,dy:-20};dctx.fillStyle=done?varColor('--accent','#2f8a66'):'#1f2c32';dctx.beginPath();dctx.arc(s.x,s.y,done?5.5:4.8,0,Math.PI*2);dctx.fill();dctx.fillStyle=done?varColor('--accent','#2f8a66'):'#11181c';dctx.font=`900 ${difficulty===4?18:difficulty===3?19:20}px system-ui`;dctx.textAlign='center';dctx.textBaseline='middle';dctx.fillText(i+1,s.x+L.dx,s.y+L.dy);if(i===dots.next&&difficulty<=2){dctx.strokeStyle='#f2b247';dctx.lineWidth=3;dctx.beginPath();dctx.arc(s.x,s.y,17,0,Math.PI*2);dctx.stroke()}})}
-function pointerCanvasGeneric(e,canvas){const r=canvas.getBoundingClientRect();return{x:(e.clientX-r.left)*canvas.width/r.width,y:(e.clientY-r.top)*canvas.height/r.height}}
-function pointerCanvas(e){return pointerCanvasGeneric(e,dc)}
-function distSeg(p,a,b){const vx=b.x-a.x,vy=b.y-a.y,wx=p.x-a.x,wy=p.y-a.y,c1=vx*wx+vy*wy,c2=vx*vx+vy*vy,t=c2?Math.max(0,Math.min(1,c1/c2)):0;return Math.hypot(p.x-(a.x+t*vx),p.y-(a.y+t*vy))}
-function hitNextAlong(a,b){let advanced=false;const tolerance=Math.max(34,Math.min(dc.width,dc.height)*0.035);while(dots.next<dots.pts.length){const target=dotScale(dots.pts[dots.next]);if(distSeg(target,a,b)<=tolerance){dots.next++;advanced=true;if(dots.next===dots.pts.length){drawDots();msg('dotsMsg','Bild fertig!',1800);reward('dots');dots.draw=false;break}}else break}if(advanced)drawDots()}
-dc.onpointerdown=e=>{if(!dots)return;const p=pointerCanvas(e),t=dotScale(dots.pts[dots.next]||dots.pts.at(-1));const startTol=Math.max(36,Math.min(dc.width,dc.height)*0.04);if(dots.next===0&&Math.hypot(p.x-t.x,p.y-t.y)<=startTol){dots.draw=true;dots.lastPointer=p;dc.setPointerCapture?.(e.pointerId);hitNextAlong(p,p)}else if(dots.next>0){dots.draw=true;dots.lastPointer=p;dc.setPointerCapture?.(e.pointerId);hitNextAlong(dots.lastPointer,p)}};dc.onpointermove=e=>{if(!dots?.draw)return;const p=pointerCanvas(e);const mid={x:(dots.lastPointer.x+p.x)/2,y:(dots.lastPointer.y+p.y)/2};hitNextAlong(dots.lastPointer,mid);hitNextAlong(mid,p);dots.lastPointer=p};dc.onpointerup=()=>dots&&(dots.draw=false);dc.onpointercancel=()=>dots&&(dots.draw=false);
+function drawDots(){
+  if(!dots?.pts?.length)return;
+  const u=canvasUnit(dc),accent=varColor('--accent','#2f8a66');
+  dctx.clearRect(0,0,dc.width,dc.height);dctx.fillStyle='#fff';dctx.fillRect(0,0,dc.width,dc.height);
+  dctx.lineCap='round';dctx.lineJoin='round';dctx.lineWidth=2.5*u;dctx.strokeStyle=varColor('--blue','#4b82b0');dctx.beginPath();
+  for(let i=0;i<dots.next;i++){
+    const b=dots.pts[i];if(b.prevGlobal===null||b.prevGlobal>=dots.next)continue;
+    const a=dots.pts[b.prevGlobal];if(!a)continue;
+    const A=dotScale(a),B=dotScale(b);dctx.moveTo(A.x,A.y);dctx.lineTo(B.x,B.y);
+  }dctx.stroke();
+  for(let i=0;i<dots.pts.length;i++){
+    const p=dotScale(dots.pts[i]),done=i<dots.next,L=dots.labels[i]||{dx:0,dy:-16};
+    const lx=p.x+L.dx*u,ly=p.y+L.dy*u;
+    if(L.leader&&!done){dctx.strokeStyle='#b9c0c4';dctx.lineWidth=.6*u;dctx.beginPath();dctx.moveTo(p.x,p.y);dctx.lineTo(lx,ly);dctx.stroke();}
+    dctx.fillStyle=done?accent:'#14232b';dctx.beginPath();dctx.arc(p.x,p.y,3.5*u,0,Math.PI*2);dctx.fill();
+    dctx.font='800 '+dots.font*u+'px system-ui';dctx.textAlign='center';dctx.textBaseline='middle';
+    dctx.strokeStyle='#fff';dctx.lineWidth=3*u;dctx.strokeText(String(i+1),lx,ly);
+    dctx.fillStyle=done?accent:'#14232b';dctx.fillText(String(i+1),lx,ly);
+    if(i===dots.next&&dots.level<=2){dctx.strokeStyle='#dfaa2e';dctx.lineWidth=2*u;dctx.beginPath();dctx.arc(p.x,p.y,10*u,0,Math.PI*2);dctx.stroke();}
+  }
+  document.getElementById('dotsStatus').textContent=dots.next>=dots.pts.length?'Bild fertig':('Punkt '+(dots.next+1)+' / '+dots.pts.length);
+}
+function pointerCanvasGeneric(e,canvas){
+  const r=canvas.getBoundingClientRect();
+  return {x:(e.clientX-r.left)*canvas.width/Math.max(1,r.width),y:(e.clientY-r.top)*canvas.height/Math.max(1,r.height)};
+}
+function pointerCanvas(e){return pointerCanvasGeneric(e,dc);}
+function distSeg(p,a,b){const dx=b.x-a.x,dy=b.y-a.y,len=dx*dx+dy*dy,t=len?Math.max(0,Math.min(1,((p.x-a.x)*dx+(p.y-a.y)*dy)/len)):0;return Math.hypot(p.x-a.x-t*dx,p.y-a.y-t*dy);}
+function acceptDot(){
+  if(!dots||dots.next>=dots.pts.length)return;
+  dots.next++;
+  if(dots.next===dots.pts.length){
+    dots.draw=false;msg('dotsMsg','Bild fertig!',2000);
+    if(!dots.rewarded){dots.rewarded=true;reward('dots');}
+  }
+}
+function hitNextAlong(a,b,single=false){
+  if(!dots||dots.next>=dots.pts.length)return;
+  const u=canvasUnit(dc),radius=17*u,dx=b.x-a.x,dy=b.y-a.y,len2=dx*dx+dy*dy;
+  if(single){const p=dotScale(dots.pts[dots.next]);if(Math.hypot(p.x-b.x,p.y-b.y)<=radius)acceptDot();return;}
+  if(len2<.25*u*u)return;
+  let consumed=-.0001;
+  // Process only targets met in forward order along this sampled movement.
+  while(dots.next<dots.pts.length){
+    const p=dotScale(dots.pts[dots.next]),raw=((p.x-a.x)*dx+(p.y-a.y)*dy)/len2,t=Math.max(0,Math.min(1,raw));
+    if(t<consumed||distSeg(p,a,b)>radius)break;
+    acceptDot();consumed=t+.0001;
+  }
+}
+function dotsDown(e){
+  if(!dots||dots.next>=dots.pts.length||e.isPrimary===false)return;
+  if(e.cancelable)e.preventDefault();
+  const p=pointerCanvas(e),next=dotScale(dots.pts[dots.next]),u=canvasUnit(dc);
+  if(dots.next===0&&Math.hypot(p.x-next.x,p.y-next.y)>20*u)return;
+  dots.draw=true;dots.pointerId=e.pointerId;dots.lastPointer=p;
+  try{dc.setPointerCapture(e.pointerId);}catch(error){}
+  hitNextAlong(p,p,true);drawDots();
+}
+function dotsMove(e){
+  if(!dots?.draw||e.pointerId!==dots.pointerId)return;
+  if(e.cancelable)e.preventDefault();
+  for(const event of pointerEventsFor(e)){
+    const p=pointerCanvas(event);hitNextAlong(dots.lastPointer||p,p);dots.lastPointer=p;
+    if(!dots.draw)break;
+  }drawDots();
+}
+function endDotsPointer(e){
+  if(!dots||e.pointerId!==dots.pointerId)return;
+  if(e.type==='pointerup'&&dots.draw)dotsMove(e);
+  dots.draw=false;dots.lastPointer=null;dots.pointerId=null;
+}
+dc.onpointerdown=dotsDown;dc.onpointermove=dotsMove;dc.onpointerup=endDotsPointer;dc.onpointercancel=endDotsPointer;dc.onlostpointercapture=endDotsPointer;
 /* QUIZ */
 const QB={jungle:[
 [1,'Welches Tier lebt typischerweise im Regenwald?',['Tukan','Eisbär','Pinguin','Rentier'],0],[1,'Was ist eine Liane?',['Kletterpflanze','Vogelart','Fluss','Pilz'],0],[2,'Warum sind Regenwälder besonders artenreich?',['Viele unterschiedliche Lebensräume auf engem Raum','Weil es dort nie regnet','Weil nur eine Pflanzenart wächst','Weil es keine Fressfeinde gibt'],0],[2,'Welche Anpassung hilft vielen Baumkronenpflanzen?',['Grosse Blätter zur Lichtaufnahme','Dicke Eisschicht','Salzdrüsen','Winterschlaf'],0],[3,'Was passiert wahrscheinlich, wenn grosse Waldflächen fragmentiert werden?',['Populationen werden stärker voneinander getrennt','Alle Arten vermehren sich schneller','Der Boden wird automatisch nährstoffreicher','Es entstehen mehr Flüsse'],0],[3,'Warum ist der Boden vieler tropischer Regenwälder trotz üppiger Vegetation relativ nährstoffarm?',['Nährstoffe zirkulieren schnell in Biomasse','Es gibt keine Mikroorganismen','Regen enthält Säure','Bäume verbrauchen keinen Stickstoff'],0],[4,'Welche Aussage beschreibt einen Kaskadeneffekt im Ökosystem am besten?',['Änderung einer Art wirkt über mehrere Nahrungsebenen','Mehr Regen erzeugt immer mehr Arten','Ein Tier wechselt seine Farbe','Ein Baum wächst schneller'],0],[4,'Warum kann der Verlust grosser Samenverbreiter die Baumarten-Zusammensetzung verändern?',['Bestimmte Samen werden seltener weit transportiert','Samen werden dadurch grösser','Bäume bilden keine Blätter mehr','Alle Pflanzen werden Windbestäuber'],0]],
@@ -461,9 +705,16 @@ QB.castle=[
 ];
 
 let quizRound=[],quizIndex=0,quizSelected=null,quizCorrect=0;function buildQuizRound(){let pool=QB[world].filter(q=>q[0]===difficulty);if(pool.length<6)pool=[...QB[world].filter(q=>q[0]>=Math.max(1,difficulty-1))];quizRound=pickN(pool,Math.min(pool.length,difficulty===4?8:6));quizIndex=0;quizCorrect=0;showQuiz()}function showQuiz(){quizSelected=null;if(quizIndex>=quizRound.length){document.getElementById('quizQuestion').textContent=`${quizCorrect}/${quizRound.length} richtig`;document.getElementById('quizOptions').innerHTML='';document.getElementById('quizStatus').textContent='Runde beendet';if(quizCorrect>=Math.ceil(quizRound.length*.7))reward('quiz');return}const q=quizRound[quizIndex];document.getElementById('quizQuestion').textContent=q[1];document.getElementById('quizStatus').textContent=`${quizIndex+1}/${quizRound.length}`;const o=document.getElementById('quizOptions');o.innerHTML='';shuffled(q[2].map((t,i)=>({t,ok:i===q[3]}))).forEach(v=>{const b=document.createElement('button');b.className='opt';b.textContent=v.t;b.dataset.ok=v.ok?'1':'0';b.onclick=()=>{quizSelected=b;[...o.children].forEach(x=>x.classList.toggle('selected',x===b))};o.appendChild(b)})}function checkQuiz(){if(!quizSelected)return msg('quizMsg','Antwort wählen.',800);if(quizSelected.dataset.ok==='1'){quizCorrect++;quizSelected.classList.add('good');quizIndex++;setTimeout(showQuiz,500)}else{quizSelected.classList.add('bad');msg('quizMsg','Noch nicht. Nochmals überlegen.',1000);quizSelected=null}}
+
+/* The canvas size has no layout influence: the observer cannot grow it recursively. */
+if('ResizeObserver' in window){
+  const canvasObserver=new ResizeObserver(scheduleCanvasLayout);
+  for(const id of ['mazeStage','dotsStage'])canvasObserver.observe(document.getElementById(id));
+}
+updateViewport();
 /* init */
 normalizeRewards();renderWizard();theme();
-if('serviceWorker' in navigator && location.protocol.startsWith('http'))navigator.serviceWorker.register('sw.js').catch(()=>{});
+if('serviceWorker' in navigator && location.protocol.startsWith('http'))navigator.serviceWorker.register('./sw.js',{updateViaCache:'none'}).then(reg=>reg.update().catch(()=>{})).catch(()=>{});
 </script>
 </body>
 </html>

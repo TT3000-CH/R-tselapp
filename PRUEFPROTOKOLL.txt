@@ -1,0 +1,33 @@
+PRUEFPROTOKOLL - RAETSELWELT V5.3.1
+
+REPRODUKTION DER ALTEN FEHLER
+V5.3 unveraendert im Chromium-Browser ausgefuehrt.
+Punktebild: ReferenceError: varColor is not defined (drawDots).
+Labyrinth: ReferenceError: varColor is not defined (drawMaze).
+Die Fehler entstehen vor Punkten bzw. vor Pfad/START/ZIEL.
+
+TEST DER KORRIGIERTEN DATEI
+- 256 Darstellungsfaelle: 8 Welten x 4 Stufen x 2 Spiele x 4 Fenstergroessen.
+- Viewports in CSS-Pixeln: 960x600 (DPR 1), 960x520 (DPR 2),
+  1280x800 (DPR 2), 1024x500 (DPR 3).
+- Geprueft: sichtbare Zeichnung, Canvas vollstaendig innerhalb des Fensters,
+  kein Seitenscroll, START/ZIEL im Bild und mindestens 14 CSS-Pixel gross.
+- Wiederholtes Oeffnen beider Spiele ohne JavaScript-Fehler.
+- Ein Punktebild mit per Browser-Protokoll eingespeisten Touchbewegungen
+  komplett geloest; Finger abheben/fortsetzen und Fenstergroesse aendern.
+- Mehrere Punkte innerhalb einer einzelnen langen Bewegungsstrecke erkannt.
+- Pro-Labyrinth komplett mit Touchbewegungen geloest; Loslassen/Fortsetzen;
+  kein Sprung an einen beliebigen frueheren Routenpunkt.
+- Hochformat/Querformat-Wechsel erhaelt den Labyrinthstand.
+- Sechs weitere Spiele in allen 32 Welt/Stufe-Kombinationen geoeffnet.
+- Logik-Rundenlaengen: 7 / 8 / 10 / 12.
+- Absichtlich ausgeloeste Fehlermeldung und Wiederherstellung getestet.
+- Keine unbehandelten JavaScript-Fehler im korrigierten Browser-Test.
+- Service-Worker separat in Unit-Tests geprueft: Vorladen, Aktivierung,
+  getrennter App-Cache, Online-Laden, Offline-Rueckfall und Pfadabgrenzung.
+
+TESTGRENZEN
+Chromium-Tests mit emulierter Touch-/Bildschirmumgebung, nicht auf einem
+physischen Galaxy Tab. Die HTML wurde in den Browser-DOM geladen; fuer
+localStorage wurde ein Testadapter benutzt. Eine reale GitHub-Bereitstellung
+und Android-App-Installation wurden hier nicht ausgefuehrt.
