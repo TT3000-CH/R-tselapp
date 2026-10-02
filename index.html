@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="theme-color" content="#f6f0e1">
 <link rel="manifest" href="manifest.webmanifest">
-<title>Rätselwelt V5.2</title>
+<title>Rätselwelt V5.3</title>
 <style>
 :root{--bg:#f6f0e1;--paper:#fffdf8;--ink:#20313a;--muted:#66757b;--line:#ddd8cb;--accent:#2f8a66;--accent2:#f2b247;--accent3:#88cf83;--soft:#e9f6ec;--good:#3ea86f;--bad:#d85f59;--blue:#4b82b0;--shadow:0 14px 36px rgba(31,48,57,.12);--h:68px}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -45,11 +45,11 @@ canvas{display:block;max-width:100%;max-height:100%;border-radius:14px;backgroun
 </style>
 </head>
 <body>
-<div class="rotate"><div><b>↻ Bitte quer drehen</b><span>Rätselwelt V5.2 ist für dein 16:10-Tablet im Querformat optimiert.</span></div></div>
+<div class="rotate"><div><b>↻ Bitte quer drehen</b><span>Rätselwelt V5.3 ist für dein 16:10-Tablet im Querformat optimiert.</span></div></div>
 <div class="toast" id="toast">⭐ Geschafft</div>
 <div class="help" id="help"><div class="helpbox"><h3 id="helpTitle">Hilfe</h3><p id="helpText"></p><button onclick="hideHelp()">Schliessen</button></div></div>
 <div class="app">
-<header><div class="brand"><img src="logo.svg" alt="" onerror="this.style.display='none'"><div><b>Rätselwelt</b><small>V5.2 · 8 Welten · Junior bis Pro</small></div></div><div class="hright"><div class="counter">⭐ <span id="stars">0</span></div><button class="hbtn" onclick="showAlbum()">Sticker</button><button class="hbtn" onclick="goWizard(1)">Start</button><button class="hbtn iconbtn" onclick="toggleFull()">⛶</button></div></header>
+<header><div class="brand"><img src="logo.svg" alt="" onerror="this.style.display='none'"><div><b>Rätselwelt</b><small>V5.3 · 8 Welten · Junior bis Pro</small></div></div><div class="hright"><div class="counter">⭐ <span id="stars">0</span></div><button class="hbtn" onclick="showAlbum()">Sticker</button><button class="hbtn" onclick="goWizard(1)">Start</button><button class="hbtn iconbtn" onclick="toggleFull()">⛶</button></div></header>
 <main>
 <section class="screen active" id="wizard"><div class="crumb"><button id="c1" class="on" onclick="goWizard(1)">1 Schwierigkeit</button><button id="c2" onclick="goWizard(2)">2 Welt &amp; Spiel</button><div class="spacer"></div><button class="album-mini" onclick="showAlbum()">📘 <span id="albumCount">0/80</span></button></div><div class="step step-difficulty on" id="step1"></div><div class="step step-play" id="step2"><div class="worldstrip" id="worldStrip"></div><div class="gamegrid" id="gameGrid"></div></div></section>
 
@@ -100,7 +100,7 @@ function openGame(id){show(id);theme();if(id==="maze")fitMazeCanvas();if(id==="d
 window.addEventListener("resize",()=>{if(activeScreen()==="maze")fitMazeCanvas();if(activeScreen()==="dots")fitDotsCanvas()});
 function toggleFull(){if(!document.fullscreenElement)document.documentElement.requestFullscreen?.();else document.exitFullscreen?.()}
 function showHelp(title,text){document.getElementById('helpTitle').textContent=title;document.getElementById('helpText').textContent=text;document.getElementById('help').classList.add('show')}function hideHelp(){document.getElementById('help').classList.remove('show')}
-const HELP={word:'Ziehe vom ersten bis zum letzten Buchstaben. Wörter können waagrecht, senkrecht, diagonal und rückwärts liegen. Kreuzungen ändern die Farbe.',maze:'Setze am START an. Du darfst den Finger loslassen und am gelben Endpunkt weiterfahren. Alte bereits besuchte Bereiche werden ignoriert.',mix:'Ordne die Buchstaben zum gesuchten Begriff. Pro enthält längere Begriffe.',logic:'Wähle eine Lösung und tippe Prüfen. Pro mischt Zahlenfolgen, verschachtelte Reihen und Matrizen.',memory:'Finde gleiche Paare. Pro verwendet mehr und ähnlichere Motive.',sudoku:'Klassisches 9×9 mit 3×3-Blöcken. Im Notizmodus kannst du Kandidaten 1–9 klein eintragen. Undo und Löschen sind jederzeit möglich.',dots:'Finger auf Punkt 1 setzen und ziehen. Die App erkennt die Strecke zwischen Touchpunkten, auch wenn du schnell fährst. Bei schwereren Stufen gibt es keinen Hinweisring.',quiz:'Wähle eine Antwort und tippe Prüfen. Pro richtet sich an Erwachsene und enthält anspruchsvollere Wissens- und Schlussfolgerungsfragen.'};
+const HELP={word:'Ziehe vom ersten bis zum letzten Buchstaben. Wörter können waagrecht, senkrecht, diagonal und rückwärts liegen. Kreuzungen ändern die Farbe.',maze:'Setze beim grünen START an und finde das rote ZIEL. START kann links oben, mittig oder unten liegen. Du darfst den Finger loslassen und am gelben Endpunkt weiterfahren.',mix:'Ordne die Buchstaben zum gesuchten Begriff. Pro enthält längere Begriffe.',logic:'Wähle eine Lösung und tippe Prüfen. Pro mischt Zahlenfolgen, verschachtelte Reihen und Matrizen.',memory:'Finde gleiche Paare. Pro verwendet mehr und ähnlichere Motive.',sudoku:'Klassisches 9×9 mit 3×3-Blöcken. Im Notizmodus kannst du Kandidaten 1–9 klein eintragen. Undo und Löschen sind jederzeit möglich.',dots:'Finger auf Punkt 1 setzen und ziehen. Die App erkennt die Strecke zwischen Touchpunkten, auch wenn du schnell fährst. Bei schwereren Stufen gibt es keinen Hinweisring.',quiz:'Wähle eine Antwort und tippe Prüfen. Pro richtet sich an Erwachsene und enthält anspruchsvollere Wissens- und Schlussfolgerungsfragen.'};
 function helpGame(id){showHelp(GAMES.find(g=>g[0]===id)?.[1]||'Hilfe',HELP[id])}
 function toast(t){const el=document.getElementById('toast');el.textContent=t;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),1400)}
 function shuffled(a){return [...a].sort(()=>Math.random()-.5)}function pick(a){return a[Math.floor(Math.random()*a.length)]}function pickN(a,n){return shuffled(a).slice(0,Math.min(n,a.length))}
@@ -160,28 +160,102 @@ function buildWord(){
 function renderWord(){const g=document.getElementById('wordGrid');g.innerHTML='';g.style.gridTemplateColumns=`repeat(${wg.cols},1fr)`;g.style.gridTemplateRows=`repeat(${wg.rows},1fr)`;const ratio=wg.cols/wg.rows;g.style.width=`min(100%, calc((100dvh - 135px) * ${ratio}))`;g.style.height='min(100%,calc(100dvh - 135px))';wg.grid.forEach((r,y)=>r.forEach((ch,x)=>{const d=document.createElement('div');d.className='letter';d.dataset.x=x;d.dataset.y=y;const n=wg.cover[`${x},${y}`]||0;if(n===1)d.classList.add('hit1');if(n===2)d.classList.add('hit2');if(n>=3)d.classList.add('hit3');d.textContent=ch;g.appendChild(d)}));document.getElementById('wordList').innerHTML=wg.placed.map(p=>`<div class="wordchip ${wg.found.has(p.word)?'done':''}">${p.word}</div>`).join('');document.getElementById('wordStatus').textContent=`${wg.found.size}/${wg.placed.length}`;g.onpointerdown=wordDown;g.onpointermove=wordMove;g.onpointerup=wordUp;g.onpointercancel=wordUp}
 function wordCell(e){const el=document.elementFromPoint(e.clientX,e.clientY);return el?.classList.contains('letter')?el:null}function wordDown(e){const c=wordCell(e);if(!c)return;wg.drag={sx:+c.dataset.x,sy:+c.dataset.y,ex:+c.dataset.x,ey:+c.dataset.y};e.currentTarget.setPointerCapture?.(e.pointerId);previewWord()}function wordMove(e){if(!wg.drag)return;const c=wordCell(e);if(!c)return;wg.drag.ex=+c.dataset.x;wg.drag.ey=+c.dataset.y;previewWord()}function wordCells(){const d=wg.drag,dx=d.ex-d.sx,dy=d.ey-d.sy,ax=Math.abs(dx),ay=Math.abs(dy);if(!(dx===0||dy===0||ax===ay))return[];const n=Math.max(ax,ay),sx=Math.sign(dx),sy=Math.sign(dy);return Array.from({length:n+1},(_,i)=>`${d.sx+sx*i},${d.sy+sy*i}`)}function previewWord(){document.querySelectorAll('.letter.preview').forEach(x=>x.classList.remove('preview'));wordCells().forEach(k=>{const[x,y]=k.split(',');document.querySelector(`.letter[data-x="${x}"][data-y="${y}"]`)?.classList.add('preview')})}function wordUp(){if(!wg.drag)return;const c=wordCells().join('|');const m=wg.placed.find(p=>!wg.found.has(p.word)&&(p.cells.join('|')===c||[...p.cells].reverse().join('|')===c));if(m){wg.found.add(m.word);m.cells.forEach(k=>wg.cover[k]=(wg.cover[k]||0)+1);renderWord();if(wg.found.size===wg.placed.length){msg('wordMsg','Alles gefunden!',2200);reward('word')}}wg.drag=null;document.querySelectorAll('.letter.preview').forEach(x=>x.classList.remove('preview'))}
 /* MAZE */
-const mc=document.getElementById('mazeCanvas'),mctx=mc.getContext('2d');let maze=null;function makeMaze(cols,rows){const cells=Array.from({length:rows},(_,y)=>Array.from({length:cols},(_,x)=>({x,y,w:[1,1,1,1],v:false}))),dirs=[[0,-1,0,2],[1,0,1,3],[0,1,2,0],[-1,0,3,1]],stack=[cells[0][0]];cells[0][0].v=true;while(stack.length){const c=stack.at(-1),opts=dirs.filter(d=>{const nx=c.x+d[0],ny=c.y+d[1];return nx>=0&&ny>=0&&nx<cols&&ny<rows&&!cells[ny][nx].v});if(!opts.length){stack.pop();continue}const d=pick(opts),n=cells[c.y+d[1]][c.x+d[0]];c.w[d[2]]=0;n.w[d[3]]=0;n.v=true;stack.push(n)}return cells}
-function buildMaze(){const dims=difficulty===1?[11,7]:difficulty===2?[15,9]:difficulty===3?[19,11]:[24,14];fitMazeCanvas();maze={cols:dims[0],rows:dims[1],cells:makeMaze(...dims),path:[{x:0,y:0}],draw:false,solved:false};drawMaze();document.getElementById('mazeMsg').classList.remove('show')}
-function mazeGeom(){
-  const margin=Math.max(10,Math.min(mc.width,mc.height)*0.035),
-        cw=(mc.width-margin*2)/maze.cols,
-        ch=(mc.height-margin*2)/maze.rows,
-        padX=(mc.width-cw*maze.cols)/2,
-        padY=(mc.height-ch*maze.rows)/2;
-  return{padX,padY,cw,ch}
+const mc=document.getElementById('mazeCanvas'),mctx=mc.getContext('2d');let maze=null;
+function freshCells(cols,rows){return Array.from({length:rows},(_,y)=>Array.from({length:cols},(_,x)=>({x,y,w:[1,1,1,1],v:false})))}
+const MDIRS=[[0,-1,0,2],[1,0,1,3],[0,1,2,0],[-1,0,3,1]];
+function carveCells(a,b,wallA,wallB){a.w[wallA]=0;b.w[wallB]=0}
+function makeMazeDFS(cols,rows,start){
+  const cells=freshCells(cols,rows),stack=[cells[start.y][start.x]];stack[0].v=true;
+  while(stack.length){const c=stack.at(-1),opts=MDIRS.filter(d=>{const nx=c.x+d[0],ny=c.y+d[1];return nx>=0&&ny>=0&&nx<cols&&ny<rows&&!cells[ny][nx].v});if(!opts.length){stack.pop();continue}const d=pick(opts),n=cells[c.y+d[1]][c.x+d[0]];carveCells(c,n,d[2],d[3]);n.v=true;stack.push(n)}return cells
 }
-function drawMaze(){const{padX,padY,cw,ch}=mazeGeom();mctx.clearRect(0,0,mc.width,mc.height);mctx.fillStyle='#fff';mctx.fillRect(0,0,mc.width,mc.height);mctx.strokeStyle='#23323a';mctx.lineWidth=Math.max(2,Math.min(cw,ch)*.085);mctx.lineCap='round';maze.cells.forEach((r,y)=>r.forEach((c,x)=>{const L=padX+x*cw,T=padY+y*ch,R=L+cw,B=T+ch;mctx.beginPath();if(c.w[0]){mctx.moveTo(L,T);mctx.lineTo(R,T)}if(c.w[1]){mctx.moveTo(R,T);mctx.lineTo(R,B)}if(c.w[2]){mctx.moveTo(L,B);mctx.lineTo(R,B)}if(c.w[3]){mctx.moveTo(L,T);mctx.lineTo(L,B)}mctx.stroke()}));mctx.lineWidth=Math.max(7,Math.min(cw,ch)*.36);mctx.strokeStyle=varColor('--blue','#4b82b0');mctx.beginPath();maze.path.forEach((p,i)=>{const X=padX+p.x*cw+cw/2,Y=padY+p.y*ch+ch/2;i?mctx.lineTo(X,Y):mctx.moveTo(X,Y)});mctx.stroke();const s=maze.path[0],e=maze.path.at(-1);[[s,'#f2b247'],[e,'#f2b247']].forEach(([p,col])=>{const X=padX+p.x*cw+cw/2,Y=padY+p.y*ch+ch/2;mctx.fillStyle=col;mctx.beginPath();mctx.arc(X,Y,Math.max(6,Math.min(cw,ch)*.16),0,Math.PI*2);mctx.fill()});}
-function mazeCell(e){const{padX,padY,cw,ch}=mazeGeom();const x=Math.floor((pointerCanvasGeneric(e,mc).x-padX)/cw),y=Math.floor((pointerCanvasGeneric(e,mc).y-padY)/ch);if(x<0||y<0||x>=maze.cols||y>=maze.rows)return null;return{x,y}}
+function makeMazePrim(cols,rows,start){
+  const cells=freshCells(cols,rows),front=[];
+  const add=(c)=>{MDIRS.forEach(d=>{const nx=c.x+d[0],ny=c.y+d[1];if(nx>=0&&ny>=0&&nx<cols&&ny<rows&&!cells[ny][nx].v)front.push({x:c.x,y:c.y,d})})};
+  cells[start.y][start.x].v=true;add(cells[start.y][start.x]);
+  while(front.length){const ix=Math.floor(Math.random()*front.length),f=front.splice(ix,1)[0],c=cells[f.y][f.x],nx=f.x+f.d[0],ny=f.y+f.d[1],n=cells[ny][nx];if(n.v)continue;carveCells(c,n,f.d[2],f.d[3]);n.v=true;add(n)}return cells
+}
+function mazeDistance(cells,start,goal){
+  const rows=cells.length,cols=cells[0].length,q=[[start.x,start.y,0]],seen=new Set([`${start.x},${start.y}`]);
+  while(q.length){const [x,y,d]=q.shift();if(x===goal.x&&y===goal.y)return d;const c=cells[y][x];MDIRS.forEach(dir=>{if(c.w[dir[2]])return;const nx=x+dir[0],ny=y+dir[1],k=`${nx},${ny}`;if(nx<0||ny<0||nx>=cols||ny>=rows||seen.has(k))return;seen.add(k);q.push([nx,ny,d+1])})}return 0
+}
+function countDeadEnds(cells){let n=0;cells.forEach(row=>row.forEach(c=>{const open=c.w.filter(v=>v===0).length;if(open===1)n++}));return n}
+function edgeRow(rows,band){const centers=[.18,.5,.82],base=centers[band%3]*(rows-1),jitter=Math.max(1,Math.floor(rows*.12));return Math.max(0,Math.min(rows-1,Math.round(base+(Math.random()*2-1)*jitter)))}
+function buildMaze(){
+  const dims=difficulty===1?[12,8]:difficulty===2?[17,11]:difficulty===3?[24,15]:[31,19];fitMazeCanvas();
+  const cols=dims[0],rows=dims[1],tries=difficulty===4?12:difficulty===3?7:3;let best=null;
+  for(let t=0;t<tries;t++){
+    const sb=(Math.floor(Math.random()*3)+t)%3,gb=(sb+1+Math.floor(Math.random()*2))%3,start={x:0,y:edgeRow(rows,sb)},goal={x:cols-1,y:edgeRow(rows,gb)};
+    const cells=difficulty>=3?makeMazePrim(cols,rows,start):makeMazeDFS(cols,rows,start);
+    cells[start.y][0].w[3]=0;cells[goal.y][cols-1].w[1]=0;
+    const dist=mazeDistance(cells,start,goal),dead=countDeadEnds(cells),score=dist*(difficulty===4?4:difficulty===3?2:1)+dead*(difficulty===4?.8:.35);
+    if(!best||score>best.score)best={cells,start,goal,score,dist,dead};
+  }
+  maze={cols,rows,cells:best.cells,start:best.start,goal:best.goal,path:[{...best.start}],draw:false,solved:false,dead:best.dead};
+  document.getElementById('mazeStatus').textContent=difficulty===4?`Pro · ${best.dead} Sackgassen`:'START → ZIEL';drawMaze();document.getElementById('mazeMsg').classList.remove('show')
+}
+function mazeGeom(){
+  const margin=Math.max(18,Math.min(mc.width,mc.height)*0.045),cw=(mc.width-margin*2)/maze.cols,ch=(mc.height-margin*2)/maze.rows,padX=(mc.width-cw*maze.cols)/2,padY=(mc.height-ch*maze.rows)/2;return{padX,padY,cw,ch}
+}
+function mazeTag(x,y,text,color,cw,ch){
+  const fs=Math.max(12,Math.min(24,Math.min(cw,ch)*.36)),w=fs*(text.length*.62+1.2),h=fs*1.35;mctx.font=`900 ${fs}px system-ui`;mctx.textAlign='center';mctx.textBaseline='middle';mctx.fillStyle='rgba(255,255,255,.92)';mctx.strokeStyle=color;mctx.lineWidth=Math.max(2,fs*.11);mctx.beginPath();mctx.roundRect?.(x-w/2,y-h/2,w,h,h*.35);if(mctx.roundRect){mctx.fill();mctx.stroke()}else{mctx.fillRect(x-w/2,y-h/2,w,h);mctx.strokeRect(x-w/2,y-h/2,w,h)}mctx.fillStyle=color;mctx.fillText(text,x,y)
+}
+function drawMaze(){
+  if(!maze)return;const{padX,padY,cw,ch}=mazeGeom();mctx.clearRect(0,0,mc.width,mc.height);mctx.fillStyle='#fff';mctx.fillRect(0,0,mc.width,mc.height);mctx.strokeStyle='#23323a';mctx.lineWidth=Math.max(2,Math.min(cw,ch)*.08);mctx.lineCap='round';
+  maze.cells.forEach((r,y)=>r.forEach((c,x)=>{const L=padX+x*cw,T=padY+y*ch,R=L+cw,B=T+ch;mctx.beginPath();if(c.w[0]){mctx.moveTo(L,T);mctx.lineTo(R,T)}if(c.w[1]){mctx.moveTo(R,T);mctx.lineTo(R,B)}if(c.w[2]){mctx.moveTo(L,B);mctx.lineTo(R,B)}if(c.w[3]){mctx.moveTo(L,T);mctx.lineTo(L,B)}mctx.stroke()}));
+  mctx.lineWidth=Math.max(6,Math.min(cw,ch)*.30);mctx.strokeStyle=varColor('--blue','#4b82b0');mctx.beginPath();maze.path.forEach((p,i)=>{const X=padX+p.x*cw+cw/2,Y=padY+p.y*ch+ch/2;i?mctx.lineTo(X,Y):mctx.moveTo(X,Y)});mctx.stroke();
+  const cur=maze.path.at(-1),sx=padX+maze.start.x*cw+cw/2,sy=padY+maze.start.y*ch+ch/2,gx=padX+maze.goal.x*cw+cw/2,gy=padY+maze.goal.y*ch+ch/2,cx=padX+cur.x*cw+cw/2,cy=padY+cur.y*ch+ch/2;
+  mctx.fillStyle='#34a66b';mctx.beginPath();mctx.arc(sx,sy,Math.max(6,Math.min(cw,ch)*.13),0,Math.PI*2);mctx.fill();mctx.fillStyle='#e05c54';mctx.beginPath();mctx.arc(gx,gy,Math.max(6,Math.min(cw,ch)*.13),0,Math.PI*2);mctx.fill();
+  if(!(cur.x===maze.start.x&&cur.y===maze.start.y)){mctx.fillStyle='#f2b247';mctx.beginPath();mctx.arc(cx,cy,Math.max(5,Math.min(cw,ch)*.10),0,Math.PI*2);mctx.fill()}
+  mazeTag(sx,sy-Math.min(ch*.34,18),'START','#238554',cw,ch);mazeTag(gx,gy-Math.min(ch*.34,18),'ZIEL','#c84a43',cw,ch)
+}
+function mazeCell(e){const{padX,padY,cw,ch}=mazeGeom();const q=pointerCanvasGeneric(e,mc),x=Math.floor((q.x-padX)/cw),y=Math.floor((q.y-padY)/ch);if(x<0||y<0||x>=maze.cols||y>=maze.rows)return null;return{x,y}}
 function canMaze(a,b){const dx=b.x-a.x,dy=b.y-a.y;if(Math.abs(dx)+Math.abs(dy)!==1)return false;const c=maze.cells[a.y][a.x];if(dx===1)return!c.w[1];if(dx===-1)return!c.w[3];if(dy===1)return!c.w[2];return!c.w[0]}
+function mazeTryCell(p){if(!p||maze.solved)return;const last=maze.path.at(-1);if(p.x===last.x&&p.y===last.y)return;const prev=maze.path.at(-2);if(prev&&p.x===prev.x&&p.y===prev.y){maze.path.pop();drawMaze();return}if(maze.path.some(c=>c.x===p.x&&c.y===p.y))return;if(canMaze(last,p)){maze.path.push(p);drawMaze();if(p.x===maze.goal.x&&p.y===maze.goal.y){maze.solved=true;maze.draw=false;msg('mazeMsg','ZIEL erreicht!',2200);reward('maze')}}}
 function mazeDown(e){const p=mazeCell(e);if(!p||maze.solved)return;const last=maze.path.at(-1);if(p.x===last.x&&p.y===last.y){maze.draw=true;mc.setPointerCapture?.(e.pointerId)}else if(canMaze(last,p)){maze.path.push(p);maze.draw=true;mc.setPointerCapture?.(e.pointerId);drawMaze()}}
-function mazeMove(e){if(!maze.draw||maze.solved)return;const p=mazeCell(e);if(!p)return;const last=maze.path.at(-1);if(p.x===last.x&&p.y===last.y)return;const prev=maze.path.at(-2);if(prev&&p.x===prev.x&&p.y===prev.y){maze.path.pop();drawMaze();return}if(maze.path.some(c=>c.x===p.x&&c.y===p.y))return;if(canMaze(last,p)){maze.path.push(p);drawMaze();if(p.x===maze.cols-1&&p.y===maze.rows-1){maze.solved=true;maze.draw=false;msg('mazeMsg','Ausgang gefunden!',2200);reward('maze')}}}
+function mazeMove(e){if(!maze.draw||maze.solved)return;const evs=e.getCoalescedEvents?.()||[e];for(const ev of evs)mazeTryCell(mazeCell(ev))}
 function undoMaze(){if(maze?.path.length>1){maze.path.pop();drawMaze()}}
 mc.onpointerdown=mazeDown;mc.onpointermove=mazeMove;mc.onpointerup=()=>maze&&(maze.draw=false);mc.onpointercancel=()=>maze&&(maze.draw=false);
 /* MIX */
 let mixAnswer='';function buildMix(){const bank=WORLDS[world].words.filter(w=>difficulty===1?w.length<=8:difficulty===2?w.length>=7&&w.length<=12:difficulty===3?w.length>=9:w.length>=10);mixAnswer=pick(bank.length?bank:WORLDS[world].words);let a;do{a=shuffled(mixAnswer.split('')).join('')}while(a===mixAnswer);document.getElementById('mixLetters').textContent=a;document.getElementById('mixInput').value='';document.getElementById('mixInput').focus()}function checkMix(){if(document.getElementById('mixInput').value.trim().toUpperCase()===mixAnswer){msg('mixMsg','Richtig!',1400);reward('mix');setTimeout(buildMix,800)}else msg('mixMsg','Noch nicht.',900)}
 /* LOGIC */
-let logicRound=[],logicIndex=0,logicSelected=null,logicCorrect=0;function makeSequence(level){const type=pick(level===1?['step','alt','double']:level===2?['step2','alt','interleave','double','squares']:level===3?['interleave','grow','second','fib','altmul','letters']:['interleave','grow','second','prime','factorial','altmul','letters','matrix']);if(type==='step'){const a=2+Math.floor(Math.random()*7),d=2+Math.floor(Math.random()*5),seq=Array.from({length:5},(_,i)=>a+i*d);return Q(seq.slice(0,4).join(' · ')+' · ?',seq[4])}if(type==='alt'){const a=3+Math.floor(Math.random()*8),s=[a,a+2,(a+2)*2,(a+2)*2+2,((a+2)*2+2)*2];return Q(s.slice(0,4).join(' · ')+' · ?',s[4])}if(type==='double'){const a=2+Math.floor(Math.random()*4),s=Array.from({length:5},(_,i)=>a*2**i);return Q(s.slice(0,4).join(' · ')+' · ?',s[4])}if(type==='step2'){const a=2,d=2,s=[a];for(let i=1;i<6;i++)s.push(s.at(-1)+d+i);return Q(s.slice(0,5).join(' · ')+' · ?',s[5])}if(type==='squares')return Q('1 · 4 · 9 · 16 · ?',25);if(type==='fib')return Q('2 · 3 · 5 · 8 · 13 · ?',21);if(type==='prime')return Q('11 · 13 · 17 · 19 · 23 · ?',29);if(type==='factorial')return Q('1 · 2 · 6 · 24 · 120 · ?',720);if(type==='grow'){const a=3,s=[a],ops=[2,3,4,5,6];ops.forEach(x=>s.push(s.at(-1)+x));return Q(s.slice(0,5).join(' · ')+' · ?',s[5])}if(type==='second')return Q('3 · 6 · 11 · 18 · 27 · ?',38);if(type==='altmul')return Q('3 · 4 · 8 · 9 · 18 · 19 · ?',38);if(type==='interleave')return Q('2 · 10 · 4 · 20 · 6 · 30 · ?',8);if(type==='letters')return Q('B · E · I · N · ?', 'T',true);if(type==='matrix')return{q:'Matrix: Welche Zahl fehlt?\n2  4  8\n3  6  12\n5  10  ?',answer:'20',opts:['15','18','20','25']};return Q('2 · 4 · 8 · 16 · ?',32)}function Q(q,a,letters=false){const val=String(a);let opts;if(letters){const code=val.charCodeAt(0);opts=shuffled([val,String.fromCharCode(code-1),String.fromCharCode(code+1),String.fromCharCode(code+2)])}else{const n=+a;opts=shuffled([...new Set([n,n+2,n-2,Math.max(0,n+Math.round(n*.25))])].map(String));while(opts.length<4)opts.push(String(n+opts.length+3))}return{q,answer:val,opts}}
-function buildLogicRound(){logicRound=Array.from({length:difficulty===4?9:difficulty+5},()=>makeSequence(difficulty));logicIndex=0;logicCorrect=0;showLogic()}function showLogic(){logicSelected=null;if(logicIndex>=logicRound.length){document.getElementById('logicQuestion').textContent=`${logicCorrect}/${logicRound.length} richtig`;document.getElementById('logicOptions').innerHTML='';document.getElementById('logicStatus').textContent='Runde beendet';if(logicCorrect>=Math.ceil(logicRound.length*.7))reward('logic');return}const q=logicRound[logicIndex];document.getElementById('logicQuestion').textContent=q.q;document.getElementById('logicStatus').textContent=`${logicIndex+1}/${logicRound.length}`;const o=document.getElementById('logicOptions');o.innerHTML='';shuffled(q.opts).forEach(v=>{const b=document.createElement('button');b.className='opt';b.textContent=v;b.onclick=()=>{logicSelected=v;[...o.children].forEach(x=>x.classList.toggle('selected',x===b))};o.appendChild(b)})}function checkLogic(){if(logicSelected===null)return msg('logicMsg','Bitte Antwort wählen.',800);const q=logicRound[logicIndex];if(String(logicSelected)===String(q.answer)){logicCorrect++;msg('logicMsg','Richtig!',700);logicIndex++;setTimeout(showLogic,450)}else msg('logicMsg','Noch nicht. Regel nochmals prüfen.',1000)}
+let logicRound=[],logicIndex=0,logicSelected=null,logicCorrect=0;
+function logicQ(q,a,alts=null){const answer=String(a);let opts;if(alts)opts=[answer,...alts.map(String)];else{const n=Number(a),cand=[n,n+1,n-1,n+2,n-2,n+Math.max(3,Math.round(Math.abs(n)*.2))];opts=[...new Set(cand.map(String))].slice(0,4);while(opts.length<4)opts.push(String(n+opts.length+4))}return{q,answer,opts:shuffled([...new Set(opts)]).slice(0,4)}}
+function logicLetterQ(q,a){const c=a.charCodeAt(0),alts=[String.fromCharCode(c-1),String.fromCharCode(c+1),String.fromCharCode(c+2)];return logicQ(q,a,alts)}
+function makeSequence(level){
+  const pools={
+    1:['step','double','alt','minus'],
+    2:['growdiff','squares','interleave','alt','triangular','timesplus'],
+    3:['second','fib','altmul','letters','cubes','interleave2','squareplus'],
+    4:['primegap','factor','recursive','matrix','interleave3','powers','alternating','quadratic']
+  },type=pick(pools[level]||pools[4]);
+  if(type==='step'){const a=2+Math.floor(Math.random()*8),d=2+Math.floor(Math.random()*6),s=Array.from({length:6},(_,i)=>a+i*d);return logicQ(s.slice(0,5).join(' · ')+' · ?',s[5])}
+  if(type==='double'){const a=1+Math.floor(Math.random()*5),m=pick([2,3]),s=Array.from({length:6},(_,i)=>a*m**i);return logicQ(s.slice(0,5).join(' · ')+' · ?',s[5])}
+  if(type==='minus'){const d=2+Math.floor(Math.random()*5),a=35+Math.floor(Math.random()*30),s=Array.from({length:6},(_,i)=>a-i*d);return logicQ(s.slice(0,5).join(' · ')+' · ?',s[5])}
+  if(type==='alt'){const a=3+Math.floor(Math.random()*7),add=1+Math.floor(Math.random()*4),mul=2,s=[a];for(let i=0;i<5;i++)s.push(i%2===0?s.at(-1)+add:s.at(-1)*mul);return logicQ(s.slice(0,5).join(' · ')+' · ?',s[5])}
+  if(type==='growdiff'){const a=2+Math.floor(Math.random()*6),s=[a];let d=1+Math.floor(Math.random()*3);for(let i=0;i<5;i++){s.push(s.at(-1)+d);d+=1+Math.floor(i/2)}return logicQ(s.slice(0,5).join(' · ')+' · ?',s[5])}
+  if(type==='squares'){const k=Math.floor(Math.random()*4),s=Array.from({length:6},(_,i)=>(i+1)**2+k);return logicQ(s.slice(0,5).join(' · ')+' · ?',s[5])}
+  if(type==='triangular'){const k=Math.floor(Math.random()*4),s=Array.from({length:6},(_,i)=>((i+1)*(i+2))/2+k);return logicQ(s.slice(0,5).join(' · ')+' · ?',s[5])}
+  if(type==='timesplus'){const a=2+Math.floor(Math.random()*4),add=1+Math.floor(Math.random()*3),s=[a];for(let i=0;i<5;i++)s.push(s.at(-1)*2+add);return logicQ(s.slice(0,5).join(' · ')+' · ?',s[5])}
+  if(type==='interleave'){const a=1+Math.floor(Math.random()*4),b=8+Math.floor(Math.random()*6),s=[a,b,a+2,b+4,a+4,b+8,a+6];return logicQ(s.slice(0,6).join(' · ')+' · ?',s[6])}
+  if(type==='second'){const a=2+Math.floor(Math.random()*4),s=[a];let d=2;for(let i=0;i<6;i++){s.push(s.at(-1)+d);d+=2}return logicQ(s.slice(0,6).join(' · ')+' · ?',s[6])}
+  if(type==='fib'){const a=1+Math.floor(Math.random()*3),b=a+1+Math.floor(Math.random()*3),s=[a,b];while(s.length<7)s.push(s.at(-1)+s.at(-2));return logicQ(s.slice(0,6).join(' · ')+' · ?',s[6])}
+  if(type==='altmul'){const a=2+Math.floor(Math.random()*3),add=1+Math.floor(Math.random()*2),s=[a];for(let i=0;i<6;i++)s.push(i%2===0?s.at(-1)+add:s.at(-1)*2);return logicQ(s.slice(0,6).join(' · ')+' · ?',s[6])}
+  if(type==='letters'){const starts=['A','B','C','D'],st=pick(starts).charCodeAt(0),jumps=[2,3,4,5,6],s=[st];jumps.forEach(j=>s.push(s.at(-1)+j));return logicLetterQ(s.slice(0,5).map(x=>String.fromCharCode(x)).join(' · ')+' · ?',String.fromCharCode(s[5]))}
+  if(type==='cubes'){const k=Math.floor(Math.random()*3),s=Array.from({length:6},(_,i)=>(i+1)**3+k);return logicQ(s.slice(0,5).join(' · ')+' · ?',s[5])}
+  if(type==='interleave2'){const a=2+Math.floor(Math.random()*4),b=20+Math.floor(Math.random()*10),s=[a,b,a+3,b-3,a+6,b-6,a+9];return logicQ(s.slice(0,6).join(' · ')+' · ?',s[6])}
+  if(type==='squareplus'){const k=2+Math.floor(Math.random()*5),s=Array.from({length:6},(_,i)=>(i+1)**2+k*(i+1));return logicQ(s.slice(0,5).join(' · ')+' · ?',s[5])}
+  if(type==='primegap'){const base=pick([[5,7,11,13,17,19,23],[11,13,17,19,23,29,31],[17,19,23,29,31,37,41]]);return logicQ(base.slice(0,6).join(' · ')+' · ?',base[6])}
+  if(type==='factor'){const m=pick([1,2,3]),s=[1*m,2*m,6*m,24*m,120*m,720*m];return logicQ(s.slice(0,5).join(' · ')+' · ?',s[5])}
+  if(type==='recursive'){const a=2+Math.floor(Math.random()*4),s=[a];for(let i=0;i<5;i++)s.push(s.at(-1)*2+(i+1));return logicQ(s.slice(0,5).join(' · ')+' · ?',s[5])}
+  if(type==='matrix'){const a=2+Math.floor(Math.random()*4),m=pick([2,3]);return logicQ(`Matrix: Welche Zahl fehlt?\n${a}  ${a*m}  ${a*m*m}\n${a+1}  ${(a+1)*m}  ${(a+1)*m*m}\n${a+2}  ${(a+2)*m}  ?`,(a+2)*m*m)}
+  if(type==='interleave3'){const a=2+Math.floor(Math.random()*3),b=3+Math.floor(Math.random()*3),s=[a,b,a*2,b*3,a*4,b*9,a*8];return logicQ(s.slice(0,6).join(' · ')+' · ?',s[6])}
+  if(type==='powers'){const base=pick([2,3]),s=Array.from({length:7},(_,i)=>base**(i+1));return logicQ(s.slice(0,6).join(' · ')+' · ?',s[6])}
+  if(type==='alternating'){const a=8+Math.floor(Math.random()*5),s=[a,a+5,(a+5)-2,(a+3)+5,(a+8)-2,(a+6)+5,(a+11)-2];return logicQ(s.slice(0,6).join(' · ')+' · ?',s[6])}
+  const k=1+Math.floor(Math.random()*3),s=Array.from({length:7},(_,i)=>(i+1)**2+(i+1)*k);return logicQ(s.slice(0,6).join(' · ')+' · ?',s[6])
+}
+function buildLogicRound(){const target=[0,7,8,10,12][difficulty],seen=new Set();logicRound=[];let tries=0;while(logicRound.length<target&&tries<100){tries++;const q=makeSequence(difficulty);if(!q||!q.q||!q.opts?.includes(String(q.answer))||seen.has(q.q))continue;seen.add(q.q);logicRound.push(q)}while(logicRound.length<target)logicRound.push(makeSequence(difficulty));logicIndex=0;logicCorrect=0;showLogic()}
+function showLogic(){logicSelected=null;if(logicIndex>=logicRound.length){document.getElementById('logicQuestion').textContent=`Runde geschafft: ${logicCorrect} von ${logicRound.length} richtig`;document.getElementById('logicOptions').innerHTML='';document.getElementById('logicStatus').textContent='Runde beendet';if(logicCorrect>=Math.ceil(logicRound.length*.7))reward('logic');return}const q=logicRound[logicIndex];document.getElementById('logicQuestion').textContent=q.q;document.getElementById('logicStatus').textContent=`Aufgabe ${logicIndex+1} von ${logicRound.length}`;const o=document.getElementById('logicOptions');o.innerHTML='';shuffled(q.opts).forEach(v=>{const b=document.createElement('button');b.className='opt';b.textContent=v;b.onclick=()=>{logicSelected=v;[...o.children].forEach(x=>x.classList.toggle('selected',x===b))};o.appendChild(b)})}
+function checkLogic(){if(logicSelected===null)return msg('logicMsg','Bitte Antwort wählen.',800);const q=logicRound[logicIndex];if(String(logicSelected)===String(q.answer)){logicCorrect++;msg('logicMsg','Richtig – nächste Aufgabe!',650);logicIndex++;setTimeout(showLogic,380)}else msg('logicMsg','Noch nicht. Regel nochmals prüfen.',1000)}
 /* MEMORY */
 let mem=null;function buildMemory(){const pairs=difficulty===1?8:difficulty===2?10:difficulty===3?12:15,symbols=pickN(WORLDS[world].memory,pairs),cards=shuffled([...symbols,...symbols]).map((s,i)=>({s,i,open:false,done:false}));mem={cards,first:null,lock:false,pairs,total:pairs};const b=document.getElementById('memoryBoard'),cols=pairs<=8?4:pairs<=10?5:pairs<=12?6:6,rows=Math.ceil(cards.length/cols);b.style.gridTemplateColumns=`repeat(${cols},1fr)`;b.style.gridTemplateRows=`repeat(${rows},1fr)`;b.innerHTML='';cards.forEach((c,i)=>{const x=document.createElement('button');x.className='mem';x.innerHTML=`<span class="face front"></span><span class="face backf">${c.s}</span>`;x.onclick=()=>flipMem(i);b.appendChild(x)});updateMem()}function updateMem(){document.getElementById('memoryStatus').textContent=`${mem.cards.filter(c=>c.done).length/2}/${mem.total}`;[...document.querySelectorAll('.mem')].forEach((e,i)=>e.classList.toggle('flip',mem.cards[i].open||mem.cards[i].done))}function flipMem(i){if(mem.lock||mem.cards[i].done||mem.first===i)return;mem.cards[i].open=true;updateMem();if(mem.first===null){mem.first=i;return}const a=mem.cards[mem.first],b=mem.cards[i];mem.lock=true;if(a.s===b.s){a.done=b.done=true;mem.first=null;mem.lock=false;updateMem();if(mem.cards.every(c=>c.done)){msg('memoryMsg','Alle Paare!',1800);reward('memory')}}else setTimeout(()=>{a.open=b.open=false;mem.first=null;mem.lock=false;updateMem()},600)}
 /* SUDOKU */
@@ -301,8 +375,23 @@ const DOT_COMPLEX=[
   ]
 ];
 function motif(seed){return DOT_COMPLEX[seed%DOT_COMPLEX.length]}
-const DOT_NAMES={jungle:['Papagei','Tiger','Frosch','Kompass','Panda','Tukan','Blüte','Tempelpfad','Schlange','Expedition'],space:['Rakete','Sternjäger','Mondrover','Satellit','Alien','Komet','Galaxie','Raumhelm','UFO','Marsbasis'],sea:['Delfin','Seepferd','Fischschwarm','Anker','Krake','Segler','Seestern','Schildkröte','Leuchtturm','Korallenriff'],greek:['Tempel','Amphore','Eule','Sonne','Minotaurus','Lyra','Dreizack','Lorbeer','Helm','Knossos'],dino:['T-Rex','Triceratops','Dino-Ei','Vulkan','Fossil','Raptor','Langhals','Dino-Spur','Urwald','Ausgrabung'],pirate:['Piratenkopf','Schatzkarte','Segelschiff','Anker','Papagei','Schatztruhe','Kompass','Insel','Fernrohr','Totenkopf'],egypt:['Pyramide','Sphinx','Kamel','Skarabäus','Pharao','Tempelkatze','Nilboot','Papyrus','Sonnenscheibe','Obelisk'],castle:['Ritter','Burg','Drache','Schild','Schwert','Krone','Pferd','Burgtor','Wappen','Katapult']};
-function buildDots(){fitDotsCanvas();const idx=Math.floor(Math.random()*10),counts=[0,52,70,92,118],pts=pathSample(motif(idx),counts[difficulty]);dots={pts,next:0,name:DOT_NAMES[world][idx],draw:false,lastPointer:null,labels:[]};computeDotLabels();document.getElementById('dotsStatus').textContent=`${dots.name} · ${pts.length} Punkte`;document.getElementById('dotsMsg').classList.remove('show');drawDots()}
+const DOT_NAMES={
+ jungle:['Papagei','Tiger','Frosch','Kompass','Panda','Tukan','Blüte','Tempelpfad','Schlange','Expedition'],
+ space:['Rakete','Sternjäger','Mondrover','Satellit','Alien','Komet','Galaxie','Raumhelm','UFO','Marsbasis'],
+ sea:['Delfin','Seepferd','Fischschwarm','Anker','Krake','Segler','Seestern','Schildkröte','Leuchtturm','Korallenriff'],
+ greek:['Tempel','Amphore','Eule','Sonne','Minotaurus','Lyra','Dreizack','Lorbeer','Helm','Knossos'],
+ dino:['T-Rex','Triceratops','Pteranodon','Dino-Ei','Stegosaurus','Raptor','Fossil','Vulkan','Saurierkopf','Langhals'],
+ pirate:['Piratenschiff','Totenkopf','Schatzkarte','Papagei','Anker','Kanone','Schatztruhe','Piratenhut','Schatzinsel','Kompass'],
+ egypt:['Pyramide','Sphinx','Skarabäus','Pharao','Ankh','Kamel','Tempel','Horus','Obelisk','Mumie'],
+ castle:['Burg','Ritterhelm','Drache','Schild','Schwert','Katapult','Krone','Burgturm','Zugbrücke','Ritter']
+};
+function buildDots(){
+  fitDotsCanvas();
+  const idx=Math.floor(Math.random()*10),counts=[0,52,70,92,118],pts=pathSample(motif(idx),counts[difficulty]);
+  const names=DOT_NAMES[world]||DOT_NAMES.jungle,name=names[idx]||`Punktebild ${idx+1}`;
+  dots={pts,next:0,name,draw:false,lastPointer:null,labels:[]};
+  computeDotLabels();document.getElementById('dotsStatus').textContent=`${name} · ${pts.length} Punkte`;document.getElementById('dotsMsg').classList.remove('show');drawDots();
+}
 function dotScale(p){const mx=92,my=66;return{x:mx+p.x/100*(dc.width-2*mx),y:my+p.y/100*(dc.height-2*my)}}
 function computeDotLabels(){
   if(!dots)return;const boxes=[],font=difficulty===4?18:difficulty===3?19:20;

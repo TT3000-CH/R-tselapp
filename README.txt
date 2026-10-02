@@ -1,21 +1,17 @@
-RÄTSELWELT V5.2 – GITHUB UPLOAD
+RÄTSELWELT V5.3 – GITHUB UPLOAD
 
-Wichtig: Für GitHub Pages alle vier Dateien direkt ins gleiche Repository-Verzeichnis laden:
+Für GitHub Pages alle Dateien direkt ins gleiche Repository-Verzeichnis laden:
 - index.html
 - logo.svg
 - manifest.webmanifest
 - sw.js
 
-Nicht nur index.html hochladen, wenn die installierbare App/PWA genutzt werden soll.
-Die Rätsel selbst funktionieren auch mit index.html allein; Logo, Offline-Modus und App-Installation benötigen die Zusatzdateien.
+README.txt ist optional. Nicht den ZIP-Ordner selbst ins Repository legen.
 
-GitHub Pages:
-Settings > Pages > Deploy from a branch > main / root.
-Nach einem Update die Seite auf dem Tablet einmal neu laden. V5.2 verwendet einen neuen Cache-Namen und ersetzt alte Rätselwelt-Caches automatisch.
+V5.3 Korrekturen:
+- Labyrinth: START und ZIEL wieder klar sichtbar; START variiert links oben/mittig/unten.
+- Knifflig/Pro verwenden stärker verzweigte Labyrinthe; Pro ist 31x19 und wählt Kandidaten mit vielen Sackgassen/langer Route.
+- Punkte verbinden: Fehler für die vier neuen Welten behoben; Punktebilder funktionieren in allen 8 Welten.
+- Logik: 7/8/10/12 unterschiedliche Aufgaben je Runde, klarer Fortschritt, deutlich mehr Generatorvarianten.
 
-Navigation V5.2:
-1. Schwierigkeitsgrad wählen.
-2. Auf einer Seite Welt und Spiel wählen.
-
-Welten:
-Dschungel, Weltraum, Meer, Griechenland, Dinosaurier, Piraten, Ägypten, Ritterburg.
+Nach Upload Seite auf dem Tablet einmal neu laden. V5.3 verwendet einen neuen Cache-Namen.

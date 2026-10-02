@@ -1,4 +1,4 @@
-const CACHE='raetselwelt-v5-2-r1';
+const CACHE='raetselwelt-v5-3-r1';
 const CORE=['./','./index.html','./manifest.webmanifest','./logo.svg'];
 self.addEventListener('install',e=>{self.skipWaiting();e.waitUntil(caches.open(CACHE).then(c=>c.addAll(CORE)).catch(()=>{}))});
 self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE&&k.startsWith('raetselwelt-')).map(k=>caches.delete(k)))).then(()=>self.clients.claim()))});
