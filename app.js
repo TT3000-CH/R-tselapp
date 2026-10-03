@@ -1,5 +1,4 @@
-
-const APP_VERSION='5.4.2';
+const APP_VERSION='5.5';
 function varColor(name,fallback){
   try{
     const value=getComputedStyle(document.documentElement).getPropertyValue(name).trim();
@@ -50,7 +49,7 @@ const GAME_ART={
   mix:{hero:'🥗',a1:'A',a2:'Z',a3:'B',a4:'✦'},
   logic:{hero:'🧠',a1:'◆',a2:'△',a3:'◼',a4:'∑'},
   memory:{hero:'🎴',a1:'☀️',a2:'🌙',a3:'★',a4:'◎'},
-  sudoku:{hero:'🔢',a1:'3',a2:'9',a3:'□',a4:'✎'},
+  sudoku:{hero:'▦',a1:'1',a2:'5',a3:'9',a4:'✎'},
   dots:{hero:'🐱',a1:'1',a2:'47',a3:'93',a4:'•'},
   quiz:{hero:'🧭',a1:'✓',a2:'?',a3:'⚡',a4:'✦'}
 };
@@ -186,73 +185,55 @@ function makeMazePrim(cols,rows,start){
 }
 function mazeDistance(cells,start,goal){
   const rows=cells.length,cols=cells[0].length,q=[[start.x,start.y,0]],seen=new Set([`${start.x},${start.y}`]);
-  while(q.length){const [x,y,d]=q.shift();if(x===goal.x&&y===goal.y)return d;const c=cells[y][x];MDIRS.forEach(dir=>{if(c.w[dir[2]])return;const nx=x+dir[0],ny=y+dir[1],k=`${nx},${ny}`;if(nx<0||ny<0||nx>=cols||ny>=rows||seen.has(k))return;seen.add(k);q.push([nx,ny,d+1])})}return 0
+  while(q.length){const [x,y,d]=q.shift();if(x===goal.x&&y===goal.y)return d;const c=cells[y][x];for(const dir of MDIRS){if(c.w[dir[2]])continue;const nx=x+dir[0],ny=y+dir[1],k=`${nx},${ny}`;if(nx<0||ny<0||nx>=cols||ny>=rows||seen.has(k))continue;seen.add(k);q.push([nx,ny,d+1])}}return 0
 }
+function mazeNeighbors(cells,p){const c=cells[p.y][p.x],out=[];for(const dir of MDIRS){if(c.w[dir[2]])continue;const x=p.x+dir[0],y=p.y+dir[1];if(y>=0&&x>=0&&y<cells.length&&x<cells[0].length)out.push({x,y})}return out}
 function mazeShortestPath(cells,start,goal){
-  const cols=cells[0].length,q=[[start.x,start.y]],seen=new Set([`${start.x},${start.y}`]),prev=new Map();
-  while(q.length){
-    const [x,y]=q.shift();if(x===goal.x&&y===goal.y)break;
-    const c=cells[y][x];
-    for(const dir of MDIRS){
-      if(c.w[dir[2]])continue;
-      const nx=x+dir[0],ny=y+dir[1],k=`${nx},${ny}`;
-      if(nx<0||ny<0||nx>=cols||ny>=cells.length||seen.has(k))continue;
-      seen.add(k);prev.set(k,`${x},${y}`);q.push([nx,ny]);
-    }
-  }
-  const path=[];let key=`${goal.x},${goal.y}`;
-  if(!seen.has(key))return path;
-  while(key){const [x,y]=key.split(',').map(Number);path.push({x,y});key=prev.get(key)||'';}
-  return path.reverse();
+  const q=[[start.x,start.y]],seen=new Set([`${start.x},${start.y}`]),prev=new Map();while(q.length){const [x,y]=q.shift();if(x===goal.x&&y===goal.y)break;for(const n of mazeNeighbors(cells,{x,y})){const k=`${n.x},${n.y}`;if(seen.has(k))continue;seen.add(k);prev.set(k,`${x},${y}`);q.push([n.x,n.y])}}
+  const path=[];let key=`${goal.x},${goal.y}`;if(!seen.has(key))return path;while(key){const [x,y]=key.split(',').map(Number);path.push({x,y});key=prev.get(key)||''}return path.reverse()
 }
-function mazePathStats(path,cols){
-  let turns=0,reversals=0,sideSwitches=0,prevDir=null,prevSide=path.length?(path[0].x<cols/2?0:1):0;
-  for(let i=1;i<path.length;i++){
-    const dx=path[i].x-path[i-1].x,dy=path[i].y-path[i-1].y,dir={dx,dy};
-    if(prevDir&&(dx!==prevDir.dx||dy!==prevDir.dy)){
-      turns++;
-      if((dx&&prevDir.dx&&dx!==prevDir.dx)||(dy&&prevDir.dy&&dy!==prevDir.dy))reversals++;
-    }
-    const side=path[i].x<cols/2?0:1;if(side!==prevSide){sideSwitches++;prevSide=side;}
-    prevDir=dir;
-  }
-  return {len:path.length,turns,reversals,sideSwitches};
+function mazePathStats(path,cols,rows){
+  let turns=0,hReversals=0,vReversals=0,sideSwitches=0,verticalSwitches=0,lastH=0,lastV=0,prevDir=null,side=path[0]?.x<cols/2?0:1,halfY=path[0]?.y<rows/2?0:1;
+  for(let i=1;i<path.length;i++){const dx=path[i].x-path[i-1].x,dy=path[i].y-path[i-1].y;if(prevDir&&(dx!==prevDir.dx||dy!==prevDir.dy))turns++;if(dx){if(lastH&&dx!==lastH)hReversals++;lastH=dx}if(dy){if(lastV&&dy!==lastV)vReversals++;lastV=dy}const ns=path[i].x<cols/2?0:1;if(ns!==side){sideSwitches++;side=ns}const nh=path[i].y<rows/2?0:1;if(nh!==halfY){verticalSwitches++;halfY=nh}prevDir={dx,dy}}
+  return{len:path.length,turns,hReversals,vReversals,sideSwitches,verticalSwitches}
 }
-function countDeadEnds(cells){let n=0;cells.forEach(row=>row.forEach(c=>{const open=c.w.filter(v=>v===0).length;if(open===1)n++}));return n}
+function mazeTrapStats(cells,path){
+  const pathSet=new Set(path.map(p=>`${p.x},${p.y}`));let branches=0,deepBranches=0,depthTotal=0,maxDepth=0,totalSize=0;
+  for(const p of path){for(const n of mazeNeighbors(cells,p)){const nk=`${n.x},${n.y}`;if(pathSet.has(nk))continue;branches++;const q=[[n,1]],seen=new Set([nk]);let localDepth=1,size=0;while(q.length){const [u,d]=q.shift();size++;localDepth=Math.max(localDepth,d);for(const v of mazeNeighbors(cells,u)){const k=`${v.x},${v.y}`;if(pathSet.has(k)||seen.has(k))continue;seen.add(k);q.push([v,d+1])}}depthTotal+=localDepth;totalSize+=size;maxDepth=Math.max(maxDepth,localDepth);if(localDepth>=4)deepBranches++}}
+  return{branches,deepBranches,depthTotal,maxDepth,totalSize}
+}
+function countDeadEnds(cells){let n=0;cells.forEach(row=>row.forEach(c=>{if(c.w.filter(v=>v===0).length===1)n++}));return n}
 function edgeRow(rows,band){const centers=[.18,.5,.82],base=centers[band%3]*(rows-1),jitter=Math.max(1,Math.floor(rows*.12));return Math.max(0,Math.min(rows-1,Math.round(base+(Math.random()*2-1)*jitter)))}
-function buildMaze(){
-  const dims=difficulty===1?[12,8]:difficulty===2?[17,11]:difficulty===3?[27,17]:[35,21];fitMazeCanvas();
-  const cols=dims[0],rows=dims[1],tries=difficulty===4?42:difficulty===3?18:4;let best=null;
-  for(let t=0;t<tries;t++){
-    const sb=(Math.floor(Math.random()*3)+t)%3,gb=(sb+1+Math.floor(Math.random()*2))%3,start={x:0,y:edgeRow(rows,sb)},goal={x:cols-1,y:edgeRow(rows,gb)};
-    const gen=difficulty>=3?(Math.random()<.58?makeMazeDFS:makeMazePrim):makeMazeDFS;
-    const cells=gen(cols,rows,start);
-    cells[start.y][0].w[3]=0;cells[goal.y][cols-1].w[1]=0;
-    const dist=mazeDistance(cells,start,goal),dead=countDeadEnds(cells),path=mazeShortestPath(cells,start,goal),stats=mazePathStats(path,cols);
-    let score=dist*(difficulty===4?3.2:difficulty===3?2.4:1.1)+dead*(difficulty===4?1.25:difficulty===3?.8:.35)+stats.turns*(difficulty===4?8:4)+stats.reversals*(difficulty===4?24:14)+stats.sideSwitches*(difficulty===4?22:12);
-    if(difficulty===3&&stats.reversals<2)score-=90;
-    if(difficulty===3&&stats.sideSwitches<2)score-=70;
-    if(difficulty===4&&stats.reversals<4)score-=180;
-    if(difficulty===4&&stats.sideSwitches<4)score-=140;
-    if(difficulty===4&&stats.turns<18)score-=120;
-    if(!best||score>best.score)best={cells,start,goal,score,dist,dead,stats};
-  }
-  maze={cols,rows,cells:best.cells,start:best.start,goal:best.goal,path:[{...best.start}],draw:false,solved:false,dead:best.dead,stats:best.stats};
-  const levelName=difficulty===4?'Pro':difficulty===3?'Knifflig':difficulty===2?'Mittel':'Leicht';
-  document.getElementById('mazeStatus').textContent=difficulty>=3?`${levelName} · ${best.dead} Sackgassen · ${best.stats.reversals} Kehren`:'START → ZIEL';drawMaze();document.getElementById('mazeMsg').classList.remove('show')
+function randomBoundaryEndpoint(cols,rows,avoidSide=''){let sides=['left','right','top','bottom'].filter(s=>s!==avoidSide);const side=pick(sides);if(side==='left'||side==='right')return{x:side==='left'?0:cols-1,y:Math.floor(Math.random()*rows),side};return{x:Math.floor(Math.random()*cols),y:side==='top'?0:rows-1,side}}
+function randomInnerEndpoint(cols,rows){return{x:Math.max(2,Math.min(cols-3,Math.floor(cols*(.18+Math.random()*.64)))),y:Math.max(2,Math.min(rows-3,Math.floor(rows*(.16+Math.random()*.68)))),side:'inside'}}
+function chooseMazeEndpoints(cols,rows){
+  if(difficulty<=2){const sb=Math.floor(Math.random()*3),gb=(sb+1+Math.floor(Math.random()*2))%3;return[{x:0,y:edgeRow(rows,sb),side:'left'},{x:cols-1,y:edgeRow(rows,gb),side:'right'}]}
+  const r=Math.random();if(r<.36){const a=randomInnerEndpoint(cols,rows),b=randomBoundaryEndpoint(cols,rows);return[a,b]}if(r<.72){const a=randomBoundaryEndpoint(cols,rows),b=randomInnerEndpoint(cols,rows);return[a,b]}const a=randomBoundaryEndpoint(cols,rows),b=randomBoundaryEndpoint(cols,rows,a.side);return[a,b]
 }
-
+function openMazeEndpoint(cells,p){if(p.side==='left')cells[p.y][p.x].w[3]=0;else if(p.side==='right')cells[p.y][p.x].w[1]=0;else if(p.side==='top')cells[p.y][p.x].w[0]=0;else if(p.side==='bottom')cells[p.y][p.x].w[2]=0}
+function buildMaze(){
+  const dims=difficulty===1?[12,8]:difficulty===2?[17,11]:difficulty===3?[28,18]:[36,22];fitMazeCanvas();const cols=dims[0],rows=dims[1],tries=difficulty===4?90:difficulty===3?50:6;let best=null,bestQualified=null;
+  for(let t=0;t<tries;t++){
+    const [start,goal]=chooseMazeEndpoints(cols,rows);if(start.x===goal.x&&start.y===goal.y)continue;const gen=difficulty>=3?(Math.random()<.45?makeMazePrim:makeMazeDFS):makeMazeDFS,cells=gen(cols,rows,start);openMazeEndpoint(cells,start);openMazeEndpoint(cells,goal);
+    const path=mazeShortestPath(cells,start,goal);if(path.length<2)continue;const stats=mazePathStats(path,cols,rows),traps=mazeTrapStats(cells,path),dead=countDeadEnds(cells),dist=path.length-1;
+    let score=dist*(difficulty===4?2.3:difficulty===3?1.8:1)+stats.turns*(difficulty===4?3.2:2)+stats.hReversals*(difficulty===4?42:28)+stats.vReversals*(difficulty===4?16:10)+stats.sideSwitches*(difficulty===4?35:22)+traps.branches*(difficulty===4?36:24)+traps.deepBranches*(difficulty===4?45:30)+Math.min(traps.depthTotal,260)*(difficulty===4?2.2:1.5)+dead*.4;
+    if(difficulty===3){if(traps.branches<8)score-=260;if(traps.deepBranches<4)score-=180;if(stats.hReversals<2)score-=140;if(stats.sideSwitches<2)score-=100}
+    if(difficulty===4){if(traps.branches<13)score-=500;if(traps.deepBranches<7)score-=350;if(stats.hReversals<4)score-=260;if(stats.sideSwitches<3)score-=220;if(stats.turns<22)score-=180}
+    const candidate={cells,start,goal,path,stats,traps,dead,score};if(!best||score>best.score)best=candidate;const qualified=difficulty===3?(traps.branches>=8&&traps.deepBranches>=4&&stats.hReversals>=2&&stats.sideSwitches>=2):difficulty===4?(traps.branches>=13&&traps.deepBranches>=7&&stats.hReversals>=4&&stats.sideSwitches>=3&&stats.turns>=22):true;if(qualified&&(!bestQualified||score>bestQualified.score))bestQualified=candidate;
+  }
+  best=bestQualified||best;
+  if(!best){const start={x:0,y:Math.floor(rows/2),side:'left'},goal={x:cols-1,y:Math.floor(rows/2),side:'right'},cells=makeMazeDFS(cols,rows,start);openMazeEndpoint(cells,start);openMazeEndpoint(cells,goal);const path=mazeShortestPath(cells,start,goal);best={cells,start,goal,path,stats:mazePathStats(path,cols,rows),traps:mazeTrapStats(cells,path),dead:countDeadEnds(cells)}}
+  maze={cols,rows,cells:best.cells,start:best.start,goal:best.goal,path:[{...best.start}],draw:false,solved:false,dead:best.dead,stats:best.stats,traps:best.traps};const levelName=difficulty===4?'Pro':difficulty===3?'Knifflig':difficulty===2?'Mittel':'Leicht';document.getElementById('mazeStatus').textContent=difficulty>=3?`${levelName} · ${best.traps.branches} falsche Abzweige · ${best.stats.hReversals} Rückwege`:'START → ZIEL';drawMaze();document.getElementById('mazeMsg').classList.remove('show')
+}
 function mazeGeom(){
   const u=canvasUnit(mc),padX=Math.min(76*u,mc.width*.14),padY=18*u;
   return {padX,padY,cw:(mc.width-2*padX)/maze.cols,ch:(mc.height-2*padY)/maze.rows};
 }
 function positionMazeLabels(){
-  if(!maze)return;
-  const {padX,padY,cw,ch}=mazeGeom(),rect=mc.getBoundingClientRect(),stage=document.getElementById('mazeStage').getBoundingClientRect();
-  const sx=rect.width/mc.width,sy=rect.height/mc.height;
-  const labels=[['mazeStartLabel',rect.left-stage.left+6,padY+(maze.start.y+.5)*ch],['mazeGoalLabel',rect.right-stage.left-68,padY+(maze.goal.y+.5)*ch]];
-  for(const [id,x,y] of labels){const el=document.getElementById(id);el.style.left=x+'px';el.style.top=(rect.top-stage.top+y*sy)+'px';el.style.display='flex';}
+  if(!maze)return;const {padX,padY,cw,ch}=mazeGeom(),rect=mc.getBoundingClientRect(),stage=document.getElementById('mazeStage').getBoundingClientRect(),sx=rect.width/mc.width,sy=rect.height/mc.height;
+  const place=(id,p)=>{const el=document.getElementById(id),cx=rect.left-stage.left+(padX+(p.x+.5)*cw)*sx,cy=rect.top-stage.top+(padY+(p.y+.5)*ch)*sy;let x=cx,y=cy,tr='translate(-50%,-135%)';if(p.side==='left'){x=rect.left-stage.left+5;tr='translate(0,-50%)'}else if(p.side==='right'){x=rect.right-stage.left-5;tr='translate(-100%,-50%)'}else if(p.side==='top'){y=rect.top-stage.top+4;tr='translate(-50%,0)'}else if(p.side==='bottom'){y=rect.bottom-stage.top-4;tr='translate(-50%,-100%)'}else{y=Math.max(rect.top-stage.top+32,cy-9);x=Math.max(38,Math.min(stage.width-38,cx))}el.style.left=x+'px';el.style.top=y+'px';el.style.transform=tr;el.style.display='flex'};place('mazeStartLabel',maze.start);place('mazeGoalLabel',maze.goal)
 }
+function drawEndpointGuide(ctx,p,pt,col,u){if(p.side==='inside')return;ctx.strokeStyle=col;ctx.lineWidth=3*u;ctx.beginPath();if(p.side==='left'){ctx.moveTo(5*u,pt.y);ctx.lineTo(pt.x,pt.y)}else if(p.side==='right'){ctx.moveTo(pt.x,pt.y);ctx.lineTo(ctx.canvas.width-5*u,pt.y)}else if(p.side==='top'){ctx.moveTo(pt.x,5*u);ctx.lineTo(pt.x,pt.y)}else if(p.side==='bottom'){ctx.moveTo(pt.x,pt.y);ctx.lineTo(pt.x,ctx.canvas.height-5*u)}ctx.stroke()}
 function drawMaze(){
   if(!maze?.cells?.length)return;
   const {padX,padY,cw,ch}=mazeGeom(),u=canvasUnit(mc);
@@ -269,9 +250,7 @@ function drawMaze(){
   }));mctx.stroke();
   const center=p=>({x:padX+(p.x+.5)*cw,y:padY+(p.y+.5)*ch});
   const start=center(maze.start),goal=center(maze.goal),current=center(maze.path.at(-1));
-  // Short coloured entrance/exit guides join the HTML badges to the actual cells.
-  mctx.lineWidth=3*u;mctx.strokeStyle='#258550';mctx.beginPath();mctx.moveTo(69*u,start.y);mctx.lineTo(start.x,start.y);mctx.stroke();
-  mctx.strokeStyle='#c5413d';mctx.beginPath();mctx.moveTo(goal.x,goal.y);mctx.lineTo(mc.width-69*u,goal.y);mctx.stroke();
+  drawEndpointGuide(mctx,maze.start,start,'#258550',u);drawEndpointGuide(mctx,maze.goal,goal,'#c5413d',u);
   mctx.lineWidth=Math.max(4*u,Math.min(cw,ch)*.29);mctx.strokeStyle=varColor('--blue','#4b82b0');mctx.beginPath();
   maze.path.forEach((p,i)=>{const c=center(p);if(i)mctx.lineTo(c.x,c.y);else mctx.moveTo(c.x,c.y);});mctx.stroke();
   for(const [c,col] of [[start,'#258550'],[goal,'#d4433f'],[current,'#e9ad32']]){
@@ -331,7 +310,13 @@ function endMazePointer(e){
 function undoMaze(){if(maze?.path.length>1){maze.path.pop();maze.solved=false;maze.draw=false;drawMaze();}}
 mc.onpointerdown=mazeDown;mc.onpointermove=mazeMove;mc.onpointerup=endMazePointer;mc.onpointercancel=endMazePointer;mc.onlostpointercapture=endMazePointer;
 /* MIX */
-let mixAnswer='';function buildMix(){const bank=WORLDS[world].words.filter(w=>difficulty===1?w.length<=8:difficulty===2?w.length>=7&&w.length<=12:difficulty===3?w.length>=9:w.length>=10);mixAnswer=pick(bank.length?bank:WORLDS[world].words);let a;do{a=shuffled(mixAnswer.split('')).join('')}while(a===mixAnswer);document.getElementById('mixLetters').textContent=a;document.getElementById('mixInput').value='';document.getElementById('mixInput').focus()}function checkMix(){if(document.getElementById('mixInput').value.trim().toUpperCase()===mixAnswer){msg('mixMsg','Richtig!',1400);reward('mix');setTimeout(buildMix,800)}else msg('mixMsg','Noch nicht.',900)}
+let mixAnswer='',mixReveal=0,mixFullShown=false;
+function mixPattern(){if(!mixAnswer)return'';const chars=[...mixAnswer];return chars.map((c,i)=>i<mixReveal?c:'_').join(' · ')}
+function renderMixHint(){const el=document.getElementById('mixHint');if(el)el.textContent=mixPattern()}
+function buildMix(){const bank=WORLDS[world].words.filter(w=>difficulty===1?w.length<=8:difficulty===2?w.length>=7&&w.length<=12:difficulty===3?w.length>=9:w.length>=10);mixAnswer=pick(bank.length?bank:WORLDS[world].words);let a;do{a=shuffled(mixAnswer.split('')).join('')}while(a===mixAnswer);mixReveal=0;mixFullShown=false;document.getElementById('mixLetters').textContent=a;document.getElementById('mixInput').value='';renderMixHint();document.getElementById('mixInput').focus()}
+function revealMixLetter(){if(!mixAnswer)return;mixReveal=Math.min([...mixAnswer].length,mixReveal+1);renderMixHint();if(mixReveal===[...mixAnswer].length)toast('Das ganze Wort ist sichtbar.')}
+function revealMixSolution(){mixReveal=[...mixAnswer].length;mixFullShown=true;renderMixHint();toast('Lösung eingeblendet')}
+function checkMix(){if(document.getElementById('mixInput').value.trim().toUpperCase()===mixAnswer){msg('mixMsg','Richtig!',1400);reward('mix');setTimeout(buildMix,800)}else msg('mixMsg','Noch nicht.',900)}
 /* LOGIC */
 let logicRound=[],logicIndex=0,logicSelected=null,logicCorrect=0;
 function logicQ(q,a,alts=null){const answer=String(a);let opts;if(alts)opts=[answer,...alts.map(String)];else{const n=Number(a),cand=[n,n+1,n-1,n+2,n-2,n+Math.max(3,Math.round(Math.abs(n)*.2))];opts=[...new Set(cand.map(String))].slice(0,4);while(opts.length<4)opts.push(String(n+opts.length+4))}return{q,answer,opts:shuffled([...new Set(opts)]).slice(0,4)}}
@@ -372,7 +357,44 @@ function buildLogicRound(){const target=[0,7,8,10,12][difficulty],seen=new Set()
 function showLogic(){logicSelected=null;if(logicIndex>=logicRound.length){document.getElementById('logicQuestion').textContent=`Runde geschafft: ${logicCorrect} von ${logicRound.length} richtig`;document.getElementById('logicOptions').innerHTML='';document.getElementById('logicStatus').textContent='Runde beendet';if(logicCorrect>=Math.ceil(logicRound.length*.7))reward('logic');return}const q=logicRound[logicIndex];document.getElementById('logicQuestion').textContent=q.q;document.getElementById('logicStatus').textContent=`Aufgabe ${logicIndex+1} von ${logicRound.length}`;const o=document.getElementById('logicOptions');o.innerHTML='';shuffled(q.opts).forEach(v=>{const b=document.createElement('button');b.className='opt';b.textContent=v;b.onclick=()=>{logicSelected=v;[...o.children].forEach(x=>x.classList.toggle('selected',x===b))};o.appendChild(b)})}
 function checkLogic(){if(logicSelected===null)return msg('logicMsg','Bitte Antwort wählen.',800);const q=logicRound[logicIndex];if(String(logicSelected)===String(q.answer)){logicCorrect++;msg('logicMsg','Richtig – nächste Aufgabe!',650);logicIndex++;setTimeout(showLogic,380)}else msg('logicMsg','Noch nicht. Regel nochmals prüfen.',1000)}
 /* MEMORY */
-let mem=null;function buildMemory(){const pairs=difficulty===1?8:difficulty===2?10:difficulty===3?12:15,symbols=pickN(WORLDS[world].memory,pairs),cards=shuffled([...symbols,...symbols]).map((s,i)=>({s,i,open:false,done:false}));mem={cards,first:null,lock:false,pairs,total:pairs};const b=document.getElementById('memoryBoard'),cols=pairs<=8?4:pairs<=10?5:pairs<=12?6:6,rows=Math.ceil(cards.length/cols);b.style.gridTemplateColumns=`repeat(${cols},1fr)`;b.style.gridTemplateRows=`repeat(${rows},1fr)`;b.innerHTML='';cards.forEach((c,i)=>{const x=document.createElement('button');x.className='mem';x.innerHTML=`<span class="face front"></span><span class="face backf">${c.s}</span>`;x.onclick=()=>flipMem(i);b.appendChild(x)});updateMem()}function updateMem(){document.getElementById('memoryStatus').textContent=`${mem.cards.filter(c=>c.done).length/2}/${mem.total}`;[...document.querySelectorAll('.mem')].forEach((e,i)=>e.classList.toggle('flip',mem.cards[i].open||mem.cards[i].done))}function flipMem(i){if(mem.lock||mem.cards[i].done||mem.first===i)return;mem.cards[i].open=true;updateMem();if(mem.first===null){mem.first=i;return}const a=mem.cards[mem.first],b=mem.cards[i];mem.lock=true;if(a.s===b.s){a.done=b.done=true;mem.first=null;mem.lock=false;updateMem();if(mem.cards.every(c=>c.done)){msg('memoryMsg','Alle Paare!',1800);reward('memory')}}else setTimeout(()=>{a.open=b.open=false;mem.first=null;mem.lock=false;updateMem()},600)}
+const MEM_ICONS=['🙂','😎','🦊','🐼','🤖','🦖','🏴‍☠️','🧙‍♂️','🐯','🦄','🐙','🚀'];
+let memoryPlayerCount=Math.max(1,Math.min(4,+(localStorage.getItem('rw55_mem_players')||1)));
+let memoryIcons=JSON.parse(localStorage.getItem('rw55_mem_icons')||'["🙂","🦊","🐼","🤖"]');
+while(memoryIcons.length<4)memoryIcons.push(MEM_ICONS[memoryIcons.length%MEM_ICONS.length]);
+let mem=null;
+function saveMemoryPrefs(){localStorage.setItem('rw55_mem_players',memoryPlayerCount);localStorage.setItem('rw55_mem_icons',JSON.stringify(memoryIcons))}
+function setMemoryPlayers(n){memoryPlayerCount=Math.max(1,Math.min(4,n));saveMemoryPrefs();buildMemory()}
+function cycleMemoryIcon(i){const cur=MEM_ICONS.indexOf(memoryIcons[i]);memoryIcons[i]=MEM_ICONS[(cur+1+MEM_ICONS.length)%MEM_ICONS.length];saveMemoryPrefs();if(mem?.players?.[i])mem.players[i].icon=memoryIcons[i];renderMemoryToolbar();updateMem()}
+function renderMemoryToolbar(){
+  const modes=document.getElementById('memModes'),players=document.getElementById('memPlayers');if(!modes||!players)return;
+  modes.innerHTML='';[1,2,3,4].forEach(n=>{const b=document.createElement('button');b.className='mem-mode'+(n===memoryPlayerCount?' on':'');b.textContent=n===1?'Solo':`${n} Spieler`;b.onclick=()=>setMemoryPlayers(n);modes.appendChild(b)});
+  players.innerHTML='';for(let i=0;i<memoryPlayerCount;i++){const p=mem?.players?.[i]||{icon:memoryIcons[i],score:0};const b=document.createElement('button');b.className='mem-player'+(mem&&i===mem.turn?' active':'');b.innerHTML=`<span>${p.icon}</span><b>${p.score}</b>`;b.title=`Spieler ${i+1}: Icon wechseln`;b.onclick=()=>cycleMemoryIcon(i);players.appendChild(b)}
+}
+function buildMemory(){
+  const pairs=difficulty===1?8:difficulty===2?10:difficulty===3?12:15,symbols=pickN(WORLDS[world].memory,pairs),cards=shuffled([...symbols,...symbols]).map((s,i)=>({s,i,open:false,done:false}));
+  const players=Array.from({length:memoryPlayerCount},(_,i)=>({icon:memoryIcons[i],score:0}));
+  mem={cards,first:null,lock:false,pairs,total:pairs,players,turn:0,moves:0,finished:false};
+  const b=document.getElementById('memoryBoard'),cols=pairs<=8?4:pairs<=10?5:pairs<=12?6:6,rows=Math.ceil(cards.length/cols);b.style.gridTemplateColumns=`repeat(${cols},1fr)`;b.style.gridTemplateRows=`repeat(${rows},1fr)`;b.innerHTML='';
+  cards.forEach((c,i)=>{const x=document.createElement('button');x.className='mem';x.innerHTML=`<span class="face front"></span><span class="face backf">${c.s}</span>`;x.onclick=()=>flipMem(i);b.appendChild(x)});renderMemoryToolbar();updateMem()
+}
+function updateMem(){
+  if(!mem)return;const found=mem.cards.filter(c=>c.done).length/2,status=document.getElementById('memoryStatus');
+  if(memoryPlayerCount===1)status.textContent=`${found}/${mem.total} Paare`;
+  else status.textContent=`${mem.players[mem.turn].icon} ist dran · ${found}/${mem.total}`;
+  [...document.querySelectorAll('.mem')].forEach((e,i)=>e.classList.toggle('flip',mem.cards[i].open||mem.cards[i].done));renderMemoryToolbar()
+}
+function finishMemory(){
+  mem.finished=true;const best=Math.max(...mem.players.map(p=>p.score)),winners=mem.players.map((p,i)=>({p,i})).filter(x=>x.p.score===best);
+  document.querySelectorAll('.mem-player').forEach((el,i)=>el.classList.toggle('winner',winners.some(w=>w.i===i)));
+  if(memoryPlayerCount===1)msg('memoryMsg','Alle Paare gefunden!',1900);else{const names=winners.map(w=>w.p.icon).join(' & ');msg('memoryMsg',`${names} gewinnt mit ${best} Paar${best===1?'':'en'}!`,2600)}
+  reward('memory')
+}
+function flipMem(i){
+  if(!mem||mem.finished||mem.lock||mem.cards[i].done||mem.first===i)return;mem.cards[i].open=true;updateMem();if(mem.first===null){mem.first=i;return}
+  const a=mem.cards[mem.first],b=mem.cards[i];mem.lock=true;mem.moves++;
+  if(a.s===b.s){a.done=b.done=true;mem.players[mem.turn].score++;mem.first=null;mem.lock=false;updateMem();if(mem.cards.every(c=>c.done))finishMemory()}
+  else setTimeout(()=>{a.open=b.open=false;mem.first=null;mem.lock=false;if(memoryPlayerCount>1)mem.turn=(mem.turn+1)%memoryPlayerCount;updateMem()},650)
+}
 /* SUDOKU */
 const BASE17='000000010400000000020000000000050407008000300001090000300400200050100000000806000';let sudoku=null,sDisplay=localStorage.getItem('rw5_sdisp')||'numbers',noteMode=false,sUndo=[];
 function solveSudokuGrid(grid){const find=()=>{let best=null,bestC=null;for(let r=0;r<9;r++)for(let c=0;c<9;c++)if(!grid[r][c]){const used=new Set(grid[r]);for(let rr=0;rr<9;rr++)used.add(grid[rr][c]);const br=Math.floor(r/3)*3,bc=Math.floor(c/3)*3;for(let y=0;y<3;y++)for(let x=0;x<3;x++)used.add(grid[br+y][bc+x]);const cand=[];for(let v=1;v<=9;v++)if(!used.has(v))cand.push(v);if(!cand.length)return[-1,-1,[]];if(!best||cand.length<bestC.length){best=[r,c];bestC=cand}}return best?[...best,bestC]:null};const f=find();if(!f)return true;if(f[0]<0)return false;const[r,c,cand]=f;for(const v of cand){grid[r][c]=v;if(solveSudokuGrid(grid))return true;grid[r][c]=0}return false}

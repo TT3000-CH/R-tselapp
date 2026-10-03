@@ -1,5 +1,5 @@
-/* Raetselwelt 5.4.2: scoped cache, fresh online shell, offline fallback. */
-const BUILD='5.4.2-gamecards-1';
+/* Raetselwelt 5.5: scoped cache, fresh online shell, offline fallback. */
+const BUILD='5.5-maze-memory-help-1';
 const ROOT=new URL('./',self.location.href);
 const PREFIX='raetselwelt:'+encodeURIComponent(ROOT.pathname)+':';
 const CACHE=PREFIX+BUILD;
@@ -21,7 +21,6 @@ self.addEventListener('activate',event=>{
   event.waitUntil((async()=>{
     const keys=await caches.keys();
     await Promise.all(keys.filter(key=>key.startsWith(PREFIX)&&key!==CACHE).map(key=>caches.delete(key)));
-    // Never erase localStorage or caches belonging to another Pages application.
     await self.clients.claim();
   })());
 });
@@ -41,9 +40,7 @@ self.addEventListener('fetch',event=>{
       return response;
     }catch(error){
       const cached=await cache.match(key);
-      return cached||new Response('Offline: Bitte die App einmal mit Internetverbindung oeffnen.',{
-        status:503,headers:{'Content-Type':'text/plain; charset=utf-8'}
-      });
+      return cached||new Response('Offline: Bitte die App einmal mit Internetverbindung oeffnen.',{status:503,headers:{'Content-Type':'text/plain; charset=utf-8'}});
     }
   })());
 });

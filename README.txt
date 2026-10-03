@@ -1,14 +1,23 @@
-Rätselwelt V5.4.2 – GitHub Pages Upload
+Rätselwelt V5.5 – GitHub Pages Upload
 
-Upload ins Repository (gleicher Ordner):
+Für GitHub Pages in denselben Ordner hochladen:
 - index.html
 - logo.svg
 - manifest.webmanifest
 - sw.js
 
-Neu in V5.4.2:
-- Spielauswahl jetzt als 3D-Kacheln analog zur Weltauswahl
-- jede Spielart hat eigene Farbwelt und Motiv-Illustration
-- Wortsalat mit Salatschüssel + Buchstaben
-- Labyrinth, Sudoku, Punktebild, Memory, Logik und Challenge mit individuellen Motiven
-- die stärkeren Labyrinthe aus V5.4.1 bleiben enthalten
+Neu in V5.5:
+- Spiel- und Weltkacheln optisch vereinheitlicht, grössere zentrale Motive und mehr Abstand
+- Sudoku-Spielkachel korrigiert
+- Memory mit Solo-, 2-, 3- und 4-Spieler-Modus; Spieler-Icons antippbar und wechselbar
+- Knifflig/Pro-Labyrinthe mit deutlich mehr echten falschen Abzweigen und tiefen Sackgassen
+- Labyrinth-Varianten: Rand zu Rand, innen zu Rand und Rand zu innen
+- Wortsalat mit +1-Buchstabe-Hilfe und kompletter Lösung
+- Neuer globaler Button "Spiele" neben "Start"
+
+Memory-Regel im Mehrspieler-Modus:
+- Treffer: 1 Punkt und derselbe Spieler bleibt dran.
+- Kein Treffer: Wechsel zum nächsten Spieler.
+- Höchste Paarzahl gewinnt.
+
+Hinweis: Nach dem Upload die GitHub-Pages-Seite einmal neu laden. V5.5 verwendet einen neuen Service-Worker-Cache.
