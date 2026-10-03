@@ -1,4 +1,4 @@
-Rätselwelt V5.4 – GitHub Pages Upload
+Rätselwelt V5.4.2 – GitHub Pages Upload
 
 Upload ins Repository (gleicher Ordner):
 - index.html
@@ -6,10 +6,9 @@ Upload ins Repository (gleicher Ordner):
 - manifest.webmanifest
 - sw.js
 
-Neu in V5.4:
-- Einstieg: Welt -> Spiel -> Schwierigkeit direkt im Spiel
-- 8 grosse 3D-Weltkacheln
-- Quiz ersetzt durch Challenge mit Schnellwahl, Richtig/Falsch und Was-passt-nicht
-- Timer mit 5/10/15/20/30 Minuten, eigener Zeit, virtueller Explosion und optionaler Eltern-PIN
-
-Hinweis: Eine PWA kann sich auf Android nicht selbst beenden. Nach Ablauf blockiert V5.4 die App mit dem BOOM-Bildschirm bis zur Elternfreigabe.
+Neu in V5.4.2:
+- Spielauswahl jetzt als 3D-Kacheln analog zur Weltauswahl
+- jede Spielart hat eigene Farbwelt und Motiv-Illustration
+- Wortsalat mit Salatschüssel + Buchstaben
+- Labyrinth, Sudoku, Punktebild, Memory, Logik und Challenge mit individuellen Motiven
+- die stärkeren Labyrinthe aus V5.4.1 bleiben enthalten

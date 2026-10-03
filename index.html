@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="theme-color" content="#f6f0e1">
 <link rel="manifest" href="manifest.webmanifest">
-<meta name="app-build" content="5.3.1-renderfix-20261002">
-<title>Rätselwelt V5.4</title>
+<meta name="app-build" content="5.4.2-gamecards-20261003">
+<title>Rätselwelt V5.4.2</title>
 <style>
 :root{--bg:#f6f0e1;--paper:#fffdf8;--ink:#20313a;--muted:#66757b;--line:#ddd8cb;--accent:#2f8a66;--accent2:#f2b247;--accent3:#88cf83;--soft:#e9f6ec;--good:#3ea86f;--bad:#d85f59;--blue:#4b82b0;--shadow:0 14px 36px rgba(31,48,57,.12);--h:68px}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -19,7 +19,7 @@ header{height:var(--h);flex:0 0 auto;display:flex;align-items:center;gap:12px;pa
 main{height:calc(100% - var(--h));padding:10px 12px 12px;overflow:hidden}.screen{display:none;height:100%}.screen.active{display:flex;flex-direction:column;gap:8px}
 /* wizard */
 #wizard.active{display:grid;grid-template-rows:46px 1fr;gap:10px}.crumb{display:flex;gap:8px;align-items:center;background:var(--paper);border-radius:17px;padding:6px 8px;box-shadow:var(--shadow)}.crumb button{height:34px;padding:0 13px;border-radius:11px;background:#eee9dd;font-weight:1000;font-size:13px}.crumb button.on{background:var(--ink);color:#fff}.crumb .spacer{flex:1}.album-mini{height:34px;border-radius:11px;padding:0 12px;background:#efe5cf;font-weight:1000}
-.step{display:none;min-height:0}.step.on{display:grid}.step-worlds{grid-template-columns:repeat(4,1fr);grid-template-rows:repeat(2,1fr);gap:14px;perspective:1200px}.world3d{--wa:#4f9652;--wb:#91cc59;border-radius:28px;padding:0;text-align:left;position:relative;overflow:hidden;color:#fff;box-shadow:0 15px 0 color-mix(in srgb,var(--wa) 72%,#13251d),0 25px 36px rgba(31,48,57,.22);transform:translateY(-6px) rotateX(2deg);transition:.16s transform,.16s box-shadow;background:linear-gradient(145deg,var(--wb),var(--wa) 58%,color-mix(in srgb,var(--wa) 72%,#102118));isolation:isolate}.world3d:active{transform:translateY(6px) rotateX(0);box-shadow:0 4px 0 color-mix(in srgb,var(--wa) 72%,#13251d),0 10px 18px rgba(31,48,57,.18)}.world3d::before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 25% 10%,rgba(255,255,255,.38),transparent 35%),linear-gradient(180deg,rgba(255,255,255,.18),transparent 42%);z-index:-1}.world3d::after{content:"";position:absolute;left:0;right:0;bottom:0;height:42%;background:linear-gradient(0deg,rgba(0,0,0,.28),transparent);z-index:-1}.world3d .world-name{position:absolute;left:18px;bottom:15px;font-size:clamp(21px,2.2vw,34px);font-weight:1000;letter-spacing:-.04em;text-shadow:0 2px 5px rgba(0,0,0,.25)}.world3d .world-stickers{position:absolute;right:13px;top:12px;padding:5px 9px;border-radius:999px;background:rgba(255,255,255,.22);backdrop-filter:blur(5px);font-size:10px;font-weight:1000}.worldscene{position:absolute;inset:5px 8px 35px;filter:drop-shadow(0 8px 8px rgba(0,0,0,.18))}.worldscene span{position:absolute;display:block}.worldscene .hero{font-size:clamp(55px,7.5vw,98px);right:9%;bottom:5%;transform:rotate(-4deg)}.worldscene .s1{font-size:clamp(34px,4vw,58px);left:9%;top:14%;transform:rotate(-12deg)}.worldscene .s2{font-size:clamp(28px,3.4vw,50px);left:38%;bottom:12%;transform:rotate(8deg)}.worldscene .spark{font-size:24px;right:42%;top:8%;opacity:.9}.step-games{grid-template-rows:56px 1fr;gap:10px}.world-banner{border-radius:18px;padding:0 18px;color:#fff;display:flex;align-items:center;gap:11px;font-weight:1000;box-shadow:0 8px 20px rgba(31,48,57,.14)}.world-banner .wi{font-size:30px}.world-banner .wn{font-size:22px}.world-banner small{margin-left:auto;font-size:11px;opacity:.85}.gamegrid{display:grid;grid-template-columns:repeat(4,1fr);grid-template-rows:repeat(2,1fr);gap:10px;min-height:0}.game{border-radius:22px;background:var(--paper);box-shadow:var(--shadow);padding:14px;display:flex;flex-direction:column;justify-content:center;position:relative;overflow:hidden;text-align:left;transition:.15s transform}.game:active{transform:scale(.975)}.game .sym{position:absolute;right:10px;bottom:-4px;font-size:62px;font-weight:1000;opacity:.13}.game b{font-size:20px;letter-spacing:-.03em}.game small{font-size:11px;color:var(--muted);margin-top:3px}.game.challenge-game{background:linear-gradient(145deg,#fff7d9,#fffdf8)}.game.challenge-game .sym{opacity:.24;color:#d08f1d}
+.step{display:none;min-height:0}.step.on{display:grid}.step-worlds{grid-template-columns:repeat(4,1fr);grid-template-rows:repeat(2,1fr);gap:14px;perspective:1200px}.world3d{--wa:#4f9652;--wb:#91cc59;border-radius:28px;padding:0;text-align:left;position:relative;overflow:hidden;color:#fff;box-shadow:0 15px 0 color-mix(in srgb,var(--wa) 72%,#13251d),0 25px 36px rgba(31,48,57,.22);transform:translateY(-6px) rotateX(2deg);transition:.16s transform,.16s box-shadow;background:linear-gradient(145deg,var(--wb),var(--wa) 58%,color-mix(in srgb,var(--wa) 72%,#102118));isolation:isolate}.world3d:active{transform:translateY(6px) rotateX(0);box-shadow:0 4px 0 color-mix(in srgb,var(--wa) 72%,#13251d),0 10px 18px rgba(31,48,57,.18)}.world3d::before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 25% 10%,rgba(255,255,255,.38),transparent 35%),linear-gradient(180deg,rgba(255,255,255,.18),transparent 42%);z-index:-1}.world3d::after{content:"";position:absolute;left:0;right:0;bottom:0;height:42%;background:linear-gradient(0deg,rgba(0,0,0,.28),transparent);z-index:-1}.world3d .world-name{position:absolute;left:18px;bottom:15px;font-size:clamp(21px,2.2vw,34px);font-weight:1000;letter-spacing:-.04em;text-shadow:0 2px 5px rgba(0,0,0,.25)}.world3d .world-stickers{position:absolute;right:13px;top:12px;padding:5px 9px;border-radius:999px;background:rgba(255,255,255,.22);backdrop-filter:blur(5px);font-size:10px;font-weight:1000}.worldscene{position:absolute;inset:5px 8px 35px;filter:drop-shadow(0 8px 8px rgba(0,0,0,.18))}.worldscene span{position:absolute;display:block}.worldscene .hero{font-size:clamp(55px,7.5vw,98px);right:9%;bottom:5%;transform:rotate(-4deg)}.worldscene .s1{font-size:clamp(34px,4vw,58px);left:9%;top:14%;transform:rotate(-12deg)}.worldscene .s2{font-size:clamp(28px,3.4vw,50px);left:38%;bottom:12%;transform:rotate(8deg)}.worldscene .spark{font-size:24px;right:42%;top:8%;opacity:.9}.step-games{grid-template-rows:56px 1fr;gap:10px}.world-banner{border-radius:18px;padding:0 18px;color:#fff;display:flex;align-items:center;gap:11px;font-weight:1000;box-shadow:0 8px 20px rgba(31,48,57,.14)}.world-banner .wi{font-size:30px}.world-banner .wn{font-size:22px}.world-banner small{margin-left:auto;font-size:11px;opacity:.85}.gamegrid{display:grid;grid-template-columns:repeat(4,1fr);grid-template-rows:repeat(2,1fr);gap:10px;min-height:0}.game{--ga:#5f86a6;--gb:#dfeef8;border-radius:25px;background:linear-gradient(145deg,var(--gb),#fff 42%,color-mix(in srgb,var(--ga) 18%,#fffdf8));box-shadow:0 10px 0 color-mix(in srgb,var(--ga) 38%,#c8c0ad),0 18px 30px rgba(31,48,57,.17);padding:16px 16px 14px;display:flex;flex-direction:column;justify-content:flex-end;position:relative;overflow:hidden;text-align:left;transition:.15s transform,.15s box-shadow;transform:translateY(-3px) rotateX(1deg);isolation:isolate}.game:active{transform:translateY(5px) rotateX(0) scale(.99);box-shadow:0 3px 0 color-mix(in srgb,var(--ga) 38%,#c8c0ad),0 8px 15px rgba(31,48,57,.14)}.game::before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 22% 12%,rgba(255,255,255,.9),transparent 33%),linear-gradient(180deg,rgba(255,255,255,.3),transparent 45%);pointer-events:none;z-index:0}.game::after{content:"";position:absolute;right:-26px;top:-34px;width:120px;height:120px;border-radius:38px;background:linear-gradient(145deg,color-mix(in srgb,var(--ga) 42%,transparent),transparent 70%);transform:rotate(18deg);z-index:-1}.game .sym{display:none}.game .gameart{position:absolute;right:7px;top:4px;width:112px;height:90px;pointer-events:none;filter:drop-shadow(0 11px 9px rgba(31,48,57,.22));z-index:1}.game .gameart span{position:absolute;display:block}.game .gameart .hero{right:4px;bottom:-2px;font-size:50px;line-height:1;transform:rotate(-5deg)}.game .gameart .a1{left:10px;top:6px;font-size:24px;font-weight:1000}.game .gameart .a2{left:30px;top:30px;font-size:20px;font-weight:1000}.game .gameart .a3{left:54px;top:8px;font-size:18px;font-weight:1000}.game .gameart .a4{right:36px;bottom:6px;font-size:22px;font-weight:1000}.game.word{--ga:#2d7fbd;--gb:#dceeff}.game.maze{--ga:#4b82b0;--gb:#deedf7}.game.mix{--ga:#cc7043;--gb:#ffe7d9}.game.logic{--ga:#6f6bd5;--gb:#eceaff}.game.memory{--ga:#cc7f8f;--gb:#fde8ee}.game.sudoku{--ga:#2f8a66;--gb:#e2f3ea}.game.dots{--ga:#4b5359;--gb:#edf0f2}.game.quiz{--ga:#d08f1d;--gb:#fff1c8}.game.word .gameart .a1,.game.word .gameart .a2,.game.word .gameart .a3{color:#2d7fbd}.game.maze .gameart .a1,.game.maze .gameart .a2,.game.maze .gameart .a3{color:#4b82b0}.game.mix .gameart .a1,.game.mix .gameart .a2,.game.mix .gameart .a3{color:#cc7043}.game.logic .gameart .a1,.game.logic .gameart .a2,.game.logic .gameart .a3{color:#6f6bd5}.game.memory .gameart .a1,.game.memory .gameart .a2,.game.memory .gameart .a3{color:#cc7f8f}.game.sudoku .gameart .a1,.game.sudoku .gameart .a2,.game.sudoku .gameart .a3{color:#2f8a66}.game.dots .gameart .a1,.game.dots .gameart .a2,.game.dots .gameart .a3{color:#40474d}.game.quiz .gameart .a1,.game.quiz .gameart .a2,.game.quiz .gameart .a3{color:#d08f1d}.game b{font-size:21px;letter-spacing:-.03em;position:relative;z-index:2;max-width:62%;text-shadow:0 1px 0 rgba(255,255,255,.8)}.game small{font-size:11px;color:var(--muted);margin-top:4px;position:relative;z-index:2;max-width:68%;font-weight:850}.game small::before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--ga);margin-right:5px;vertical-align:1px}.game.challenge-game{background:linear-gradient(145deg,#fff7d9,#fffdf8)}
 /* game chrome */
 .topbar{height:48px;flex:0 0 auto;display:flex;align-items:center;gap:8px}.back,.tool{height:42px;border-radius:13px;background:#fff;box-shadow:0 7px 16px rgba(31,48,57,.08);padding:0 12px;font-weight:1000}.tool.on{background:var(--ink);color:#fff}.gtitle{font-size:28px;font-weight:1000;letter-spacing:-.05em}.status{height:42px;border-radius:13px;background:#fff;box-shadow:0 7px 16px rgba(31,48,57,.08);padding:0 12px;display:flex;align-items:center;font-weight:1000;color:var(--muted);font-size:12px}.grow{flex:1}.stagebox{flex:1;min-height:0;background:var(--paper);border-radius:26px;box-shadow:var(--shadow);padding:10px;display:flex;flex-direction:column;overflow:hidden}.stage{flex:1;min-height:0;display:grid;place-items:center}.msg{display:none;position:absolute;left:50%;bottom:18px;transform:translateX(-50%);z-index:15;background:var(--ink);color:#fff;border-radius:14px;padding:10px 14px;font-weight:1000;box-shadow:var(--shadow)}.msg.show{display:block}.stagebox{position:relative}
 .help{position:fixed;inset:0;background:rgba(21,32,38,.45);z-index:70;display:none;place-items:center;padding:20px}.help.show{display:grid}.helpbox{width:min(560px,90vw);background:var(--paper);border-radius:28px;padding:20px;box-shadow:var(--shadow)}.helpbox h3{margin:0 0 8px;font-size:26px}.helpbox p{margin:0;color:var(--muted);line-height:1.45}.helpbox button{margin-top:14px;height:44px;border-radius:13px;background:var(--ink);color:#fff;padding:0 16px;font-weight:1000}
@@ -70,13 +70,13 @@ main{flex:1 1 0;height:auto;min-height:0;min-width:0}
 </style>
 </head>
 <body>
-<div class="rotate"><div><b>↻ Bitte quer drehen</b><span>Rätselwelt V5.3.1 ist für dein 16:10-Tablet im Querformat optimiert.</span></div></div>
+<div class="rotate"><div><b>↻ Bitte quer drehen</b><span>Rätselwelt V5.4.2 ist für dein 16:10-Tablet im Querformat optimiert.</span></div></div>
 <div class="toast" id="toast">⭐ Geschafft</div>
 <div class="help" id="help"><div class="helpbox"><h3 id="helpTitle">Hilfe</h3><p id="helpText"></p><button onclick="hideHelp()">Schliessen</button></div></div>
 <div class="timer-modal" id="timerModal"><div class="timer-box"><button class="timer-x" onclick="closeTimer()">×</button><h2>⏱ Rätselzeit</h2><p>Wie lange darf gespielt werden?</p><div class="timer-presets" id="timerPresets"><button data-min="5">5 min</button><button data-min="10">10 min</button><button data-min="15" class="on">15 min</button><button data-min="20">20 min</button><button data-min="30">30 min</button></div><div class="timer-custom"><label>Eigene Zeit</label><input id="timerCustom" type="number" min="1" max="180" inputmode="numeric" placeholder="Minuten"></div><label class="pinrow"><input type="checkbox" id="timerPinToggle" onchange="togglePinField()"><span>Eltern-PIN verwenden</span></label><input class="pininput" id="timerPinInput" type="password" inputmode="numeric" maxlength="6" placeholder="4–6 Ziffern"><div class="timer-actions"><button class="timer-stop" onclick="stopTimer()">Timer stoppen</button><button class="timer-start" onclick="startTimerFromModal()">Starten</button></div><small>Der Timer läuft auch weiter, wenn die Seite neu geladen wird.</small></div></div>
 <div class="timeup" id="timeup"><div class="boom-stage"><div class="countdown" id="boomCountdown"></div><div class="boom" id="boomFx">💥</div><div class="smoke">☁️ ☁️ ☁️</div></div><div class="timeup-card" id="timeupCard"><div class="timeup-icon">💥</div><h1>BOOM!</h1><h2>Rätselzeit vorbei.</h2><p>Bis zum nächsten Mal.</p><button onclick="unlockTimeup()">🔐 Eltern entsperren</button></div></div>
 <div class="app">
-<header><div class="brand"><img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIj48ZGVmcz48bGluZWFyR3JhZGllbnQgaWQ9ImciIHgxPSIwIiB5MT0iMCIgeDI9IjEiIHkyPSIxIj48c3RvcCBzdG9wLWNvbG9yPSIjMmY4YTY2Ii8+PHN0b3Agb2Zmc2V0PSIxIiBzdG9wLWNvbG9yPSIjZjJiMjQ3Ii8+PC9saW5lYXJHcmFkaWVudD48L2RlZnM+PHJlY3Qgd2lkdGg9IjUxMiIgaGVpZ2h0PSI1MTIiIHJ4PSIxMTIiIGZpbGw9InVybCgjZykiLz48cGF0aCBkPSJNMTEyIDEyOGgyODh2NjRIMTc2djY0aDE2MHY2NEgxNzZ2NjRoMjI0djY0SDExMnoiIGZpbGw9IiNmZmYiIG9wYWNpdHk9Ii45NiIvPjxjaXJjbGUgY3g9IjM5MCIgY3k9IjExNiIgcj0iMzYiIGZpbGw9IiNmZmY0YzIiLz48L3N2Zz4=" alt="R"><div><b>Rätselwelt</b><small id="appVersion">V5.4 · 8 Welten · Challenge & Timer</small></div></div><div class="hright"><div class="counter">⭐ <span id="stars">0</span></div><button class="hbtn timerbtn" id="timerBtn" onclick="openTimer()">⏱ <span id="timerText">Timer</span></button><button class="hbtn" onclick="showAlbum()">Sticker</button><button class="hbtn" onclick="goWizard(1)">Start</button><button class="hbtn iconbtn" onclick="toggleFull()">⛶</button></div></header>
+<header><div class="brand"><img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIj48ZGVmcz48bGluZWFyR3JhZGllbnQgaWQ9ImciIHgxPSIwIiB5MT0iMCIgeDI9IjEiIHkyPSIxIj48c3RvcCBzdG9wLWNvbG9yPSIjMmY4YTY2Ii8+PHN0b3Agb2Zmc2V0PSIxIiBzdG9wLWNvbG9yPSIjZjJiMjQ3Ii8+PC9saW5lYXJHcmFkaWVudD48L2RlZnM+PHJlY3Qgd2lkdGg9IjUxMiIgaGVpZ2h0PSI1MTIiIHJ4PSIxMTIiIGZpbGw9InVybCgjZykiLz48cGF0aCBkPSJNMTEyIDEyOGgyODh2NjRIMTc2djY0aDE2MHY2NEgxNzZ2NjRoMjI0djY0SDExMnoiIGZpbGw9IiNmZmYiIG9wYWNpdHk9Ii45NiIvPjxjaXJjbGUgY3g9IjM5MCIgY3k9IjExNiIgcj0iMzYiIGZpbGw9IiNmZmY0YzIiLz48L3N2Zz4=" alt="R"><div><b>Rätselwelt</b><small id="appVersion">V5.4.2 · 3D-Spielkacheln</small></div></div><div class="hright"><div class="counter">⭐ <span id="stars">0</span></div><button class="hbtn timerbtn" id="timerBtn" onclick="openTimer()">⏱ <span id="timerText">Timer</span></button><button class="hbtn" onclick="showAlbum()">Sticker</button><button class="hbtn" onclick="goWizard(1)">Start</button><button class="hbtn iconbtn" onclick="toggleFull()">⛶</button></div></header>
 <main>
 <section class="screen active" id="wizard"><div class="crumb"><button id="c1" class="on" onclick="goWizard(1)">1 Welt</button><button id="c2" onclick="goWizard(2)">2 Spiel</button><div class="spacer"></div><button class="album-mini" onclick="showAlbum()">📘 <span id="albumCount">0/80</span></button></div><div class="step step-worlds on" id="step1"></div><div class="step step-games" id="step2"><div class="world-banner" id="worldBanner"></div><div class="gamegrid" id="gameGrid"></div></div></section>
 
@@ -92,7 +92,7 @@ main{flex:1 1 0;height:auto;min-height:0;min-width:0}
 </main></div>
 <script>
 
-const APP_VERSION='5.3.1';
+const APP_VERSION='5.4.2';
 function varColor(name,fallback){
   try{
     const value=getComputedStyle(document.documentElement).getPropertyValue(name).trim();
@@ -137,6 +137,16 @@ const WORLDS={
 };
 const WORLD_SCENES={jungle:['🌿','🦜','🐒'],space:['🪐','🚀','✨'],sea:['🌊','🐬','🐚'],greek:['🏛️','⚡','🫒'],dino:['🌋','🦖','🦴'],pirate:['🏝️','🏴‍☠️','💰'],egypt:['🏜️','🔺','🐫'],castle:['🏰','🐉','⚔️']};
 const GAMES=[['word','Wortsuche','ABC','Kreuzungen'],['maze','Labyrinth','↝','Fingerpfad'],['mix','Wortsalat','AZ','Buchstaben'],['logic','Logik','◆','Muster & Matrizen'],['memory','Memory','◎','Merken'],['sudoku','Sudoku','⊞','9×9 + Notizen'],['dots','Punktebild','⋯','Finger ziehen'],['quiz','Challenge','⚡','Kurz & intuitiv']];
+const GAME_ART={
+  word:{hero:'🔎',a1:'A',a2:'B',a3:'C',a4:'✦'},
+  maze:{hero:'🧩',a1:'↶',a2:'↷',a3:'┐',a4:'●'},
+  mix:{hero:'🥗',a1:'A',a2:'Z',a3:'B',a4:'✦'},
+  logic:{hero:'🧠',a1:'◆',a2:'△',a3:'◼',a4:'∑'},
+  memory:{hero:'🎴',a1:'☀️',a2:'🌙',a3:'★',a4:'◎'},
+  sudoku:{hero:'🔢',a1:'3',a2:'9',a3:'□',a4:'✎'},
+  dots:{hero:'🐱',a1:'1',a2:'47',a3:'93',a4:'•'},
+  quiz:{hero:'🧭',a1:'✓',a2:'?',a3:'⚡',a4:'✦'}
+};
 let difficulty=+(localStorage.getItem('rw5_diff')||2), world=localStorage.getItem('rw5_world')||'jungle', stars=+(localStorage.getItem('rw5_stars')||0), wizardStep=1;
 if(!WORLDS[world])world='jungle';
 let stickerData=JSON.parse(localStorage.getItem('rw5_stickers')||'{}'), challengeData=JSON.parse(localStorage.getItem('rw5_challenge')||'{}');
@@ -147,7 +157,7 @@ function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.to
 function goWizard(step=1){show('wizard');wizardStep=Math.max(1,Math.min(2,step));renderWizard();}
 function renderWizard(){theme();['c1','c2'].forEach((id,i)=>document.getElementById(id).classList.toggle('on',i+1===wizardStep));document.querySelectorAll('#wizard .step').forEach((s,i)=>s.classList.toggle('on',i+1===wizardStep));document.getElementById('stars').textContent=stars;document.getElementById('albumCount').textContent=`${totalStickers()}/80`;renderStep1();renderStep2();}
 function renderStep1(){const el=document.getElementById('step1');el.innerHTML='';Object.entries(WORLDS).forEach(([k,w])=>{const s=WORLD_SCENES[k]||[w.icon,'✨','⭐'];const b=document.createElement('button');b.className='world3d';b.style.setProperty('--wa',w.accent);b.style.setProperty('--wb',w.accent3);b.innerHTML=`<div class="worldscene"><span class="s1">${s[0]}</span><span class="hero">${s[1]}</span><span class="s2">${s[2]}</span><span class="spark">✦</span></div><span class="world-stickers">${stickerCount(k)}/10</span><span class="world-name">${w.name}</span>`;b.onclick=()=>{world=k;saveBase();theme();goWizard(2)};el.appendChild(b)});}
-function renderStep2(){const banner=document.getElementById('worldBanner'),grid=document.getElementById('gameGrid'),w=WORLDS[world];banner.style.background=`linear-gradient(145deg,${w.accent3},${w.accent})`;banner.innerHTML=`<span class="wi">${w.icon}</span><span class="wn">${w.name}</span><small>Spiel auswählen · Schwierigkeit kommt im Spiel</small>`;grid.innerHTML='';GAMES.forEach(([id,name,sym,sub])=>{const b=document.createElement('button');b.className='game'+(id==='quiz'?' challenge-game':'');b.innerHTML=`<span class="sym">${sym}</span><b>${name}</b><small>${sub}</small>`;b.onclick=()=>openGame(id);grid.appendChild(b)});}
+function renderStep2(){const banner=document.getElementById('worldBanner'),grid=document.getElementById('gameGrid'),w=WORLDS[world];banner.style.background=`linear-gradient(145deg,${w.accent3},${w.accent})`;banner.innerHTML=`<span class="wi">${w.icon}</span><span class="wn">${w.name}</span><small>Spiel auswählen · Schwierigkeit kommt im Spiel</small>`;grid.innerHTML='';GAMES.forEach(([id,name,sym,sub])=>{const b=document.createElement('button');const art=GAME_ART[id]||{hero:sym,a1:'✦',a2:'',a3:'',a4:''};b.className='game '+id+(id==='quiz'?' challenge-game':'');b.innerHTML=`<div class="gameart"><span class="a1">${art.a1||''}</span><span class="a2">${art.a2||''}</span><span class="a3">${art.a3||''}</span><span class="a4">${art.a4||''}</span><span class="hero">${art.hero||sym}</span></div><b>${name}</b><small>${sub}</small>`;b.onclick=()=>openGame(id);grid.appendChild(b)});}
 function difficultyName(){return DIFFS.find(d=>d.id===difficulty).name}
 function activeScreen(){return document.querySelector(".screen.active")?.id||""}
 
@@ -271,20 +281,58 @@ function mazeDistance(cells,start,goal){
   const rows=cells.length,cols=cells[0].length,q=[[start.x,start.y,0]],seen=new Set([`${start.x},${start.y}`]);
   while(q.length){const [x,y,d]=q.shift();if(x===goal.x&&y===goal.y)return d;const c=cells[y][x];MDIRS.forEach(dir=>{if(c.w[dir[2]])return;const nx=x+dir[0],ny=y+dir[1],k=`${nx},${ny}`;if(nx<0||ny<0||nx>=cols||ny>=rows||seen.has(k))return;seen.add(k);q.push([nx,ny,d+1])})}return 0
 }
+function mazeShortestPath(cells,start,goal){
+  const cols=cells[0].length,q=[[start.x,start.y]],seen=new Set([`${start.x},${start.y}`]),prev=new Map();
+  while(q.length){
+    const [x,y]=q.shift();if(x===goal.x&&y===goal.y)break;
+    const c=cells[y][x];
+    for(const dir of MDIRS){
+      if(c.w[dir[2]])continue;
+      const nx=x+dir[0],ny=y+dir[1],k=`${nx},${ny}`;
+      if(nx<0||ny<0||nx>=cols||ny>=cells.length||seen.has(k))continue;
+      seen.add(k);prev.set(k,`${x},${y}`);q.push([nx,ny]);
+    }
+  }
+  const path=[];let key=`${goal.x},${goal.y}`;
+  if(!seen.has(key))return path;
+  while(key){const [x,y]=key.split(',').map(Number);path.push({x,y});key=prev.get(key)||'';}
+  return path.reverse();
+}
+function mazePathStats(path,cols){
+  let turns=0,reversals=0,sideSwitches=0,prevDir=null,prevSide=path.length?(path[0].x<cols/2?0:1):0;
+  for(let i=1;i<path.length;i++){
+    const dx=path[i].x-path[i-1].x,dy=path[i].y-path[i-1].y,dir={dx,dy};
+    if(prevDir&&(dx!==prevDir.dx||dy!==prevDir.dy)){
+      turns++;
+      if((dx&&prevDir.dx&&dx!==prevDir.dx)||(dy&&prevDir.dy&&dy!==prevDir.dy))reversals++;
+    }
+    const side=path[i].x<cols/2?0:1;if(side!==prevSide){sideSwitches++;prevSide=side;}
+    prevDir=dir;
+  }
+  return {len:path.length,turns,reversals,sideSwitches};
+}
 function countDeadEnds(cells){let n=0;cells.forEach(row=>row.forEach(c=>{const open=c.w.filter(v=>v===0).length;if(open===1)n++}));return n}
 function edgeRow(rows,band){const centers=[.18,.5,.82],base=centers[band%3]*(rows-1),jitter=Math.max(1,Math.floor(rows*.12));return Math.max(0,Math.min(rows-1,Math.round(base+(Math.random()*2-1)*jitter)))}
 function buildMaze(){
-  const dims=difficulty===1?[12,8]:difficulty===2?[17,11]:difficulty===3?[24,15]:[31,19];fitMazeCanvas();
-  const cols=dims[0],rows=dims[1],tries=difficulty===4?12:difficulty===3?7:3;let best=null;
+  const dims=difficulty===1?[12,8]:difficulty===2?[17,11]:difficulty===3?[27,17]:[35,21];fitMazeCanvas();
+  const cols=dims[0],rows=dims[1],tries=difficulty===4?42:difficulty===3?18:4;let best=null;
   for(let t=0;t<tries;t++){
     const sb=(Math.floor(Math.random()*3)+t)%3,gb=(sb+1+Math.floor(Math.random()*2))%3,start={x:0,y:edgeRow(rows,sb)},goal={x:cols-1,y:edgeRow(rows,gb)};
-    const cells=difficulty>=3?makeMazePrim(cols,rows,start):makeMazeDFS(cols,rows,start);
+    const gen=difficulty>=3?(Math.random()<.58?makeMazeDFS:makeMazePrim):makeMazeDFS;
+    const cells=gen(cols,rows,start);
     cells[start.y][0].w[3]=0;cells[goal.y][cols-1].w[1]=0;
-    const dist=mazeDistance(cells,start,goal),dead=countDeadEnds(cells),score=dist*(difficulty===4?4:difficulty===3?2:1)+dead*(difficulty===4?.8:.35);
-    if(!best||score>best.score)best={cells,start,goal,score,dist,dead};
+    const dist=mazeDistance(cells,start,goal),dead=countDeadEnds(cells),path=mazeShortestPath(cells,start,goal),stats=mazePathStats(path,cols);
+    let score=dist*(difficulty===4?3.2:difficulty===3?2.4:1.1)+dead*(difficulty===4?1.25:difficulty===3?.8:.35)+stats.turns*(difficulty===4?8:4)+stats.reversals*(difficulty===4?24:14)+stats.sideSwitches*(difficulty===4?22:12);
+    if(difficulty===3&&stats.reversals<2)score-=90;
+    if(difficulty===3&&stats.sideSwitches<2)score-=70;
+    if(difficulty===4&&stats.reversals<4)score-=180;
+    if(difficulty===4&&stats.sideSwitches<4)score-=140;
+    if(difficulty===4&&stats.turns<18)score-=120;
+    if(!best||score>best.score)best={cells,start,goal,score,dist,dead,stats};
   }
-  maze={cols,rows,cells:best.cells,start:best.start,goal:best.goal,path:[{...best.start}],draw:false,solved:false,dead:best.dead};
-  document.getElementById('mazeStatus').textContent=difficulty===4?`Pro · ${best.dead} Sackgassen`:'START → ZIEL';drawMaze();document.getElementById('mazeMsg').classList.remove('show')
+  maze={cols,rows,cells:best.cells,start:best.start,goal:best.goal,path:[{...best.start}],draw:false,solved:false,dead:best.dead,stats:best.stats};
+  const levelName=difficulty===4?'Pro':difficulty===3?'Knifflig':difficulty===2?'Mittel':'Leicht';
+  document.getElementById('mazeStatus').textContent=difficulty>=3?`${levelName} · ${best.dead} Sackgassen · ${best.stats.reversals} Kehren`:'START → ZIEL';drawMaze();document.getElementById('mazeMsg').classList.remove('show')
 }
 
 function mazeGeom(){
