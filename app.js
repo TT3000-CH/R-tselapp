@@ -1,4 +1,5 @@
-const APP_VERSION='5.5';
+
+const APP_VERSION='5.5.1';
 function varColor(name,fallback){
   try{
     const value=getComputedStyle(document.documentElement).getPropertyValue(name).trim();

@@ -1,5 +1,5 @@
-/* Raetselwelt 5.5: scoped cache, fresh online shell, offline fallback. */
-const BUILD='5.5-maze-memory-help-1';
+/* Raetselwelt 5.5.1: scoped cache, fresh online shell, offline fallback. */
+const BUILD='5.5.1-tile-polish-1';
 const ROOT=new URL('./',self.location.href);
 const PREFIX='raetselwelt:'+encodeURIComponent(ROOT.pathname)+':';
 const CACHE=PREFIX+BUILD;
