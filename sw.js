@@ -1,5 +1,5 @@
-/* Raetselwelt 5.3.1: scoped cache, fresh online shell, offline fallback. */
-const BUILD='5.3.1-renderfix-1';
+/* Raetselwelt 5.4: scoped cache, fresh online shell, offline fallback. */
+const BUILD='5.4-worlds-challenge-timer-1';
 const ROOT=new URL('./',self.location.href);
 const PREFIX='raetselwelt:'+encodeURIComponent(ROOT.pathname)+':';
 const CACHE=PREFIX+BUILD;
